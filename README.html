@@ -190,55 +190,66 @@ $(document).ready(function () {
 <div id="stagel3_2018" class="section level1">
 <h1>stageL3_2018</h1>
 <p>les données et le reste pour mes stagiaires de l’année 2018-2019, Marc Xu et Eric Son Dutt</p>
-</div>
-<div id="creer-un-git" class="section level1">
-<h1>Créer un git</h1>
+<div id="creer-un-git" class="section level2">
+<h2>Créer un git</h2>
 <ul>
 <li>me donner leur login</li>
 <li>et je les invite</li>
 </ul>
 </div>
-<div id="le-sujet" class="section level1">
-<h1>Le sujet</h1>
+<div id="le-sujet" class="section level2">
+<h2>Le sujet</h2>
 <p>Etablir un modèle de prédiction de la clairance à partir de descripteurs géométriques et physico-chimiques de petits composés. Deux méthodes seront utilisées :</p>
 <ul>
 <li>SVM</li>
 <li>réseaux de neurones</li>
 </ul>
 </div>
-<div id="les-donnees" class="section level1">
-<h1>Les données</h1>
+<div id="les-donnees" class="section level2">
+<h2>Les données</h2>
 <p>Il y a deux fichiers :</p>
 <ul>
-<li>le premier “placenta_edragon_91mol.csv” provient d’un logiciel libre,
+<li>le premier <a href="https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_edragon_91mol.csv">data edragon</a> provient d’un logiciel libre,
 <ul>
 <li>c’est celui là que nous allons utiliser.</li>
 </ul></li>
-<li>le second “placenta_MOE_2D_192.csv” provient d’un logiciel payant (cher),
+<li>le second <a href="https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_MOE_2D_192.csv">data MOE</a> provient d’un logiciel payant (cher),
 <ul>
 <li>nous n’allons donc pas l’utiliser.</li>
 </ul></li>
 </ul>
 <p>Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).</p>
-<div id="etape-1" class="section level2">
-<h2>Etape 1</h2>
+<div id="etape-1-realisation-dun-jeu-de-donnees-utilisable" class="section level3">
+<h3>Etape 1 : réalisation d’un jeu de données “utilisable”</h3>
 <ul>
 <li>lire les deux jeux de données</li>
 <li>vérifier que les noms des lignes sont les mêmes</li>
 <li>récupérer la colonne “CI” du fichier MOE et l’ajouter au fichier edragon</li>
 </ul>
 </div>
-<div id="etape-2" class="section level2">
-<h2>Etape 2</h2>
+<div id="etape-2-regarder-les-donnees" class="section level3">
+<h3>Etape 2 : regarder les données</h3>
+<pre><code>- y a t'il des valeurs abérrantes ?
+- y a t'il des données manquantes ?
+- y a t'il des variables &quot;constantes&quot; ?</code></pre>
 <ul>
-<li><p>Regarder les données</p>
-<ul>
-<li>Y a t’il des valeurs abérrantes ?</li>
-<li>Y a t’il des données manquantes ?</li>
-<li>Y a t’il des variables “constantes” ?</li>
-</ul></li>
-<li><p>Traiter ces “anomalies”</p></li>
+<li>traiter ces “anomalies”</li>
 </ul>
+</div>
+<div id="etape-3-regarder-les-donnees-dans-le-sens-multivarie" class="section level3">
+<h3>Etape 3 : regarder les données dans le sens “multivarié”</h3>
+<ul>
+<li>ACP</li>
+<li>classification, hclust et kmeans</li>
+</ul>
+</div>
+<div id="etape-4-faire-des-modeles" class="section level3">
+<h3>Etape 4 : faire des modèles</h3>
+<ul>
+<li>apprendre la méthode choisie (SVM ou NN) sur un jeu “facile”, type iris de Fisher.</li>
+<li>appliquer à nos données …</li>
+</ul>
+</div>
 </div>
 </div>
 

@@ -15,9 +15,9 @@ Etablir un modèle de prédiction de la clairance à partir de descripteurs géo
 ## Les données
 Il y a deux fichiers :
 
-  - le premier "placenta_edragon_91mol.csv" provient d'un logiciel libre, 
+  - le premier [data edragon](https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_edragon_91mol.csv) provient d'un logiciel libre, 
   	- c'est celui là que nous allons utiliser.
-  - le second "placenta_MOE_2D_192.csv"  provient d'un logiciel payant (cher), 
+  - le second [data MOE](https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_MOE_2D_192.csv) provient d'un logiciel payant (cher), 
   	- nous n'allons donc pas l'utiliser. 
   
 Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).
