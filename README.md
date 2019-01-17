@@ -1,18 +1,18 @@
 # stageL3_2018
 les données et le reste pour mes stagiaires de l'année 2018-2019, Marc Xu et Eric Son Dutt
 
-# Créer un git
+## Créer un git
   
   - me donner leur login
   - et je les invite
 
-# Le sujet
+## Le sujet
 Etablir un modèle de prédiction de la clairance à partir de descripteurs géométriques et physico-chimiques de petits composés. Deux méthodes seront utilisées :
 
   - SVM
   - réseaux de neurones
 
-# Les données
+## Les données
 Il y a deux fichiers :
 
   - le premier "placenta_edragon_91mol.csv" provient d'un logiciel libre, 
@@ -22,13 +22,13 @@ Il y a deux fichiers :
   
 Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).
 
-## Etape 1 
+### Etape 1 
 
   - lire les deux jeux de données
   - vérifier que les noms des lignes sont les mêmes
   - récupérer la colonne "CI" du fichier MOE et l'ajouter au fichier edragon
   
-## Etape 2
+### Etape 2
 
   - Regarder les données
   
