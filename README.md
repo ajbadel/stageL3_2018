@@ -22,18 +22,26 @@ Il y a deux fichiers :
   
 Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).
 
-### Etape 1 
+### Etape 1 : réalisation d'un jeu de données "utilisable"
 
   - lire les deux jeux de données
   - vérifier que les noms des lignes sont les mêmes
   - récupérer la colonne "CI" du fichier MOE et l'ajouter au fichier edragon
   
-### Etape 2
+### Etape 2 : regarder les données
 
-  - Regarder les données
-  
-  	- Y a t'il des valeurs abérrantes ?
-  	- Y a t'il des données manquantes ?
-  	- Y a t'il des variables "constantes" ?
+  	- y a t'il des valeurs abérrantes ?
+  	- y a t'il des données manquantes ?
+  	- y a t'il des variables "constantes" ?
   	
-  - Traiter ces "anomalies"
+  - traiter ces "anomalies"
+  
+### Etape 3 : regarder les données  dans le sens "multivarié"
+
+  - ACP
+  - classification, hclust et kmeans
+  
+### Etape 4 : faire des modèles
+
+  - apprendre la méthode choisie (SVM ou NN) sur un jeu "facile", type iris de Fisher.
+  - appliquer à nos données ...
