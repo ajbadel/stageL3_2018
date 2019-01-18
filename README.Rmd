@@ -6,9 +6,10 @@ les données et le reste pour mes stagiaires de l'année 2018-2019, Marc Xu et E
   - me donner leur login
   - et je les invite
     - fait pour Marc 'marcxu'
+    - fait pour Eric 'Bibirani01'
   - sur vos machines, faire git clone "" du dossier dans son ensemble
   - dans vos répertoires respectifs, créez, avec un Rstudio, un projet ("xx.Rproj") ce sera votre projet principal de travail.
-  - à partir de ce projet, créez autant de fichiers .Rmd (on oublie les fichiers scripts simples .R) que nécessaires
+  - à partir de ce projet, créez autant de fichiers .Rmd (c'est à dire Rmarkdown, on oublie les fichiers scripts simples .R) que nécessaires
   
 ## Apprendre le Markdown
 
@@ -35,23 +36,30 @@ Cependant, ce second fichier (MOE) contient une données très importante pour n
   - récupérer la colonne "CI" du fichier MOE et l'ajouter au fichier edragon
   - faire un jeu de données d'étude
     - combien ce fichier a t'il de ligne ?
-    - combien de colonnes
+    - combien de colonnes ?
     - quels sont les entetes des lignes ?
       * si ce n'est pas le cas, donner le nom du composé
   
 ### Etape 2 : regarder les données
 
-  	- comment visualiser ces données ?
-    - y a t'il des valeurs abérrantes ?
-  	- y a t'il des données manquantes ?
-  	- y a t'il des variables "constantes" ?
-  	
-  - traiter ces "anomalies"
+  - comment visualiser ces données ?
+  - y a t'il des valeurs abérrantes ?
+    - que faut-il en faire ? 
+      - les garder ?
+      - les enlever ? qu'est-ce que ca veut dire les enlever ?
+        - enlever la ligne
+        - enlever la colonne
+        - remplacer la valeur abérrante par xx
+  - y a t'il des données manquantes (999 dans le fichier) ?
+    - comment traiter ces valeurs manquantes ?
+  - y a t'il des variables "constantes" ?
+    - si oui, on les enlève
+
   
 ### Etape 3 : regarder les données  dans le sens "multivarié"
 
   - ACP
-  - classification, hclust et kmeans
+  - classification (clustering), classification hiérarchique ascendante (`hclust`) et `kmeans`
   
 ### Etape 4 : faire des modèles
 

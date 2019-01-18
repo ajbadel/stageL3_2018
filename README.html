@@ -194,8 +194,18 @@ $(document).ready(function () {
 <h2>Créer un git</h2>
 <ul>
 <li>me donner leur login</li>
-<li>et je les invite</li>
+<li>et je les invite
+<ul>
+<li>fait pour Marc ‘marcxu’</li>
+<li>fait pour Eric ‘Bibirani01’</li>
+</ul></li>
+<li>sur vos machines, faire git clone “” du dossier dans son ensemble</li>
+<li>dans vos répertoires respectifs, créez, avec un Rstudio, un projet (“xx.Rproj”) ce sera votre projet principal de travail.</li>
+<li>à partir de ce projet, créez autant de fichiers .Rmd (c’est à dire Rmarkdown, on oublie les fichiers scripts simples .R) que nécessaires</li>
 </ul>
+</div>
+<div id="apprendre-le-markdown" class="section level2">
+<h2>Apprendre le Markdown</h2>
 </div>
 <div id="le-sujet" class="section level2">
 <h2>Le sujet</h2>
@@ -225,22 +235,45 @@ $(document).ready(function () {
 <li>lire les deux jeux de données</li>
 <li>vérifier que les noms des lignes sont les mêmes</li>
 <li>récupérer la colonne “CI” du fichier MOE et l’ajouter au fichier edragon</li>
+<li>faire un jeu de données d’étude
+<ul>
+<li>combien ce fichier a t’il de ligne ?</li>
+<li>combien de colonnes ?</li>
+<li>quels sont les entetes des lignes ?</li>
+<li>si ce n’est pas le cas, donner le nom du composé</li>
+</ul></li>
 </ul>
 </div>
 <div id="etape-2-regarder-les-donnees" class="section level3">
 <h3>Etape 2 : regarder les données</h3>
-<pre><code>- y a t'il des valeurs abérrantes ?
-- y a t'il des données manquantes ?
-- y a t'il des variables &quot;constantes&quot; ?</code></pre>
 <ul>
-<li>traiter ces “anomalies”</li>
+<li>comment visualiser ces données ?</li>
+<li>y a t’il des valeurs abérrantes ?
+<ul>
+<li>que faut-il en faire ?</li>
+<li>les garder ?</li>
+<li>les enlever ? qu’est-ce que ca veut dire les enlever ?
+<ul>
+<li>enlever la ligne</li>
+<li>enlever la colonne</li>
+<li>remplacer la valeur abérrante par xx</li>
+</ul></li>
+</ul></li>
+<li>y a t’il des données manquantes (999 dans le fichier) ?
+<ul>
+<li>comment traiter ces valeurs manquantes ?</li>
+</ul></li>
+<li>y a t’il des variables “constantes” ?
+<ul>
+<li>si oui, on les enlève</li>
+</ul></li>
 </ul>
 </div>
 <div id="etape-3-regarder-les-donnees-dans-le-sens-multivarie" class="section level3">
 <h3>Etape 3 : regarder les données dans le sens “multivarié”</h3>
 <ul>
 <li>ACP</li>
-<li>classification, hclust et kmeans</li>
+<li>classification (clustering), classification hiérarchique ascendante (<code>hclust</code>) et <code>kmeans</code></li>
 </ul>
 </div>
 <div id="etape-4-faire-des-modeles" class="section level3">
