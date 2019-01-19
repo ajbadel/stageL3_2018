@@ -1,0 +1,16 @@
+---
+title: "proj"
+author: "Eric"
+date: "19 janvier 2019"
+output: html_document
+---
+
+```{r}
+tab = read.csv("C:/Users/Eric/Desktop/Github/stageL3_2018/data/placenta_edragon_91mol.csv")
+
+```
+
+```{r}
+summary(tab)
+```
+
