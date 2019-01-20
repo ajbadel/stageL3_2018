@@ -1,0 +1,14 @@
+# Projet
+
+---
+title: "SVM"
+Nom : "Marc"
+Date : 20 Janvier 2019"
+output: html_document
+---
+
+## R Markdown
+
+```{r setup, include=FALSE}}
+donnees = read.csv("C:/Users/Marc/Desktop/Github/stageL3_2018/data/donnees.csv")
+
