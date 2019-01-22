@@ -1,16 +1,61 @@
 ---
-title: "proj"
+title: "proj.Rmd"
 author: "Eric"
-date: "19 janvier 2019"
+date: "21 janvier 2019"
 output: html_document
 ---
 
 ```{r}
-tab = read.csv("C:/Users/Eric/Desktop/Github/stageL3_2018/data/placenta_edragon_91mol.csv")
+
+setwd = ("C:/Users/Eric/Desktop/Biostat/Github/stageL3_2018/Eric/projet/")
 
 ```
+
+Lecture des jeux de données
+```{r}
+
+donnee1 = read.csv (file = "./../../data/placenta_edragon_91mol.csv", header = T, sep = ";")
+donnee2 = read.csv (file = "C:/Users/Eric/Desktop/Biostat/Github/stageL3_2018/data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
+
+```
+
+On verifie si les noms des colonnes est la meme
 
 ```{r}
-summary(tab)
+row.names(donnee1)
 ```
+
+
+On insère la donnée CI dans le fichier
+```{r}
+clairance = donnee2["CI"]
+
+donneefin = data.frame(donnee1, clairance)
+
+donneefin
+```
+
+JEU DE DONNEE
+
+Nb de lignes
+```{r}
+
+nblig = nrow(donneefin)
+nbcol = ncol (donneefin)
+
+nblig
+nbcol
+```
+
+Headers
+
+```{r}
+header = rownames(donneefin)
+
+header
+```
+
+
+
+
 
