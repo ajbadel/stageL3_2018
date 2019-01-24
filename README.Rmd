@@ -19,6 +19,11 @@ Etablir un modèle de prédiction de la clairance à partir de descripteurs géo
   - SVM
   - réseaux de neurones
 
+## De la biblio
+
+  - une référence dans le domaine dumachine learning (apprentissage supervisé) : [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/index.html) par Hastie, Tibshirani & Friedman
+  - un article sur les SVM : [SVM](https://towardsdatascience.com/demystifying-maths-of-svm-13ccfe00091e)
+  
 ## Les données
 Il y a deux fichiers :
 
