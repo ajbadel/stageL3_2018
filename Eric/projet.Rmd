@@ -5,7 +5,7 @@ date: "21 janvier 2019"
 output: html_document
 ---
 
-ETAPE 1
+#ETAPE 1
 
 ```{r}
 
@@ -71,7 +71,7 @@ box
 boxmax = box$out
 ```
 
--> On fait une moyenne avec la valeur aberrante.
+-> On fait une moyenne avec la valeur aberrante (pour comparaison).
 
 ```{r}
 moy = mean(donneefin [, "clairance"])
@@ -91,7 +91,7 @@ moyfin = mean (donneefin [, "clairance"], na.rm = T)
 moyfin
 ```
 
--> On remplace la valeur NA par la moyenne calculÃ©e
+-> On remplace la valeur NA par la moyenne calculee
 
 ```{r}
 CIfin = donneefin$clairance [is.na(donneefin$clairance)] <- moyfin
@@ -110,20 +110,41 @@ Methode 1: Sans convertir -999 en NA
 suma = apply(donneefin, 2, function(x) sum(x==-999))
 ```
 
-On supprimme les colonnes ne contenant que des Na
+-> On supprimme les colonnes ne contenant que des -999 ()
 
 ```{r}
 donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
-donneefin2
 ```
+
+
 
 Methode 2: On remplace les -999 par Na
 
-donneefinNa = donneefin[donneefin == -999] <- NA
-donneefinNa
+```{r}
+donneefin[donneefin == -999] <- NA
+```
+
 
 -> On compte le nombre de NA dans chaque colonne et on enleve les colonnes avec seulement des NA
 
-donneefin2 = donneefinNa[ , ! apply( donneefinNa , 2 , function(donneefinNa) all(is.na(donneefinNa)))]
-donneefin2
+```{r}
+donneefin2bis = donneefin[, colSums(is.na(donneefin)) != nrow(donneefin)]
+donneefin2bis
+```
+
+Ou on aurait pu faire : 
+
+donneefin2bis = donneefin[ , ! apply( donneefin , 2 , function(donneefin) all(is.na(donneefin)))]
+donneefin2bis
+
+NOTE : Cependant je n'est pas reussi à supprimer les NA present dans plus de n cases dans 
+une colonne
+
+
+-> On remplace les autres NA par la moyenne de leur colonne respectives
+
+```{r}
+#moyfin2 = mean (donneefin2bis, na.rm = T)
+#moyfin
+```
 
