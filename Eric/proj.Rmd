@@ -1,0 +1,59 @@
+---
+title: "proj.Rmd"
+author: "Eric"
+date: "21 janvier 2019"
+output: html_document
+---
+
+```{r}
+
+setwd = ("./2019_L3.Rproj")
+
+```
+
+1) LECTURE DES JEU DE DONNEE
+```{r}
+
+donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";")
+donnee2 = read.csv (file = "./../data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
+
+```
+
+2) ON VERIFIE SI LES NOMS DES LIGNES SONT CORRECTES
+
+```{r}
+nom_col1 = donnee1[,"NOM"]
+nom_col2 = donnee2[, "Noms"]
+comp = nom_col1%in%nom_col2
+comp
+```
+
+-> Les noms des lignes sont identiques
+
+3) ON INSERE LA DONNEE CLAIRANCE DANS LE FICHIER EDRAGON
+```{r}
+clairance = donnee2[,"CI"]
+
+donneefin = data.frame(donnee1, clairance)
+```
+
+
+4) DIMENSION DE LA TABLE
+```{r}
+dim = dim(donneefin)
+dim
+```
+-> Les dimension de la table sont 
+
+
+5) LES ENTETES DES LIGNES
+```{r}
+namecol = colnames(donneefin)
+namecol
+```
+
+Donnees manquantes (-999)
+
+
+
+
