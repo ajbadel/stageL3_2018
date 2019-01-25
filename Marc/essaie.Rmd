@@ -13,18 +13,12 @@ getwd()
 # Projet de stage
 
 ```{r}
-donnees1 = read.csv("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet/placenta_edragon_91mol.csv", header=TRUE, sep=";")
-
-tableau1 = donnees1[,c(1:196)]
-?c
-
-tableau_init = data.frame(tableau1)
-
-donnees2 = read.csv("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
+donnees1 = read.csv("../data/placenta_edragon_91mol.csv", header=TRUE, sep=";")
+donnees2 = read.csv("../data/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
 
 
-clairance = donnees2["CI"]
-new_table = data.frame(tableau_init, clairance)
+clairance = donnees2[,"CI"]
+new_table = data.frame(donnees1, clairance)
 
 new_table = new_table[, !colnames(new_table)=="nBR"]
 new_table = new_table[, !colnames(new_table)=="nI"]
@@ -55,18 +49,13 @@ new_table
 summary(new_table)
 ```
 
-## Le nombre de lignes :
+## dimension :
 ```{r}
-nrow(new_table)
-```
-
-## Le nombre de colonnes :
-```{r}
-ncol(new_table)
+dim(new_table)
 ```
 
 ## Le nom de chaque colonne :
 ```{r}
-colnames(new_table)
+col.nom <- colnames(new_table)
 ```
 
