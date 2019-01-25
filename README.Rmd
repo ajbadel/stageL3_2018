@@ -75,7 +75,7 @@ Cependant, ce second fichier (MOE) contient une données très importante pour n
   - y a t'il des variables "constantes" (variance nulle) ?
     - si oui, on les enlève => 3 lignes de programme
     - calcul de la variance de toutes les colonnes (descripteurs) (`apply`)
-    - ne garder que celle de variance non nulle (`which`)
+    - ne garder que celles de variance non nulle (`which`)
     - on vérifie qu'il n'y a plus de constante
   - Au final, combien de lignes et de colonnes reste t-il ?
 
