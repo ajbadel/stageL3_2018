@@ -1,0 +1,61 @@
+---
+title: "Projet"
+author: "Marc"
+date: "22 janvier 2019"
+output: html_document
+---
+
+```{r}
+setwd("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet")
+getwd()
+```
+
+# Projet de stage
+
+```{r}
+donnees1 = read.csv("../data/placenta_edragon_91mol.csv", header=TRUE, sep=";")
+donnees2 = read.csv("../data/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
+
+
+clairance = donnees2[,"CI"]
+new_table = data.frame(donnees1, clairance)
+
+new_table = new_table[, !colnames(new_table)=="nBR"]
+new_table = new_table[, !colnames(new_table)=="nI"]
+new_table = new_table[, !colnames(new_table)=="T.N..Br."]
+new_table = new_table[, !colnames(new_table)=="T.N..I."]
+new_table = new_table[, !colnames(new_table)=="T.O..Br."]
+new_table = new_table[, !colnames(new_table)=="T.O..I."]
+new_table = new_table[, !colnames(new_table)=="T.S..Br."]
+new_table = new_table[, !colnames(new_table)=="T.S..I."]
+new_table = new_table[, !colnames(new_table)=="T.P..P."]
+new_table = new_table[, !colnames(new_table)=="T.P..F."]
+new_table = new_table[, !colnames(new_table)=="T.P..Cl."]
+new_table = new_table[, !colnames(new_table)=="T.P..Br."]
+new_table = new_table[, !colnames(new_table)=="T.Cl..Br."]
+new_table = new_table[, !colnames(new_table)=="T.Cl..I."]
+new_table = new_table[, !colnames(new_table)=="T.Br..Br."]
+new_table = new_table[, !colnames(new_table)=="T.Br..I."]
+new_table = new_table[, !colnames(new_table)=="T.I..I."]
+```
+
+## Les données
+```{r}
+new_table
+```
+
+## Informations sur les données
+```{r}
+summary(new_table)
+```
+
+## dimension :
+```{r}
+dim(new_table)
+```
+
+## Le nom de chaque colonne :
+```{r}
+col.nom <- colnames(new_table)
+```
+

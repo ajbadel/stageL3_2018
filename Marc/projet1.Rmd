@@ -1,0 +1,54 @@
+---
+title: "Projet"
+author: "Marc"
+date: "22 janvier 2019"
+output: html_document
+---
+
+```{r}
+setwd("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet")
+getwd()
+```
+
+# Projet de stage
+
+```{r}
+donnees1 = read.csv("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet/placenta_edragon_91mol.csv", header=TRUE, sep=";")
+
+tableau1 = donnees1[,c(1:196)]
+?c
+summary(tableau1)
+
+tableau_init = data.frame(tableau1)
+tableau_init
+
+donnees2 = read.csv("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
+
+
+clairance = donnees2["CI"]
+new_table = data.frame(tableau_init, clairance)
+```
+## Les données
+```{r}
+new_table
+```
+
+## Informations sur les données
+```{r}
+summary(new_table)
+```
+
+## Le nombre de lignes :
+```{r}
+nrow(new_table)
+```
+
+## Le nombre de colonnes :
+```{r}
+ncol(new_table)
+```
+
+## Le nom de chaque colonne :
+```{r}
+colnames(new_table)
+```

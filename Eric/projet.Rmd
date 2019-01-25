@@ -1,0 +1,129 @@
+---
+title: "proj.Rmd"
+author: "Eric"
+date: "21 janvier 2019"
+output: html_document
+---
+
+ETAPE 1
+
+```{r}
+
+setwd = ("./2019_L3.Rproj")
+
+```
+
+1) LECTURE DES JEUX DE DONNEE
+
+```{r}
+
+donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";")
+donnee2 = read.csv (file = "./../data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
+
+```
+
+2) ON VERIFIE SI LES NOMS DES LIGNES SONT CORRECTES
+
+```{r}
+nom_col1 = donnee1[,"NOM"]
+nom_col2 = donnee2[, "Noms"]
+comp = nom_col1%in%nom_col2
+comp
+```
+
+-> Les noms des lignes sont identiques
+
+3) ON INSERE LA DONNEE CLAIRANCE DANS LE FICHIER EDRAGON
+```{r}
+clairance = donnee2[,"CI"]
+
+donneefin = data.frame(donnee1, clairance)
+```
+
+
+4) DIMENSION DE LA TABLE
+```{r}
+dim = dim(donneefin)
+dim
+```
+-> Les dimension de la table sont 
+
+
+5) LES ENTETES DES LIGNES
+```{r}
+namecol = colnames(donneefin)
+```
+
+
+
+#ETAPE 2
+
+1)VALEURS ABERRANTES DANS CI
+
+On remarque une valeur aberrante (1,57)
+On extrait la valeur dans boxmax
+
+
+```{r}
+hist(donneefin[, "clairance"])
+box = boxplot (donneefin [,"clairance"])
+box
+boxmax = box$out
+```
+
+-> On fait une moyenne avec la valeur aberrante.
+
+```{r}
+moy = mean(donneefin [, "clairance"])
+moy
+```
+
+-> On remplace la (ou les) valeurs abérentes par NA (les valeurs aberantes etant $out)
+
+```{r}
+CI2 = donneefin$clairance[donneefin$clairance >= boxmax] <- NA
+```
+
+-> On fait la moyenne des donnees en enlevant NA
+
+```{r}
+moyfin = mean (donneefin [, "clairance"], na.rm = T)
+moyfin
+```
+
+-> On remplace la valeur NA par la moyenne calculée
+
+```{r}
+CIfin = donneefin$clairance [is.na(donneefin$clairance)] <- moyfin
+donneefin$clairance
+```
+
+
+
+2) DONNEE MANQUANTE (-999)
+
+-> On compte le nombre de -999
+
+Methode 1: Sans convertir -999 en NA
+
+```{r}
+suma = apply(donneefin, 2, function(x) sum(x==-999))
+```
+
+On supprimme les colonnes ne contenant que des Na
+
+```{r}
+donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
+donneefin2
+```
+
+Methode 2: On remplace les -999 par Na
+
+donneefinNa = donneefin[donneefin == -999] <- NA
+donneefinNa
+
+-> On compte le nombre de NA dans chaque colonne et on enleve les colonnes avec seulement des NA
+
+donneefin2 = donneefinNa[ , ! apply( donneefinNa , 2 , function(donneefinNa) all(is.na(donneefinNa)))]
+donneefin2
+
