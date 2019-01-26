@@ -1,5 +1,5 @@
 ---
-title: "proj.Rmd"
+title: "projet.Rmd"
 author: "Eric"
 date: "21 janvier 2019"
 output: html_document
@@ -17,7 +17,7 @@ setwd = ("./2019_L3.Rproj")
 
 ```{r}
 
-donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";")
+donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";", dec = ".")
 donnee2 = read.csv (file = "./../data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
 
 ```
@@ -56,6 +56,8 @@ namecol = colnames(donneefin)
 
 
 
+
+
 #ETAPE 2
 
 1)VALEURS ABERRANTES DANS CI
@@ -78,7 +80,7 @@ moy = mean(donneefin [, "clairance"])
 moy
 ```
 
--> On remplace la (ou les) valeurs abÃ©rentes par NA (les valeurs aberantes etant $out)
+-> On remplace la (ou les) valeurs aberentes par NA (les valeurs aberantes etant $out)
 
 ```{r}
 CI2 = donneefin$clairance[donneefin$clairance >= boxmax] <- NA
@@ -129,22 +131,25 @@ donneefin[donneefin == -999] <- NA
 
 ```{r}
 donneefin2bis = donneefin[, colSums(is.na(donneefin)) != nrow(donneefin)]
-donneefin2bis
 ```
 
 Ou on aurait pu faire : 
 
 donneefin2bis = donneefin[ , ! apply( donneefin , 2 , function(donneefin) all(is.na(donneefin)))]
-donneefin2bis
+
 
 NOTE : Cependant je n'est pas reussi à supprimer les NA present dans plus de n cases dans 
 une colonne
 
 
--> On remplace les autres NA par la moyenne de leur colonne respectives
+-> On remplace les autres NA par la moyenne de leur colonne respectives (à faire)
 
 ```{r}
 #moyfin2 = mean (donneefin2bis, na.rm = T)
 #moyfin
 ```
+
+3) DONNEE CONSTANTES
+
+
 
