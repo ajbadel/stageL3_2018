@@ -6,11 +6,13 @@ output: html_document
 ---
 
 ```{r}
-setwd("/Users/marc/Desktop/Cours L3 S6/Stage/stageL3_2018-master/Marc/projet")
+setwd("./../Marc")
 getwd()
 ```
 
 # Projet de stage
+
+## Partie 1
 
 ```{r}
 donnees1 = read.csv("../data/placenta_edragon_91mol.csv", header=TRUE, sep=";")
@@ -19,43 +21,142 @@ donnees2 = read.csv("../data/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
 
 clairance = donnees2[,"CI"]
 new_table = data.frame(donnees1, clairance)
-
-new_table = new_table[, !colnames(new_table)=="nBR"]
-new_table = new_table[, !colnames(new_table)=="nI"]
-new_table = new_table[, !colnames(new_table)=="T.N..Br."]
-new_table = new_table[, !colnames(new_table)=="T.N..I."]
-new_table = new_table[, !colnames(new_table)=="T.O..Br."]
-new_table = new_table[, !colnames(new_table)=="T.O..I."]
-new_table = new_table[, !colnames(new_table)=="T.S..Br."]
-new_table = new_table[, !colnames(new_table)=="T.S..I."]
-new_table = new_table[, !colnames(new_table)=="T.P..P."]
-new_table = new_table[, !colnames(new_table)=="T.P..F."]
-new_table = new_table[, !colnames(new_table)=="T.P..Cl."]
-new_table = new_table[, !colnames(new_table)=="T.P..Br."]
-new_table = new_table[, !colnames(new_table)=="T.Cl..Br."]
-new_table = new_table[, !colnames(new_table)=="T.Cl..I."]
-new_table = new_table[, !colnames(new_table)=="T.Br..Br."]
-new_table = new_table[, !colnames(new_table)=="T.Br..I."]
-new_table = new_table[, !colnames(new_table)=="T.I..I."]
 ```
 
-## Les données
+### Vérification des jeux de données :
 ```{r}
-new_table
+ligne_nom <- donnees1[,"NOM"]
+
+ligne_nom2 <- donnees2[, "Noms"]
+
+comparaison = ligne_nom %in% ligne_nom2
+comparaison
 ```
 
-## Informations sur les données
+On peut voir que les les noms de chaque ligne est identique.
+
+L'importance de vérifier si les colonnes correspondant aux noms des espèce est identique et dans le même ordre permet de pouvoir utiliser les données dans une des fichiers et de pouvoir l'utiliser dans l'autre.
+
+### Les données
 ```{r}
-summary(new_table)
+# new_table
 ```
 
-## dimension :
+### Les dimensions :
 ```{r}
 dim(new_table)
 ```
 
-## Le nom de chaque colonne :
+### Le nom de chaque colonne
 ```{r}
 col.nom <- colnames(new_table)
+```
+
+## Partie 2
+
+### Vérification de valeurs aberrantes dans la clairance
+```{r}
+hist(new_table[,"clairance"],
+     xlab = "10^-2mL/min",
+     main = "Histogramme des données à étudier")
+```
+
+```{r}
+box1 = boxplot(new_table[,"clairance"],
+     main = "Boxplot des données à étudier")
+box1
+valeur_out = box1$out
+```
+
+Sur l'histogramme, on peut voir qu'il y a une valeur qui est très différentes des autres.
+
+Sur le boxplot, cette valeur est en dehors de la valeur maximale du boxplot. C'est une valeur aberrante, car elle pourrait modifier le jeu de données bien qu'elle soit une vraie valeur.
+
+On peut remplacer la valeur aberrante par la moyenne.
+
+```{r}
+new_table$clairance[new_table$clairance == valeur_out]<- NA
+moy.ci = mean(new_table[, "clairance"], na.rm = T)
+moy.ci
+new_table$clairance[is.na(new_table$clairance)]<- moy.ci
+
+mean(new_table[, "clairance"])
+```
+
+### Données manquantes
+
+Dans certaines données, il y a des valeurs manquantes qu'on ne peut pas traiter et qu'ils sont remplacés par -999.
+
+On devra alors modifier les valeurs manquantes par la moyenne de la colonne sans prendre en compte de la valeur manquante.
+
+Cependant, si une colonne contient énormément de valeurs manquantes ou toute la colonne a de valeurs manquantes, alors il faudra supprimer la colonne. Il sera difficile de travailler avec très peu de valeurs dans une colonne.
+
+```{r}
+# chose = which(new_table == -999, arr.ind = T)
+
+new_table[new_table == -999] <- NA
+num_col = {1:801}
+
+val_manq = apply(new_table, 2, function(new_table) sum(is.na(new_table)))
+val_manq = data.frame(val_manq, num_col)
+
+for (i in 1:nrow(val_manq)) {
+  val = val_manq[i,1];
+  if (val>=10)
+  {
+    cat(i, val, "\n")
+  }
+}
+new_table = new_table[, - c(680, 715, 740, 748:749, 756:769, 801)]
+new_table
+
+```
+
+On peut observer dans chaque colonne, le nombre total de valeurs manquantes.
+
+On peut voir que pour les colonnes : U.045 / U.080 / U.105 / U.113 / U.114. Toutes la colonne n'a pas de données.
+Il y a d'autres colonnes, où il y a quelques valeurs présentes, mais il reste encore beaucoup de valeurs manquantes : qpmax / qnmax / Qpos / Qneg / Qtot / Qmean /Q2 /RPCG / RNCG / SPP / TE1 / TE2 / PCWTe / LDI
+
+#### Notes
+which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction which, cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
+
+J'ai du utilisé une boucle (for) qui permet de rechercher le numéro de colonne où le nombre de NA est supérieur à un seuil, ainsi je supprime dans le data.frame la colonne grâce à son numéro.
+
+
+## Valeurs constantes
+
+```{r}
+var(new_table[1:91,3])
+?var
+```
+
+```{r}
+
+#new_table = new_table[, !colnames(new_table)=="nBR"]
+#new_table = new_table[, !colnames(new_table)=="nI"]
+#new_table = new_table[, !colnames(new_table)=="T.N..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.N..I."]
+#new_table = new_table[, !colnames(new_table)=="T.O..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.O..I."]
+#new_table = new_table[, !colnames(new_table)=="T.S..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.S..I."]
+#new_table = new_table[, !colnames(new_table)=="T.P..P."]
+#new_table = new_table[, !colnames(new_table)=="T.P..F."]
+#new_table = new_table[, !colnames(new_table)=="T.P..Cl."]
+#new_table = new_table[, !colnames(new_table)=="T.P..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.Cl..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.Cl..I."]
+#new_table = new_table[, !colnames(new_table)=="T.Br..Br."]
+#new_table = new_table[, !colnames(new_table)=="T.Br..I."]
+#new_table = new_table[, !colnames(new_table)=="T.I..I."]
+
+```
+
+```{r}
+# summary(new_table)
+
+```
+
+```{r}
 ```
 
