@@ -1,6 +1,6 @@
 ---
 title: "Projet"
-author: "Marc"
+author: "Marc XU"
 date: "22 janvier 2019"
 output: html_document
 ---
@@ -12,8 +12,9 @@ getwd()
 
 # Projet de stage
 
-## Partie 1
+## Partie 1 : Réalisation d'un jeu de données "utilisable"
 
+### Lecture des jeux de données :
 ```{r}
 donnees1 = read.csv("../data/placenta_edragon_91mol.csv", header=TRUE, sep=";")
 donnees2 = read.csv("../data/placenta_MOE_2D_192.csv", header=TRUE, sep=";")
@@ -37,22 +38,18 @@ On peut voir que les les noms de chaque ligne est identique.
 
 L'importance de vérifier si les colonnes correspondant aux noms des espèce est identique et dans le même ordre permet de pouvoir utiliser les données dans une des fichiers et de pouvoir l'utiliser dans l'autre.
 
-### Les données
-```{r}
-# new_table
-```
 
 ### Les dimensions :
 ```{r}
 dim(new_table)
 ```
 
-### Le nom de chaque colonne
+### Le nom de chaque colonne : 
 ```{r}
 col.nom <- colnames(new_table)
 ```
 
-## Partie 2
+## Partie 2 : Regarder les données
 
 ### Vérification de valeurs aberrantes dans la clairance
 ```{r}
@@ -64,7 +61,6 @@ hist(new_table[,"clairance"],
 ```{r}
 box1 = boxplot(new_table[,"clairance"],
      main = "Boxplot des données à étudier")
-box1
 valeur_out = box1$out
 ```
 
@@ -72,7 +68,7 @@ Sur l'histogramme, on peut voir qu'il y a une valeur qui est très différentes 
 
 Sur le boxplot, cette valeur est en dehors de la valeur maximale du boxplot. C'est une valeur aberrante, car elle pourrait modifier le jeu de données bien qu'elle soit une vraie valeur.
 
-On peut remplacer la valeur aberrante par la moyenne.
+On peut remplacer la valeur aberrante par la moyenne (sans compter la valeur abberante car sinon la moyenne serait modifiée).
 
 ```{r}
 new_table$clairance[new_table$clairance == valeur_out]<- NA
@@ -93,63 +89,78 @@ Cependant, si une colonne contient énormément de valeurs manquantes ou toute l
 
 ```{r}
 # chose = which(new_table == -999, arr.ind = T)
-
 new_table[new_table == -999] <- NA
 num_col = {1:801}
 
 val_manq = apply(new_table, 2, function(new_table) sum(is.na(new_table)))
 val_manq = data.frame(val_manq, num_col)
 
-for (i in 1:nrow(val_manq)) {
+for (i in nrow(val_manq):1) {
   val = val_manq[i,1];
-  if (val>=10)
+  if (val>=5)
   {
+    new_table = new_table[, -c(i)];
     cat(i, val, "\n")
   }
+  # On aurait pu ajouter un else pour les colonnes ayant des valeurs manquantes en dessous du seuil. Cependant, j'ai pu vérifier à la main qu'il n'y avait pas de colonne ayant des NA en dessous du seuil, donc j'ai évité de rajouter le "else" qui serait inutile ici.
 }
-new_table = new_table[, - c(680, 715, 740, 748:749, 756:769, 801)]
-new_table
+#new_table = new_table[, - c(680, 715, 740, 748:749, 756:769)]
+
 
 ```
 
 On peut observer dans chaque colonne, le nombre total de valeurs manquantes.
 
 On peut voir que pour les colonnes : U.045 / U.080 / U.105 / U.113 / U.114. Toutes la colonne n'a pas de données.
-Il y a d'autres colonnes, où il y a quelques valeurs présentes, mais il reste encore beaucoup de valeurs manquantes : qpmax / qnmax / Qpos / Qneg / Qtot / Qmean /Q2 /RPCG / RNCG / SPP / TE1 / TE2 / PCWTe / LDI
+Il y a d'autres colonnes, où il y a quelques valeurs présentes, mais il reste encore beaucoup de valeurs manquantes : qpmax / qnmax / Qpos / Qneg / Qtot / Qmean /Q2 /RPCG / RNCG / SPP / TE1 / TE2 / PCWTe / LDI.
+
+Nous remplaçons les valeurs manquantes, affichées par "-999", par les NA.
+
+Nous avons créer une nouvelle matrice permettant le jeu de données avec les NA affichées. C'est dans la boucle, qui cherchera la somme des NA dans une colonne et les supprimera directement de la colonne des jeux de données de départ.
+
 
 #### Notes
-which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction which, cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
+which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction "which", cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
 
-J'ai du utilisé une boucle (for) qui permet de rechercher le numéro de colonne où le nombre de NA est supérieur à un seuil, ainsi je supprime dans le data.frame la colonne grâce à son numéro.
+J'ai du utilisé une boucle (for) qui permet de rechercher le numéro de colonne où le nombre de NA supérieur à un seuil, ainsi je supprime dans le data.frame la colonne grâce à son numéro. Cette boucle "for" décrémente car les numéros des colonnes sont modifiées lorsqu'on supprime une colonne, la décrémentation permet de contourner ce problème.
+
+Nous supposons que le seuil de NA est de 5% : 91 x 0,05 = 4,55 donc 5
 
 
-## Valeurs constantes
+### Valeurs constantes
 
 ```{r}
-var(new_table[1:91,3])
-?var
+?apply
+
+non_num_col = new_table[,1:2]
+new_table = new_table[,-c(1,2)]
+new_table= rbind(new_table, apply(new_table[,1:780], MARGIN = 2, FUN = var))
+
+new_table = new_table[,which(new_table[nrow(new_table),] > 0)]
+new_table = new_table[-nrow(new_table),]
+new_table = data.frame(non_num_col, new_table)
 ```
+Ici, nous voulons supprimer les colonnes où leur variance est nulle, c'est-à-dire des valeurs constantes pour tous les individus.
+
+Nous procédons d'abord à l'enlèvement des variables non numériques, donc les noms et l'identifiant de la molécule. Puis nous travaillerons que sur les valeurs numériques, et nous faisons la variance avec la fonction "apply". 
+
+Nous avons également utilisé la fonction "rbind" qui permet de rajouter une ligne sur les jeux de données afin de pouvoir placer sur chaque colonne sa variance.
+
+Ainsi, nous pouvons utiliser une autre fonction, "which" qui permet la sélection des colonnes qu'on souhaite, c'est-à-dire toutes les colonnes dans lequel la variance est différente de 0. Nous savons également que la variance est toujours positive car c'est une somme de carrées. Donc nous pouvons cherchons toutes la variances strictement supérieures à 0.
+
+La sélection des colonnes voulues et la suppression des colonnes à enlever se fait directement en une seule ligne.
+
+Ensuite, nous supprimons la dernier ligne, car elle n'est plus utile mais aussi permettre de rajouter les colonnes non numériques supprimées précédemment.
+
+#### Notes
+La façon de procédé à la suppression des colonnes ayant une variance nulle n'est pas très jolie, car nous adaptions notre jeux de données à chaque fois qu'on essaye de faire quelque chose.
+
+### Dimensions
+
+Les dimensions des jeux de données après relecture : il y a `{r} nrow(new_table)` lignes et `{r}` ncol(new_table)` colonnes
 
 ```{r}
-
-#new_table = new_table[, !colnames(new_table)=="nBR"]
-#new_table = new_table[, !colnames(new_table)=="nI"]
-#new_table = new_table[, !colnames(new_table)=="T.N..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.N..I."]
-#new_table = new_table[, !colnames(new_table)=="T.O..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.O..I."]
-#new_table = new_table[, !colnames(new_table)=="T.S..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.S..I."]
-#new_table = new_table[, !colnames(new_table)=="T.P..P."]
-#new_table = new_table[, !colnames(new_table)=="T.P..F."]
-#new_table = new_table[, !colnames(new_table)=="T.P..Cl."]
-#new_table = new_table[, !colnames(new_table)=="T.P..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.Cl..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.Cl..I."]
-#new_table = new_table[, !colnames(new_table)=="T.Br..Br."]
-#new_table = new_table[, !colnames(new_table)=="T.Br..I."]
-#new_table = new_table[, !colnames(new_table)=="T.I..I."]
-
+dim(new_table)
 ```
 
 ```{r}
