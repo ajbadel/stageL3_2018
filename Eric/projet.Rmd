@@ -2,27 +2,32 @@
 title: "projet.Rmd"
 author: "Eric"
 date: "21 janvier 2019"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: TRUE
+    number_sections: true
+    theme: paper # ou default, cerulean, journal, flatly, darkly, readable, spacelab, united, cosmo, lumen, paper, sandstone, simplex, and yeti
+    highlight: tango # ou  default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, and textmate
+    code_folding: hide
 ---
 
-#ETAPE 1
+# ETAPE 1
 
 ```{r}
-
-setwd = ("./2019_L3.Rproj")
-
+setwd = ("2019_L3.Rproj")
+getwd()
 ```
 
-1) LECTURE DES JEUX DE DONNEE
+## LECTURE DES JEUX DE DONNEE
 
 ```{r}
-
-donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";", dec = ".")
-donnee2 = read.csv (file = "./../data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
-
+donnee1 = read.csv (file = "./data/placenta_edragon_91mol.csv", header = T, sep = ";", dec = ".")
+donnee2 = read.csv (file = "./data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
 ```
 
-2) ON VERIFIE SI LES NOMS DES LIGNES SONT CORRECTES
+## ON VERIFIE SI LES NOMS DES LIGNES SONT CORRECTES
 
 ```{r}
 nom_col1 = donnee1[,"NOM"]
@@ -30,26 +35,34 @@ nom_col2 = donnee2[, "Noms"]
 comp = nom_col1%in%nom_col2
 comp
 ```
+**NON**,  `%in%` vérifie que ce sont les mêmes nom, mais pas l'ordre or les deux sont importants. En effet, pour vérifier, tu peux essayer :
 
--> Les noms des lignes sont identiques
+```{r}
+nom_col2 <- sort(nom_col2, decreasing=T)
+comp = nom_col1%in%nom_col2
+comp
+```
 
-3) ON INSERE LA DONNEE CLAIRANCE DANS LE FICHIER EDRAGON
+ce qui donne un vecteur à `TRUE` aussi. Ce n'est donc pas la bonne fonction.
+
+=> on laisse tomber pour l'instant.
+
+
+## ON INSERE LA DONNEE CLAIRANCE DANS LE FICHIER EDRAGON
 ```{r}
 clairance = donnee2[,"CI"]
-
 donneefin = data.frame(donnee1, clairance)
 ```
 
 
-4) DIMENSION DE LA TABLE
+## DIMENSION DE LA TABLE
 ```{r}
-dim = dim(donneefin)
-dim
+dim(donneefin)
 ```
--> Les dimension de la table sont 
+-> Les dimensions de la table sont `r ncol(donnefin)` descripteurs et `r nrow(donnefin)` composés.
 
 
-5) LES ENTETES DES LIGNES
+## LES ENTETES DES LIGNES
 ```{r}
 namecol = colnames(donneefin)
 ```
@@ -58,13 +71,9 @@ namecol = colnames(donneefin)
 
 
 
-#ETAPE 2
+# ETAPE 2
 
-1)VALEURS ABERRANTES DANS CI
-
-On remarque une valeur aberrante (1,57)
-On extrait la valeur dans boxmax
-
+## VALEURS ABERRANTES DANS CI
 
 ```{r}
 hist(donneefin[, "clairance"])
@@ -73,54 +82,33 @@ box
 boxmax = box$out
 ```
 
--> On fait une moyenne avec la valeur aberrante (pour comparaison).
+On remarque une valeur aberrante (1,57)
+On extrait la valeur dans boxmax
 
-```{r}
-moy = mean(donneefin [, "clairance"])
-moy
-```
-
--> On remplace la (ou les) valeurs aberentes par NA (les valeurs aberantes etant $out)
-
-```{r}
-CI2 = donneefin$clairance[donneefin$clairance >= boxmax] <- NA
-```
-
--> On fait la moyenne des donnees en enlevant NA
-
-```{r}
-moyfin = mean (donneefin [, "clairance"], na.rm = T)
-moyfin
-```
-
--> On remplace la valeur NA par la moyenne calculee
-
-```{r}
-CIfin = donneefin$clairance [is.na(donneefin$clairance)] <- moyfin
-donneefin$clairance
-```
+**NON** -> On fait une moyenne avec la valeur aberrante (pour comparaison).
+On enlève ce composé
 
 
 
-2) DONNEE MANQUANTE (-999)
+## DONNEE MANQUANTE (-999)
 
 -> On compte le nombre de -999
 
-Methode 1: Sans convertir -999 en NA
+### Methode 1: Sans convertir -999 en NA
 
-```{r}
-#suma = apply(donneefin, 2, function(x) sum(x==-999))
+```{r, eval=F}
+suma = apply(donneefin, 2, function(x) sum(x==-999))
 ```
 
 -> On supprimme les colonnes ne contenant que des -999 ()
 
-```{r}
-#donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
+```{r, eval=F}
+donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
 ```
 
 
 
-Methode 2: On remplace les -999 par Na
+### Methode 2: On remplace les -999 par NA
 
 ```{r}
 donneefin[donneefin == -999] <- NA
@@ -135,16 +123,15 @@ donneefin2bis = donneefin[, colSums(is.na(donneefin)) != nrow(donneefin)]
 
 -> Ou on aurait pu faire : 
 
-```{r}
-#donneefin2bis = donneefin[ , !apply( donneefin , 2 , function(donneefin)       all(is.na(donneefin)))]
+```{r, eval=F}
+donneefin2bis = donneefin[ , !apply( donneefin , 2 , function(donneefin)       all(is.na(donneefin)))]
 ```
 
 
-NOTE : Cependant je n'ai pas reussi � supprimer les NA present dans plus de n cases dans 
-une colonne
+NOTE : Cependant je n'ai pas reussi ? supprimer les NA present dans plus de n cases dans une colonne
 
 
--> On �limine les 2 premieres colonnes pour effectuer la moyenne de chaque colonne
+-> On ?limine les 2 premieres colonnes pour effectuer la moyenne de chaque colonne
 
 ```{r}
 donneemoy = donneefin2bis[ ,3:796]
@@ -174,4 +161,7 @@ donneefin3
 
 
 
+# Sauvegarde des données
+`write.table` écrire au format texte
+`save`sauvegarder au format .Rdata, (`load`)
 

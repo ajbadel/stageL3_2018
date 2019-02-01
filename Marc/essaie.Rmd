@@ -109,7 +109,7 @@ for (i in nrow(val_manq):1) {
   val = val_manq[i,1];
   if (val>=5)
   {
-    new_table = new_table[, -c(i)];
+    new_table = new_table[, -i];
     #cat(i, val, "\n")
   }
   # On aurait pu ajouter un else pour les colonnes ayant des valeurs manquantes en dessous du seuil. Cependant, j'ai pu vérifier à la main qu'il n'y avait pas de colonne ayant des NA en dessous du seuil, donc j'ai évité de rajouter le "else" qui serait inutile ici.
@@ -144,11 +144,11 @@ Nous avons créer une nouvelle matrice permettant le jeu de données avec les NA
 
 non_num_col = new_table[,1:2]
 new_table = new_table[,-c(1,2)]
-new_table= rbind(new_table, apply(new_table[,1:780], MARGIN = 2, FUN = var))
+var.table <- apply(new_table[,1:780], MARGIN = 2, FUN = var)
 
-new_table = new_table[,which(new_table[nrow(new_table),] > 0)]
-new_table = new_table[-nrow(new_table),] # Nous enlevons la dernière ligne car elle n'est plus nécessaire
-new_table = data.frame(non_num_col, new_table)
+toRm <- which(var.table == 0)
+toKeep <- which(var.table > 0)
+new_table = new_table[,toKeep] 
 ```
 
 Ici, nous voulons supprimer les colonnes où leur variance est nulle, c'est-à-dire des valeurs constantes pour tous les individus.
@@ -168,7 +168,7 @@ La façon de procédé à la suppression des colonnes ayant une variance nulle n
 
 ### Dimensions
 
-Les dimensions des jeux de données après relecture : il y a `{r} nrow(new_table)` lignes et `{r} ncol(new_table)` colonnes.
+Les dimensions des jeux de données après relecture : il y a `r nrow(new_table)` lignes et `r ncol(new_table)` colonnes.
 
 ```{r}
 dim(new_table)
