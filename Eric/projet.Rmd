@@ -47,7 +47,6 @@ ce qui donne un vecteur à `TRUE` aussi. Ce n'est donc pas la bonne fonction.
 
 => on laisse tomber pour l'instant.
 
-
 ## ON INSERE LA DONNEE CLAIRANCE DANS LE FICHIER EDRAGON
 ```{r}
 clairance = donnee2[,"CI"]
@@ -59,7 +58,7 @@ donneefin = data.frame(donnee1, clairance)
 ```{r}
 dim(donneefin)
 ```
--> Les dimensions de la table sont `r ncol(donnefin)` descripteurs et `r nrow(donnefin)` composés.
+-> Les dimensions de la table sont `r ncol(donneefin)` descripteurs et `r nrow(donneefin)` composés.
 
 
 ## LES ENTETES DES LIGNES
@@ -67,6 +66,11 @@ dim(donneefin)
 namecol = colnames(donneefin)
 ```
 
+-> On enleve les 2 premi�res colonnes (NOMS et ID)
+
+```{r}
+donneefin = donneefin[ ,-c(1:2)]
+```
 
 
 # ETAPE 2
@@ -88,6 +92,8 @@ On extrait la valeur dans boxmax
 ```{r}
 donneefin$clairance[donneefin$clairance == boxmax] <- NA
 ```
+
+-> On supprime les NA
 
 ```{r}
 donneefin = na.omit(donneefin)
@@ -119,55 +125,28 @@ donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
 donneefin[donneefin == -999] <- NA
 ```
 
--> On compte le nombre de NA dans chaque colonne et on enleve les colonnes avec seulement des NA
+-> On compte le nombre de NA dans chaque colonne et on enleve les colonnes ayant des NA
 
 ```{r}
-sum_Na = apply (donneefin, 2, function(x) sum (is.na(x)))
+sum_NA = apply (donneefin, 2, function(x) sum (is.na(x)))
 
-sum_non_NA = which(sum_Na ==0)
+sum_non_NA = which(sum_NA ==0)
 
 donneefin = donneefin[ ,sum_non_NA]
 ```
 
--> Ou on aurait pu faire : 
 
-```{r, eval=F}
-donneefinbis = donneefin[ , !apply( donneefin , 2 , function(donneefin)       all(is.na(donneefin)))]
-```
+## DONNEE CONSTANTES
 
--
-
-NOTE : Cependant je n'ai pas reussi ? supprimer les NA present dans plus de n cases dans une colonne
-
-
--> On ?limine les 2 premieres colonnes pour effectuer la moyenne de chaque colonne
+-> On calcul la variance de chaque colonne et on ne garde que les colonnes qui ont une variance superieure � 0
 
 ```{r}
-donneemoy = donneefin2bis[ ,3:796]
+varx = apply(donneefin[,1:780], MARGIN = 2, FUN = var)
+
+toRm = which(varx == 0)
+toKeep = which(varx > 0)
+donneefinbis = donneefin[,toKeep] 
 ```
-
--> On fait la moyenne de chaque colonne
-
-```{r}
-moyfin2 = apply(donneemoy, 2, function(x) mean(x, na.rm=T))
-```
-
--> On remplace les NA par les moyennes de la colonne respectives
-
-```{r}
-donneefin3 = apply (donneemoy, 2, function(x) x[is.na (x)]) <- moyfin2
-donneefin3
-```
-
-
-3) DONNEE CONSTANTES
-
--> On verifie les variances des colonnes contenant des valeurs constantes
-
-```{r}
-
-```
-
 
 
 # Sauvegarde des données

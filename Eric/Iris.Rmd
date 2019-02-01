@@ -1,0 +1,96 @@
+---
+title: "Iris"
+author: "Eric"
+date: "1 février 2019"
+output: 
+  html_document:
+   code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd(".")
+data(iris)
+```
+
+#FICHIERS DE DONNEES
+
+dim(iris)
+-> Affiche la dimension du tableau
+
+names(iris)
+-> Affiche les noms des colonnes
+
+iris$Species
+-> Affiche les lignes de la colonne Species
+
+iris$Petal.Length
+-> Affiche les lignes de la colonne Petal.Length
+
+#REPRESENTATION DES ESPECES D'IRIS
+
+### Visu des données
+
+```{r}
+summary (iris)
+```
+
+##Exercice 1
+
+### Creation des vecteurs
+
+```{r}
+collection1 <- rep(c("setosa", "versicolor", "virginica"), c(15,
+19, 12))
+collection2 <- rep(c("setosa", "versicolor", "virginica"), c(22,
+27, 17))
+```
+
+Note : collection1 à 15 setosa, 19 versicolor, 12 virginica, collection 2 à 22 setosa, 27 versicolor et 17 virginica
+
+### Representation en secteur de la distribution des vecteurs
+
+```{r}
+par(mfrow = c(1,2))
+pie(table(collection1))
+pie(table(collection2))
+```
+
+### Representation en baton de la distribution des vecteurs
+
+```{r}
+par(mfrow = c(1,2))
+barplot(table(collection1))
+barplot(table(collection2))
+```
+
+### Representation en dotchart de la distribution des vecteurs
+
+```{r}
+par(mfrow = c(1,2))
+dotchart(table(collection1))
+dotchart(table(collection2))
+```
+
+-> Avantage de la représentation en secteurs:
+
+
+# REPRESENTATION DE LA LONGEUR DU PETALE
+
+## Exercice
+
+```{r}
+min(iris$Petal.Length)
+max(iris$Petal.Length)
+sum(iris$Petal.Length)
+length(iris$Petal.Length)
+
+sum(iris$Petal.Length)/length(iris$Petal.Length)
+ordLpetal <- sort(iris$Petal.Length)
+ordLpetal
+```
+
+
