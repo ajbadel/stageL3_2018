@@ -1,0 +1,112 @@
+---
+title: "Iris_test"
+author: "Marc XU"
+date: "1 février 2019"
+output: 
+  html_document :
+    toc: true
+    toc_depth: 2
+    toc_float: TRUE
+    number_sections: true
+    theme: paper # ou default, cerulean, journal, flatly, darkly, readable, spacelab, united, cosmo, lumen, paper, sandstone, simplex, and yeti
+    highlight: tango # ou  default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, and textmate
+    code_folding: hide
+---
+```{r}
+setwd("./../Marc")
+getwd()
+```
+
+# Les iris de FISHER
+
+```{r}
+data(iris)
+colnames(iris)
+
+relation <- rep(1:3, each = 50)
+iris <- data.frame(iris, relation)
+iris$relation = as.factor(iris$relation)
+# str(iris)
+```
+
+Il y a 4 études que nous devons réalisé, la longueur et la largeur de la sépale et du pétale (2 paramètres pour chacune des composantes de la corelle d'une fleur).
+
+**Question : est-ce que le paramètre et la composante choisit diffère-t-il selon les espèces ?**
+
+Facteur stimulant à 3 modalités principal, fixe
+# HO : μset = μvir = μver ou H1 : un des μ est différent
+
+Pour chacun des études, nous vérifier les conditions d'applications et ainsi utiliser le test adéquat (paramétrique ou non) pour pouvoir conclure.
+
+```{r}
+par(mfrow = c(2, 2))
+boxplot(iris$Sepal.Length ~ iris$relation,
+        main = paste("Boxplot", "\n",
+                     sub = "longueur du sépale et l'espèce"))
+boxplot(iris$Sepal.Width ~ iris$Species,
+        main = paste("Boxplot", "\n",
+                     sub = "largeur du sépale et l'espèce"))
+boxplot(iris$Petal.Length ~ iris$Species,
+        main = paste("Boxplot", "\n",
+                     sub = "longueur du pétale et l'espèce"))
+boxplot(iris$Petal.Width ~ iris$Species,
+        main = paste("Boxplot", "\n",
+                     sub = "largeur du pétale et l'espèce"))
+```
+
+## Conditions d'applications
+
+### Test d'homogéneité des variances
+
+**Hypothèse H0** : Il y a égalité des 3 variances : σ²set = σ²ver = σ²vir
+**Hypothèse H1** : Il n'y a pas égalité des variances
+
+Pour vérifier l'égalité des variances, nous utilisons le test de Bartlett.
+
+  - Test pour la longueur du sépale
+```{r}
+bart_1 = bartlett.test(Sepal.Length ~ Species, data = iris)
+bart_1$p.value
+```
+
+  - Test pour la largeur du sépale
+```{r}
+bart_2 = bartlett.test(Sepal.Width ~ Species, data = iris)
+bart_2$p.value
+```
+
+  - Test pour la longueur du pétale
+```{r}
+bart_3 = bartlett.test(Petal.Length ~ Species, data = iris)
+bart_2$p.value
+```
+
+  - Test pour la largeur du pétale
+```{r}
+bart_4 = bartlett.test(Petal.Width ~ Species, data = iris)
+bart_2$p.value
+```
+
+On remarque qu'il y 3 p.value < 0.05 donc le test est significatif, on rejette H0 pour ces 3 tests. Il n'y a pas d'égalité des variances de :
+  - longueur du sépale chez les 3 espèces
+  - longueur du pétale chez les 3 espèces
+  - largeur du pétale chez les 3 espèces
+
+La largeur du sépale a une p.value supérieur à 0.05, donc le test est non significatif, on ne rejette pas HO. Il y a égalité des variances.
+
+### Test de la normalité
+
+**Hypothèse HO** : X suit une loi normale.
+**Hypothèse H1** : X ne suit pas une loi normale.
+
+Pour vérifier la normalité, on utilise un test de Shapiro
+```{r, comment=NA}
+shapi_2 = by (iris$Sepal.Width, iris$relation, shapiro.test)
+par(mfrow= c(1, 3))
+by(iris$Sepal.Width, iris$relation, hist)
+```
+
+Les 3 p.value > 0.5, donc le test est NS, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la largeur du sépale.
+L'histogramme confirme le résultat.
+
+**Conclusion sur les CA** : il y a 3 tests où les conditions d'applications ne permettent d'utiliser un test paramétrique, donc il faudra utiliser un test non paramétrique

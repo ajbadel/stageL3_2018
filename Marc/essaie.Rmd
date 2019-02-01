@@ -44,7 +44,7 @@ Nous allons extraire les données de la clairance dans le second fichier "placen
 ```{r, eval = FALSE}
 ligne_nom <- donnees1[,"NOM"]
 ligne_nom2 <- donnees2[, "Noms"]
-
+ligne_nom3 <- rev(ligne_nom2)
 comparaison <- ligne_nom %in% ligne_nom2
 # comparaison
 ```
@@ -119,9 +119,9 @@ Nous remplaçons les valeurs manquantes, affichées par "-999", par les NA. Ensu
 
 #### Notes
 
-  - which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction "which", cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
+which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction "which", cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
 
-``` {R, eval = F}
+``` {r, eval = F}
 # Bouble "for" qui cherche les colonnes où les valeurs manquantes sont supérieurs à un certain seuil.
 
 for (i in nrow(val_manq):1) {

@@ -1,0 +1,246 @@
+---
+title: "Iris de Fisher"
+author: "Marc XU"
+date: "1 février 2019"
+output: 
+  html_document :
+    toc: true
+    toc_depth: 2
+    toc_float: TRUE
+    number_sections: true
+    theme: paper # ou default, cerulean, journal, flatly, darkly, readable, spacelab, united, cosmo, lumen, paper, sandstone, simplex, and yeti
+    highlight: tango # ou  default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, and textmate
+    code_folding: hide
+---
+
+```{r}
+setwd("./../Marc")
+getwd()
+```
+# Les iris de FISHER
+
+## Données : iris
+
+```{r}
+data(iris)
+```
+
+Variables :
+  - longueur du sépale (Sepal.Length)
+  - largeur du sépale (Sepal.Width)
+  - longueur du pétale (Petal.Length)
+  - largeur du pétale (Petal.Width)
+  - nom de l'espèce (Species)
+ 
+Mesures pour trois espèces d’iris :
+  - Iris setosa
+  - I. versicolor
+  - I. virginica.
+
+Les dimensions des jeux de données : il y a `r nrow(iris)` lignes et `r ncol(iris)` colonnes.
+
+## Représentation des espèces d'Iris
+
+### Modalités de la variable
+```{r}
+levels(iris$Species)
+```
+
+### Nombre d’individus par modalité
+```{r}
+summary(iris$Species)
+# table(iris$Species)
+```
+
+### Les différentes représentations
+
+```{r}
+par(mfrow= c(1, 3))
+pie(table(iris$Species)) # représentation en secteur
+barplot(table(iris$Species)) # représentation en bâtons
+dotchart(table(iris$Species)) # représentation de Cleveland
+```
+
+**Exercice**
+
+```{r}
+collection1 <- rep(c("setosa", "versicolor", "virginica"), c(15, 19, 12))
+collection2 <- rep(c("setosa", "versicolor", "virginica"), c(22, 27, 17))
+
+par(mfrow = c(1, 2))
+pie(table(collection1))
+pie(table(collection2))
+
+barplot(table(collection1))
+barplot(table(collection2))
+
+dotchart(table(collection1))
+dotchart(table(collection2))
+
+```
+
+##### Commentaire : 
+  - le camembert : il y a une répartition égale, car pour chaque variable, il n'est présent qu'une fois
+    - Nous avons les variables
+    - Cependant, la répartition ne reflète aucunement le jeu de données
+  - le bâton : représente les nombres d'individus, et on peut voir qu'il y a une différence entre les deux vecteurs
+    - Nous avons les répartitions
+    - Cependant, nous savons pas à quoi cela correspond
+  - Cleveland : pour chaque variable, il y a le nombre d'individus par variable
+    - Nous avons les deux contraintes des deux précédentes représentation
+
+## Représentation de la longueur du pétale
+
+### Résumer l’information contenue dans cette variable
+```{r}
+summary(iris)
+```
+
+**Exercice**
+
+```{r, eval = FALSE}
+min(iris$Petal.Length) # valeur minimale
+max(iris$Petal.Length) # valeur maximale
+sum(iris$Petal.Length) # somme des valeurs
+length(iris$Petal.Length) # distribution
+sum(iris$Petal.Length)/length(iris$Petal.Length) # moyenne
+ordLpetal = sort(iris$Petal.Length) # toutes les valeurs de la distribution
+```
+
+```{r}
+hist(iris$Petal.Length, col = grey(0.6),
+     main = "Histogramme")
+```
+
+### Analyse sur la variable "largeur du pétale"
+
+**Valeur minimum**
+```{r}
+min(iris$Sepal.Width) # valeur minimale
+```
+
+**Valeur maximal**
+```{r}
+max(iris$Sepal.Width) # valeur maximale
+```
+
+**Somme des valeurs**
+```{r}
+sum(iris$Sepal.Width) # somme des valeurs
+```
+
+**Distribution**
+```{r}
+length(iris$Sepal.Width) # distribution
+```
+
+**Moyenne**
+```{r}
+sum(iris$Sepal.Width)/length(iris$Sepal.Width) # moyenne
+```
+
+```{r}
+ordLpetal = sort(iris$Sepal.Width) # toutes les valeurs de la distribution
+```
+
+```{r}
+hist(iris$Sepal.Width, col = grey(0.6), main = "Histogramme")
+```
+
+## Représentation de la longueur et de la largeur du pétale
+
+**Représentation en nuage de points**
+```{r}
+plot(iris$Petal.Length, iris$Petal.Width,
+     xlab = "Longueur du\npetale", 
+     ylab = "Largeur du petale", 
+     main = "Nuage de points",
+     pch = 20)
+```
+
+**Représentation en nuage de points affichant les superpositions**
+```{r}
+sunflowerplot(iris$Petal.Length, iris$Petal.Width, 
+              xlab = "Longueur du petale",
+              ylab = "Largeur du petale",
+              main = "Nuage\nde points",
+              pch = 20)
+```
+
+**Représentation par des densités de points
+```{r}
+library(MASS)
+densite <- kde2d(iris$Petal.Length, iris$Petal.Width)
+filled.contour(densite, color = topo.colors, 
+               xlab = "Longueur du petale",
+               ylab = "Largeur du petale")
+```
+
+On peut réaliser l'étude avec la largeur de la sépale et la longueur de sépale
+
+## Représentation de la longueur du pétale selon les différentes espèces
+```{r}
+boxplot(iris$Petal.Length ~ iris$Species, col = grey(0.6))
+```
+
+## Pour aller plus loin . . .
+```{r}
+par(mfrow = c(2, 2))
+brk = seq(from = 0, to = 8, length = 20)
+hist(iris$Petal.Length,
+     main = "Ensemble des 150 iris",
+     xlab = "Longueur du petale",
+     breaks = brk)
+
+hist(iris$Petal.Length[iris$Species == "setosa"],
+     main = "Setosa",
+     xlab = "Longueur du petale",
+     breaks = brk)
+
+hist(iris$Petal.Length[iris$Species == "versicolor"],
+     main = "Versicolor",
+     xlab = "Longueur du petale",
+     breaks = brk)
+
+hist(iris$Petal.Length[iris$Species == "virginica"],
+     main = "Virginica",
+     xlab = "Longueur du petale",
+     breaks = brk)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(iris$Petal.Length, iris$Petal.Width,
+     xlab = "Longueur du petale", ylab = "Largeur du petale",
+     main = "Nuage de points", pch = 20)
+
+plot(iris$Petal.Length[iris$Species == "setosa"],
+     iris$Petal.Width[iris$Species == "setosa"], 
+     xlim = c(1, 6.9), ylim = c(0.1, 2.5),
+     xlab = "", ylab = "", 
+     main = "iris setosa", pch = 20)
+
+plot(iris$Petal.Length[iris$Species == "versicolor"],
+     iris$Petal.Width[iris$Species == "versicolor"],
+     xlim = c(1, 6.9), ylim = c(0.1, 2.5),
+     xlab = "", ylab = "", 
+     main = "iris\nversicolor", pch = 20)
+
+plot(iris$Petal.Length[iris$Species == "virginica"],
+     iris$Petal.Width[iris$Species == "virginica"],
+     xlim = c(1, 6.9), ylim = c(0.1, 2.5),
+     xlab = "", ylab = "",
+     main = "iris virginica", pch = 20)
+```
+
+```{r}
+spiris <- unclass(iris$Species)
+pairs(iris[1:4], main = "Les iris de Fisher -- 3 especes",
+      pch = c(21, 25, 24)[spiris], 
+      bg = c("red", "green3", "blue")[spiris],
+      las = 1, gap = 0,
+      labels = c("Longueur\nSepale",
+                 "Largeur\nSepale",
+                 "Longueur\nPetale",
+                 "Largeur\nPetale"))
+```
