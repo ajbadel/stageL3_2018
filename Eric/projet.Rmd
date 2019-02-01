@@ -16,15 +16,15 @@ output:
 # ETAPE 1
 
 ```{r}
-setwd = ("2019_L3.Rproj")
+setwd = (".")
 getwd()
 ```
 
 ## LECTURE DES JEUX DE DONNEE
 
 ```{r}
-donnee1 = read.csv (file = "./data/placenta_edragon_91mol.csv", header = T, sep = ";", dec = ".")
-donnee2 = read.csv (file = "./data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
+donnee1 = read.csv (file = "./../data/placenta_edragon_91mol.csv", header = T, sep = ";", dec = ".")
+donnee2 = read.csv (file = "./../data/placenta_MOE_2D_192.csv", header = T, dec = ".", sep =";")
 ```
 
 ## ON VERIFIE SI LES NOMS DES LIGNES SONT CORRECTES
@@ -37,7 +37,7 @@ comp
 ```
 **NON**,  `%in%` vérifie que ce sont les mêmes nom, mais pas l'ordre or les deux sont importants. En effet, pour vérifier, tu peux essayer :
 
-```{r}
+```{r, eval = F}
 nom_col2 <- sort(nom_col2, decreasing=T)
 comp = nom_col1%in%nom_col2
 comp
@@ -69,8 +69,6 @@ namecol = colnames(donneefin)
 
 
 
-
-
 # ETAPE 2
 
 ## VALEURS ABERRANTES DANS CI
@@ -85,9 +83,16 @@ boxmax = box$out
 On remarque une valeur aberrante (1,57)
 On extrait la valeur dans boxmax
 
-**NON** -> On fait une moyenne avec la valeur aberrante (pour comparaison).
-On enlève ce composé
+-> On transforme le 1.57 en NA
 
+```{r}
+donneefin$clairance[donneefin$clairance == boxmax] <- NA
+```
+
+```{r}
+donneefin = na.omit(donneefin)
+donneefin$clairance
+```
 
 
 ## DONNEE MANQUANTE (-999)
@@ -114,19 +119,23 @@ donneefin2 = Filter(function(x) length(unique(x))>1, donneefin)
 donneefin[donneefin == -999] <- NA
 ```
 
-
 -> On compte le nombre de NA dans chaque colonne et on enleve les colonnes avec seulement des NA
 
 ```{r}
-donneefin2bis = donneefin[, colSums(is.na(donneefin)) != nrow(donneefin)]
+sum_Na = apply (donneefin, 2, function(x) sum (is.na(x)))
+
+sum_non_NA = which(sum_Na ==0)
+
+donneefin = donneefin[ ,sum_non_NA]
 ```
 
 -> Ou on aurait pu faire : 
 
 ```{r, eval=F}
-donneefin2bis = donneefin[ , !apply( donneefin , 2 , function(donneefin)       all(is.na(donneefin)))]
+donneefinbis = donneefin[ , !apply( donneefin , 2 , function(donneefin)       all(is.na(donneefin)))]
 ```
 
+-
 
 NOTE : Cependant je n'ai pas reussi ? supprimer les NA present dans plus de n cases dans une colonne
 
