@@ -159,11 +159,19 @@ moyfin2 = apply(donneemoy, 2, function(x) mean(x, na.rm=T))
 -> On remplace les NA par les moyennes de la colonne respectives
 
 ```{r}
-donneefin3 = donneemoy[  ]
+donneefin3 = apply (donneemoy, 2, function(x) x[is.na (x)]) <- moyfin2
+donneefin3
 ```
 
 
 3) DONNEE CONSTANTES
+
+-> On verifie les variances des colonnes contenant des valeurs constantes
+
+```{r}
+
+```
+
 
 
 
