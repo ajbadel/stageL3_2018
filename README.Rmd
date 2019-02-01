@@ -71,8 +71,7 @@ Cependant, ce second fichier (MOE) contient une données très importante pour n
     - comment traiter ces valeurs manquantes ?
     - remplacer "-999" par NA (`which(, arr.ind))
     - compter le nombre de NA par colonne (`apply` et `sum` et `is.na`)
-      - si toutes la colonne (ou beaucoup de lignes) en NA => on enlève la colonne
-      - si peu de NA => remplacer les NA par la moyenne de la colonne (ou la médiane)
+      - on enlève les descripteurs ayant des données manquantes, quelque soit ce nombre (`na.omit`)
     - on vérifie qu'il n'y a plus de NA (ou de -999)
   
   - y a t'il des variables "constantes" (variance nulle) ?
@@ -92,3 +91,10 @@ Cependant, ce second fichier (MOE) contient une données très importante pour n
 
   - apprendre la méthode choisie (SVM ou NN) sur un jeu "facile", type iris de Fisher.
   - appliquer à nos données ...
+
+## En parallèle : les iris de Fisher
+
+### Comprendre ces données
+cf programme de L2S5
+
+### Appliquer NN ou SVM sur ces données
