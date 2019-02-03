@@ -69,17 +69,20 @@ bart_1 = bartlett.test(Sepal.Length ~ Species, data = iris)
 bart_1$p.value
 ```
 
+
   - Test pour la largeur du sépale
 ```{r}
 bart_2 = bartlett.test(Sepal.Width ~ Species, data = iris)
 bart_2$p.value
 ```
 
+
   - Test pour la longueur du pétale
 ```{r}
 bart_3 = bartlett.test(Petal.Length ~ Species, data = iris)
 bart_2$p.value
 ```
+
 
   - Test pour la largeur du pétale
 ```{r}
