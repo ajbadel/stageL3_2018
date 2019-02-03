@@ -33,8 +33,19 @@ Il y a 4 études que nous devons réalisé, la longueur et la largeur de la sép
 
 **Question : est-ce que le paramètre et la composante choisit diffère-t-il selon les espèces ?**
 
-Facteur stimulant à 3 modalités principal, fixe
-# HO : μset = μvir = μver ou H1 : un des μ est différent
+## Descriptions de l'étude
+
+Population : "Iris"
+Échantillon : n = 3 variétés d'iris => ni = 50
+Unité statistique : "Une iris"
+Expérience aléatoire : "Mesure sur les Iris"
+Variable aléatoire : "Largeur et longueur du sépale ou du pétale" => VA quantitative continue
+ X : quantité de nourriture -> VA quantitative 
+3 échantillons 
+
+Facteur stimulant à 3 modalités principal, fixe.
+HO : μset = μvir = μver ou H1 : un des μ est différent
+==> ANOVA
 
 Pour chacun des études, nous vérifier les conditions d'applications et ainsi utiliser le test adéquat (paramétrique ou non) pour pouvoir conclure.
 
@@ -112,4 +123,79 @@ by(iris$Sepal.Width, iris$relation, hist)
 Les 3 p.value > 0.5, donc le test est NS, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la largeur du sépale.
 L'histogramme confirme le résultat.
 
-**Conclusion sur les CA** : il y a 3 tests où les conditions d'applications ne permettent d'utiliser un test paramétrique, donc il faudra utiliser un test non paramétrique
+**Conclusion sur les CA** : il y a 3 tests où les conditions d'applications ne permettent d'utiliser un test paramétrique, donc il faudra utiliser un test non paramétrique. Pour la "largeur du sépale", nous pouvons utiliser un test paramétrique.
+
+## Test paramétrique
+
+### Largeur du sépale
+
+Nous allons réaliser un test d'ANOVA (aov)
+```{R}
+test_anova = aov(Sepal.Width ~ relation, data = iris)
+test_anova
+summary(test_anova)
+```
+
+Fcal > Ftheo.
+
+**Conclusion** : au risque α = 5%, le test est significatif, on rejette donc H0. La largeur du sépale est différente selon l'espèce.
+
+Il y a au moins une des 3 moyennes est différente.
+Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
+
+```{R}
+TukeyHSD(test_anova)
+plot(TukeyHSD(test_anova))
+```
+
+Si l'intervalle de confiance de la différence des moyennes passe par 0, alors il y a égalité des moyennes. 
+Cependant, aucune des intervalles ne passent par 0, donc chez les 3 espèces, les sépales n'ont pas la même largeur.
+
+## Test non paramétrique
+
+### Longueur du sépale chez les 3 espèces
+```{R}
+long_sep = kruskal.test(Sepal.Length ~ Species, data = iris)
+long_sep
+```
+
+**Conclusion** : la p.value < 5%, le test est significatif, on rejette H0. La longueur du sépale est différente selon l'espèce. 
+
+Il y a au moins une des 3 moyennes est différente.
+Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
+
+```{R}
+pairwise.wilcox.test(iris$Sepal.Length, iris$Species, p.adjust = "bonferroni")
+```
+
+Aucune des comparaisons ne passent par 0, donc chez les 3 espèces, les sépales n'ont pas la même largeur.
+
+### Longueur du pétale chez les 3 espèces
+```{R}
+long_pet = kruskal.test(Petal.Length ~ Species, data = iris)
+long_pet
+```
+
+```{R}
+```
+
+### Largeur du pétale chez les 3 espèces
+```{R}
+larg_pet = kruskal.test(Petal.Width ~ Species, data = iris)
+larg_pet
+```
+
+```{R}
+```
+
+```{R}
+```
+
+```{R}
+```
+```{R}
+```
+```{R}
+```
+```{R}
+```
