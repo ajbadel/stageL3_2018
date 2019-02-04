@@ -67,6 +67,64 @@ boxplot(iris$Petal.Width ~ iris$Species,
 
 ## Conditions d'applications
 
+
+### Test de la normalité
+
+**Hypothèse HO** : X suit une loi normale.
+**Hypothèse H1** : X ne suit pas une loi normale.
+
+Pour vérifier la normalité, on utilise un test de Shapiro.
+
+#### Test pour la longueur du sépale
+```{r}
+shapi1 = by(iris$Sepal.Length, iris$relation, shapiro.test)
+shapi1
+par(mfrow= c(1, 3))
+shapi1_hist = by(iris$Sepal.Length, iris$relation, hist,
+                 main = "Test pour la longueur du sépale")
+```
+
+
+#### Test pour la largeur du sépale
+```{r}
+shapi2 = by (iris$Sepal.Width, iris$relation, shapiro.test)
+shapi2
+par(mfrow= c(1, 3))
+shapi2_hist = by(iris$Sepal.Width, iris$relation, hist)
+```
+
+
+#### Test pour la longueur du pétale
+```{r}
+shapi3 = by(iris$Petal.Length, iris$relation, shapiro.test)
+shapi3
+par(mfrow= c(1, 3))
+shapi3_hist = by(iris$Petal.Length, iris$relation, hist)
+```
+
+
+#### Test pour la largeur du pétale
+```{r}
+shapi4 = by (iris$Petal.Width, iris$relation, shapiro.test)
+shapi4
+par(mfrow= c(1, 3))
+shapi4_hist = by(iris$Petal.Width, iris$relation, hist)
+```
+
+Sur les 4 test sur la normalité, on mesure 3 modalités à la fois :
+
+  - Test pour la longueur du sépale : les 3 p.value > 0.5, donc le test est non significatif, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la longueur du sépale.
+  
+  - Test pour la largeur du sépale : les 3 p.value > 0.5, donc le test est non significatif, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la largeur du sépale.
+  
+  - Test pour la longueur du pétale : les 3 p.value > 0.5, donc le test est non significatif, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la longueur du pétale
+  
+  - Test pour la largeur du pétale : ( /!\ ) 2 des 3 p.value < 0.5, donc le test est significatif, on rejette H0. Les 3 espèces ne suivent pas une loi normale pour la longueur du sépale.
+
+L'histogramme confirme le résultat.
+
+**Conclusion sur les CA** : Seule la "largeur du pétale" ne suit pas une loi normale. Il n'y aura pas besoin de vérifier l'homoscédasticité (égalité des variances) de la "largeur du pétale".
+
 ### Test d'homogéneité des variances
 
 **Hypothèse H0** : Il y a égalité des 3 variances : σ²set = σ²ver = σ²vir
@@ -74,56 +132,34 @@ boxplot(iris$Petal.Width ~ iris$Species,
 
 Pour vérifier l'égalité des variances, nous utilisons le test de Bartlett.
 
-  - Test pour la longueur du sépale
+#### Test pour la longueur du sépale
 ```{r}
-bart_1 = bartlett.test(Sepal.Length ~ Species, data = iris)
-bart_1$p.value
+bart1 = bartlett.test(Sepal.Length ~ Species, data = iris)
+bart1$p.value
 ```
 
 
-  - Test pour la largeur du sépale
+#### Test pour la largeur du sépale
 ```{r}
-bart_2 = bartlett.test(Sepal.Width ~ Species, data = iris)
-bart_2$p.value
+bart2 = bartlett.test(Sepal.Width ~ Species, data = iris)
+bart2$p.value
 ```
 
 
-  - Test pour la longueur du pétale
+#### Test pour la longueur du pétale
 ```{r}
-bart_3 = bartlett.test(Petal.Length ~ Species, data = iris)
-bart_2$p.value
+bart3 = bartlett.test(Petal.Length ~ Species, data = iris)
+bart3$p.value
 ```
 
-
-  - Test pour la largeur du pétale
-```{r}
-bart_4 = bartlett.test(Petal.Width ~ Species, data = iris)
-bart_2$p.value
-```
 
 On remarque qu'il y 3 p.value < 0.05 donc le test est significatif, on rejette H0 pour ces 3 tests. Il n'y a pas d'égalité des variances de :
+
   - longueur du sépale chez les 3 espèces
+  
   - longueur du pétale chez les 3 espèces
-  - largeur du pétale chez les 3 espèces
 
 La largeur du sépale a une p.value supérieur à 0.05, donc le test est non significatif, on ne rejette pas HO. Il y a égalité des variances.
-
-### Test de la normalité
-
-**Hypothèse HO** : X suit une loi normale.
-**Hypothèse H1** : X ne suit pas une loi normale.
-
-Pour vérifier la normalité, on utilise un test de Shapiro
-```{r, comment=NA}
-shapi_2 = by (iris$Sepal.Width, iris$relation, shapiro.test)
-par(mfrow= c(1, 3))
-by(iris$Sepal.Width, iris$relation, hist)
-```
-
-Les 3 p.value > 0.5, donc le test est NS, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la largeur du sépale.
-L'histogramme confirme le résultat.
-
-**Conclusion sur les CA** : il y a 3 tests où les conditions d'applications ne permettent d'utiliser un test paramétrique, donc il faudra utiliser un test non paramétrique. Pour la "largeur du sépale", nous pouvons utiliser un test paramétrique.
 
 ## Test paramétrique
 
@@ -132,7 +168,6 @@ L'histogramme confirme le résultat.
 Nous allons réaliser un test d'ANOVA (aov)
 ```{R}
 test_anova = aov(Sepal.Width ~ relation, data = iris)
-test_anova
 summary(test_anova)
 ```
 
