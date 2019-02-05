@@ -1,13 +1,14 @@
 ---
 title: "Iris2"
 author: "Eric"
-date: "1 février 2019"
-output: 
-  html_document: 
+date: "1 fÃ©vrier 2019"
+output:
+  html_document:
     code_folding: hide
+  pdf_document: default
 ---
 
-# Question : La longueur des sepales est differente selon les espèces?
+# Nous allons etudier 4 variables aleatoire
 
 X : Longueur des sepales : variable quantitative
 
@@ -21,6 +22,8 @@ Homoscédasticité -> bartlett.test
 
 ->> Si les conditions d'application sont vérifiés alors on fait une ANOVA, sinon on fait un KRUSKAL-WALLIS
 
+## Preparation des donnees:
+
 ```{r}
 setwd(".")
 
@@ -31,31 +34,57 @@ data(iris)
 summary(iris)
 ```
 
+
 ## Verification des conditions d'application:
 
-### Visualisation graphique de la longueur des sepales parmi les 3 especes
+### Visualisation graphique des variables aleatoires pour les 3 especes
 
 ```{r}
+par(mfrow = c(2,2))
 box1 = boxplot (Sepal.Length~Species, data = iris)
-box1
+box2 = boxplot (Sepal.Width~Species, data = iris)
+box3 = boxplot (Petal.Length~Species, data = iris)
+box4 = boxplot (Petal.Width~Species, data = iris)
 ```
 
 ->> On remarque qu'il y a en moyenne plus de fleurs d'espece "virginica" qui possèdent de longues sepales. les individus de l'espece "setosa" possèdent en moyenne des sepales plus petites.
 
 
-### Visualisation graphique de la normalité de distribution de la variable aleatoire
+### Visualisation graphique de la normalité de distribution des variables aleatoires
 
 ```{r}
-par(mfrow = c(1,3))
-by(iris$Sepal.Length, iris$Species, hist)
+par (mfrow = c(1,3))
+
+by(iris$Sepal.Length, iris$Species, hist, xlab = "longueur Sepale", main = "Hist longueur Sepale")
+by(iris$Sepal.Width, iris$Species, hist, xlab = "largeur Sepale", main = "Hist largeur Sepale")
+by(iris$Petal.Length, iris$Species, hist, xlab = "longueur Petale", main = "Hist longueur Sepale")
+by(iris$Petal.Width, iris$Species, hist, xlab = "largeur Petale", main = "Hist largeur Petale")
 ```
 
-### Verification de la normalite de la variable en fonction des especes
+
+### Verification de la normalite des variables en fonction des especes
 
 ```{r}
 
 by(iris$Sepal.Length, iris$Species, shapiro.test)
+by(iris$Sepal.Width, iris$Species, shapiro.test)
+by(iris$Petal.Length, iris$Species, shapiro.test)
+by(iris$Petal.Width, iris$Species, shapiro.test)
 
 ```
 
-->> D'apres l'histogramme et les resultats du shapiro.test, 
+->> D'apres les histogrammes et les resultats du shapiro.test, avec un risque alpha = 0.05,
+seules les variables largeur de la petale pour l'espece setosa et versicolor ne suivent pas une loi normale. Toutes les autres varaibles suivent une loi normale. 
+
+### Verification de l'homoscedasticite de la variable largeur des sepales:
+
+H0: sigma²A = sigma²B = sigma²C
+H1: une des variance est differente
+
+```{r}
+bartlett.test(Sepal.Length~Species, data = iris)
+bartlett.test(Sepal.Width~Species, data = iris)
+bartlett.test(Petal.Length~Species, data = iris)
+```
+
+->> D'apres les resultats du test, avec un risque alpha, seules les variances de la variable largeur de sepales sont identiques.
