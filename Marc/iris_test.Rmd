@@ -35,15 +35,13 @@ Il y a 4 études que nous devons réalisé, la longueur et la largeur de la sép
 
 ## Descriptions de l'étude
 
-Population : "Iris"
-Échantillon : n = 3 variétés d'iris => ni = 50
-Unité statistique : "Une iris"
-Expérience aléatoire : "Mesure sur les Iris"
-Variable aléatoire : "Largeur et longueur du sépale ou du pétale" => VA quantitative continue
- X : quantité de nourriture -> VA quantitative 
-3 échantillons 
+Population : "Iris"  
+Échantillon : n = 3 variétés d'iris => ni = 50  
+Unité statistique : "Une iris"  
+Expérience aléatoire : "Mesure sur les Iris"  
+Variable aléatoire : "Largeur et longueur du sépale ou du pétale" => VA quantitative continue  
 
-Facteur stimulant à 3 modalités principal, fixe.
+Facteur stimulant à 3 modalités principal, fixe.  
 HO : μset = μvir = μver ou H1 : un des μ est différent
 ==> ANOVA
 
@@ -70,7 +68,7 @@ boxplot(iris$Petal.Width ~ iris$Species,
 
 ### Test de la normalité
 
-**Hypothèse HO** : X suit une loi normale.
+**Hypothèse HO** : X suit une loi normale.  
 **Hypothèse H1** : X ne suit pas une loi normale.
 
 Pour vérifier la normalité, on utilise un test de Shapiro.
@@ -127,7 +125,7 @@ L'histogramme confirme le résultat.
 
 ### Test d'homogéneité des variances
 
-**Hypothèse H0** : Il y a égalité des 3 variances : σ²set = σ²ver = σ²vir
+**Hypothèse H0** : Il y a égalité des 3 variances : σ²set = σ²ver = σ²vir  
 **Hypothèse H1** : Il n'y a pas égalité des variances
 
 Pour vérifier l'égalité des variances, nous utilisons le test de Bartlett.
@@ -153,10 +151,8 @@ bart3$p.value
 ```
 
 
-On remarque qu'il y 3 p.value < 0.05 donc le test est significatif, on rejette H0 pour ces 3 tests. Il n'y a pas d'égalité des variances de :
-
-  - longueur du sépale chez les 3 espèces
-  
+On remarque qu'il y 3 p.value < 0.05 donc le test est significatif, on rejette H0 pour ces 3 tests. Il n'y a pas d'égalité des variances de :  
+  - longueur du sépale chez les 3 espèces  
   - longueur du pétale chez les 3 espèces
 
 La largeur du sépale a une p.value supérieur à 0.05, donc le test est non significatif, on ne rejette pas HO. Il y a égalité des variances.
@@ -171,11 +167,10 @@ test_anova = aov(Sepal.Width ~ relation, data = iris)
 summary(test_anova)
 ```
 
-Fcal > Ftheo.
-
+Fcal > Ftheo.  
 **Conclusion** : au risque α = 5%, le test est significatif, on rejette donc H0. La largeur du sépale est différente selon l'espèce.
 
-Il y a au moins une des 3 moyennes est différente.
+Il y a au moins une des 3 moyennes est différente.  
 Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
 
 ```{R}
@@ -183,45 +178,75 @@ TukeyHSD(test_anova)
 plot(TukeyHSD(test_anova))
 ```
 
-Si l'intervalle de confiance de la différence des moyennes passe par 0, alors il y a égalité des moyennes. 
+Si l'intervalle de confiance de la différence des moyennes passe par 0, alors il y a égalité des moyennes.  
 Cependant, aucune des intervalles ne passent par 0, donc chez les 3 espèces, les sépales n'ont pas la même largeur.
 
 ## Test non paramétrique
 
 ### Longueur du sépale chez les 3 espèces
 ```{R}
-long_sep = kruskal.test(Sepal.Length ~ Species, data = iris)
-long_sep
+long_sep = kruskal.test(Sepal.Length ~ relation, data = iris)
+long_sep$p.value
 ```
 
 **Conclusion** : la p.value < 5%, le test est significatif, on rejette H0. La longueur du sépale est différente selon l'espèce. 
 
-Il y a au moins une des 3 moyennes est différente.
+Il y a au moins une des 3 moyennes est différente.  
 Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
 
 ```{R}
-pairwise.wilcox.test(iris$Sepal.Length, iris$Species, p.adjust = "bonferroni")
+pairwise.wilcox.test(iris$Sepal.Length, iris$relation, p.adjust = "bonferroni")
 ```
 
-Aucune des comparaisons ne passent par 0, donc chez les 3 espèces, les sépales n'ont pas la même largeur.
+**Conclusion** :  
+μset - μvir < 2% = significativement différent  
+μvir - μver < 2% = significativement différent  
+μver - μset < 2% = significativement différent  
+Donc toutes les moyennes sur la longueur du sépale sont significativement différentes selon l'espèce.
 
 ### Longueur du pétale chez les 3 espèces
 ```{R}
-long_pet = kruskal.test(Petal.Length ~ Species, data = iris)
-long_pet
+long_pet = kruskal.test(Petal.Length ~ relation, data = iris)
+long_pet$p.value
 ```
 
+**Conclusion** : la p.value < 5%, le test est significatif, on rejette H0. La longueur du pétale est différente selon l'espèce. 
+
+Il y a au moins une des 3 moyennes est différente.  
+Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
+
 ```{R}
+pairwise.wilcox.test(iris$Petal.Length, iris$relation, p.adjust = "non")
+pairwise.wilcox.test(iris$Petal.Length, iris$relation, p.adjust = "bonferroni")
 ```
+
+**Conclusion** :  
+μset - μvir < 2% = significativement différent  
+μvir - μver < 2% = significativement différent  
+μver - μset < 2% = significativement différent  
+Donc toutes les moyennes sur la longueur du pétale sont significativement différentes selon l'espèce.
 
 ### Largeur du pétale chez les 3 espèces
 ```{R}
-larg_pet = kruskal.test(Petal.Width ~ Species, data = iris)
-larg_pet
+larg_pet = kruskal.test(Petal.Width ~ relation, data = iris)
+larg_pet$p.value
 ```
 
+**Conclusion** : la p.value < 5%, le test est significatif, on rejette H0. La largeur du pétale est différente selon l'espèce. 
+
+Il y a au moins une des 3 moyennes est différente.  
+Nous allons réaliser un test post-hoc pour déterminer quelle(s) moyenne(s) diffère-t-il des autres.
+
 ```{R}
+pairwise.wilcox.test(iris$Petal.Width, iris$relation, p.adjust = "bonferroni")
 ```
+
+**Conclusion** :  
+μset - μvir < 2% = significativement différent  
+μvir - μver < 2% = significativement différent  
+μver - μset < 2% = significativement différent  
+Donc toutes les moyennes sur la largeur du pétale sont significativement différentes selon l'espèce.
+
 
 ```{R}
 ```
