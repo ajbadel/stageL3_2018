@@ -117,7 +117,7 @@ Sur les 4 test sur la normalité, on mesure 3 modalités à la fois :
   
   - Test pour la longueur du pétale : les 3 p.value > 0.5, donc le test est non significatif, on ne rejette pas H0. Les 3 espèces suivent une loi normale pour la longueur du pétale
   
-  - Test pour la largeur du pétale : ( /!\ ) 2 des 3 p.value < 0.5, donc le test est significatif, on rejette H0. Les 3 espèces ne suivent pas une loi normale pour la longueur du sépale.
+  - Test pour la largeur du pétale : (!) 2 des 3 p.value < 0.5, donc le test est significatif, on rejette H0. Les 3 espèces ne suivent pas une loi normale pour la longueur du sépale.
 
 L'histogramme confirme le résultat.
 
@@ -136,20 +136,17 @@ bart1 = bartlett.test(Sepal.Length ~ Species, data = iris)
 bart1$p.value
 ```
 
-
 #### Test pour la largeur du sépale
 ```{r}
 bart2 = bartlett.test(Sepal.Width ~ Species, data = iris)
 bart2$p.value
 ```
 
-
 #### Test pour la longueur du pétale
 ```{r}
 bart3 = bartlett.test(Petal.Length ~ Species, data = iris)
 bart3$p.value
 ```
-
 
 On remarque qu'il y 3 p.value < 0.05 donc le test est significatif, on rejette H0 pour ces 3 tests. Il n'y a pas d'égalité des variances de :  
   - longueur du sépale chez les 3 espèces  
