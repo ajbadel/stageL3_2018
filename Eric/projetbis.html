@@ -386,11 +386,11 @@ comp</code></pre></div>
 ## [57] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [71] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 ## [85] TRUE TRUE TRUE TRUE TRUE TRUE TRUE</code></pre>
-<p><strong>NON</strong>, <code>%in%</code> vÃ©rifie que ce sont les mÃªmes nom, mais pas l’ordre or les deux sont importants. En effet, pour vÃ©rifier, tu peux essayer :</p>
+<p><strong>NON</strong>, <code>%in%</code> vérifie que ce sont les mêmes nom, mais pas l’ordre or les deux sont importants. En effet, pour vérifier, tu peux essayer :</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nom_col2 &lt;-<span class="st"> </span><span class="kw">sort</span>(nom_col2, <span class="dt">decreasing=</span>T)
 comp =<span class="st"> </span>nom_col1<span class="op">%in%</span>nom_col2
 comp</code></pre></div>
-<p>ce qui donne un vecteur Ã  <code>TRUE</code> aussi. Ce n’est donc pas la bonne fonction.</p>
+<p>ce qui donne un vecteur à <code>TRUE</code> aussi. Ce n’est donc pas la bonne fonction.</p>
 <p>=&gt; on laisse tomber pour l’instant.</p>
 </div>
 <div id="on-insere-la-donnee-clairance-dans-le-fichier-edragon" class="section level2">
@@ -402,12 +402,12 @@ donneefin =<span class="st"> </span><span class="kw">data.frame</span>(donnee1, 
 <h2><span class="header-section-number">1.4</span> DIMENSION DE LA TABLE</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(donneefin)</code></pre></div>
 <pre><code>## [1]  91 801</code></pre>
-<p>-&gt; Les dimensions de la table sont 801 descripteurs et 91 composÃ©s.</p>
+<p>-&gt; Les dimensions de la table sont 801 descripteurs et 91 composés.</p>
 </div>
 <div id="les-entetes-des-lignes" class="section level2">
 <h2><span class="header-section-number">1.5</span> LES ENTETES DES LIGNES</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">namecol =<span class="st"> </span><span class="kw">colnames</span>(donneefin)</code></pre></div>
-<p>-&gt; On enleve les 2 premières colonnes (NOMS et ID)</p>
+<p>-&gt; On enleve les 2 premi?res colonnes (NOMS et ID)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">donneefin =<span class="st"> </span>donneefin[ ,<span class="op">-</span><span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>)]</code></pre></div>
 </div>
 </div>
@@ -477,10 +477,11 @@ donneefin<span class="op">$</span>clairance</code></pre></div>
 sum_non_NA =<span class="st"> </span><span class="kw">which</span>(sum_NA <span class="op">==</span><span class="dv">0</span>)
 
 donneefin =<span class="st"> </span>donneefin[ ,sum_non_NA]</code></pre></div>
-<ol start="3" style="list-style-type: decimal">
-<li>DONNEE CONSTANTES</li>
-</ol>
-<p>-&gt; On calcul la variance de chaque colonne et on ne garde que les colonnes qui ont une variance superieure à 0</p>
+</div>
+</div>
+<div id="donnee-constantes" class="section level2">
+<h2><span class="header-section-number">2.3</span> DONNEE CONSTANTES</h2>
+<p>-&gt; On calcul la variance de chaque colonne et on ne garde que les colonnes qui ont une variance superieure ? 0</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">varx =<span class="st"> </span><span class="kw">apply</span>(donneefin[,<span class="dv">1</span><span class="op">:</span><span class="dv">780</span>], <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> var)
 
 toRm =<span class="st"> </span><span class="kw">which</span>(varx <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)
@@ -488,10 +489,9 @@ toKeep =<span class="st"> </span><span class="kw">which</span>(varx <span class=
 donneefinbis =<span class="st"> </span>donneefin[,toKeep] </code></pre></div>
 </div>
 </div>
-</div>
-<div id="sauvegarde-des-donnaes" class="section level1">
-<h1><span class="header-section-number">3</span> Sauvegarde des donnÃ©es</h1>
-<p><code>write.table</code> Ã©crire au format texte <code>save</code>sauvegarder au format .Rdata, (<code>load</code>)</p>
+<div id="sauvegarde-des-donnees" class="section level1">
+<h1><span class="header-section-number">3</span> Sauvegarde des données</h1>
+<p><code>write.table</code> écrire au format texte <code>save</code>sauvegarder au format .Rdata, (<code>load</code>)</p>
 </div>
 
 

@@ -66,7 +66,7 @@ dim(donneefin)
 namecol = colnames(donneefin)
 ```
 
--> On enleve les 2 premiËres colonnes (NOMS et ID)
+-> On enleve les 2 premi?res colonnes (NOMS et ID)
 
 ```{r}
 donneefin = donneefin[ ,-c(1:2)]
@@ -138,7 +138,7 @@ donneefin = donneefin[ ,sum_non_NA]
 
 ## DONNEE CONSTANTES
 
--> On calcul la variance de chaque colonne et on ne garde que les colonnes qui ont une variance superieure ‡ 0
+-> On calcul la variance de chaque colonne et on ne garde que les colonnes qui ont une variance superieure ? 0
 
 ```{r}
 varx = apply(donneefin[,1:780], MARGIN = 2, FUN = var)
@@ -152,4 +152,3 @@ donneefinbis = donneefin[,toKeep]
 # Sauvegarde des donn√©es
 `write.table` √©crire au format texte
 `save`sauvegarder au format .Rdata, (`load`)
-
