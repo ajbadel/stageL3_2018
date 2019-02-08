@@ -189,9 +189,9 @@ $(document).ready(function () {
 
 <div id="stagel3_2018" class="section level1">
 <h1>stageL3_2018</h1>
-<p>les données et le reste pour mes stagiaires de l’année 2018-2019, Marc Xu et Eric Son Dutt</p>
-<div id="creer-un-git" class="section level2">
-<h2>Créer un git</h2>
+<p>les donnÃ©es et le reste pour mes stagiaires de l’annÃ©e 2018-2019, Marc Xu et Eric Son Dutt</p>
+<div id="craer-un-git" class="section level2">
+<h2>CrÃ©er un git</h2>
 <ul>
 <li>me donner leur login</li>
 <li>et je les invite
@@ -200,8 +200,8 @@ $(document).ready(function () {
 <li>fait pour Eric ‘Bibirani01’</li>
 </ul></li>
 <li>sur vos machines, faire git clone “” du dossier dans son ensemble</li>
-<li>dans vos répertoires respectifs, créez, avec un Rstudio, un projet (“xx.Rproj”) ce sera votre projet principal de travail.</li>
-<li>à partir de ce projet, créez autant de fichiers .Rmd (c’est à dire Rmarkdown, on oublie les fichiers scripts simples .R) que nécessaires</li>
+<li>dans vos rÃ©pertoires respectifs, crÃ©ez, avec un Rstudio, un projet (“xx.Rproj”) ce sera votre projet principal de travail.</li>
+<li>Ã  partir de ce projet, crÃ©ez autant de fichiers .Rmd (c’est Ã  dire Rmarkdown, on oublie les fichiers scripts simples .R) que nÃ©cessaires</li>
 </ul>
 </div>
 <div id="apprendre-le-markdown" class="section level2">
@@ -209,46 +209,65 @@ $(document).ready(function () {
 </div>
 <div id="le-sujet" class="section level2">
 <h2>Le sujet</h2>
-<p>Etablir un modèle de prédiction de la clairance à partir de descripteurs géométriques et physico-chimiques de petits composés. Deux méthodes seront utilisées :</p>
+<p>Etablir un modÃ¨le de prÃ©diction de la clairance Ã  partir de descripteurs gÃ©omÃ©triques et physico-chimiques de petits composÃ©s. Deux mÃ©thodes seront utilisÃ©es :</p>
 <ul>
 <li>SVM</li>
-<li>réseaux de neurones</li>
+<li>rÃ©seaux de neurones</li>
 </ul>
 </div>
-<div id="les-donnees" class="section level2">
-<h2>Les données</h2>
+<div id="de-la-biblio" class="section level2">
+<h2>De la biblio</h2>
+<ul>
+<li>une rÃ©fÃ©rence dans le domaine dumachine learning (apprentissage supervisÃ©) : <a href="https://web.stanford.edu/~hastie/ElemStatLearn/index.html">ESL</a> par Hastie, Tibshirani &amp; Friedman</li>
+<li>un article sur les SVM : <a href="https://towardsdatascience.com/demystifying-maths-of-svm-13ccfe00091e">SVM</a></li>
+</ul>
+</div>
+<div id="les-donnaes" class="section level2">
+<h2>Les donnÃ©es</h2>
 <p>Il y a deux fichiers :</p>
 <ul>
 <li>le premier <a href="https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_edragon_91mol.csv">data edragon</a> provient d’un logiciel libre,
 <ul>
-<li>c’est celui là que nous allons utiliser.</li>
+<li>c’est celui lÃ  que nous allons utiliser.</li>
 </ul></li>
 <li>le second <a href="https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_MOE_2D_192.csv">data MOE</a> provient d’un logiciel payant (cher),
 <ul>
 <li>nous n’allons donc pas l’utiliser.</li>
 </ul></li>
 </ul>
-<p>Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).</p>
-<div id="etape-1-realisation-dun-jeu-de-donnees-utilisable" class="section level3">
-<h3>Etape 1 : réalisation d’un jeu de données “utilisable”</h3>
+<p>Cependant, ce second fichier (MOE) contient une donnÃ©es trÃ¨s importante pour nous, la Clairance (CI).</p>
+<div id="etape-1-raalisation-dun-jeu-de-donnaes-utilisable" class="section level3">
+<h3>Etape 1 : rÃ©alisation d’un jeu de donnÃ©es “utilisable”</h3>
 <ul>
-<li>lire les deux jeux de données</li>
-<li>vérifier que les noms des lignes sont les mêmes</li>
-<li>récupérer la colonne “CI” du fichier MOE et l’ajouter au fichier edragon</li>
-<li>faire un jeu de données d’étude
+<li>lire les deux jeux de donnÃ©es
+<ul>
+<li>vous avez lu des matrices ? des data.frames ? autre chose ?</li>
+</ul></li>
+<li>vÃ©rifier que les noms des lignes sont les mÃªmes
+<ol style="list-style-type: decimal">
+<li>les noms des lignes doivent Ãªtre les noms des composÃ©s Ã©tudiÃ©s</li>
+<li>vÃ©rifier que les composÃ©s sont bien dans le mÃªme ordre</li>
+<li>pourquoi est-ce important ?</li>
+</ol></li>
+<li>rÃ©cupÃ©rer la colonne “CI” du fichier MOE et l’ajouter au fichier edragon</li>
+<li>faire un jeu de donnÃ©es d’Ã©tude
 <ul>
 <li>combien ce fichier a t’il de ligne ?</li>
 <li>combien de colonnes ?</li>
 <li>quels sont les entetes des lignes ?</li>
-<li>si ce n’est pas le cas, donner le nom du composé</li>
+<li>si ce n’est pas le cas, donner le nom du composÃ©</li>
 </ul></li>
 </ul>
 </div>
-<div id="etape-2-regarder-les-donnees" class="section level3">
-<h3>Etape 2 : regarder les données</h3>
+<div id="etape-2-regarder-les-donnaes" class="section level3">
+<h3>Etape 2 : regarder les donnÃ©es</h3>
 <ul>
-<li>comment visualiser ces données ?</li>
-<li>y a t’il des valeurs abérrantes ?
+<li>comment visualiser ces donnÃ©es ?
+<ul>
+<li>on laisse tomber pour l’instant</li>
+<li>on fera plus tard, cf Etape 3</li>
+</ul></li>
+<li>y a t’il des valeurs aberrantes ?
 <ul>
 <li>que faut-il en faire ?</li>
 <li>les garder ?</li>
@@ -256,32 +275,56 @@ $(document).ready(function () {
 <ul>
 <li>enlever la ligne</li>
 <li>enlever la colonne</li>
-<li>remplacer la valeur abérrante par xx</li>
+<li>remplacer la valeur aberrante par xx</li>
 </ul></li>
 </ul></li>
-<li>y a t’il des données manquantes (999 dans le fichier) ?
+<li>ici, on ne peut regarder dans le dÃ©tail que la clairance (<code>CI</code>)
+<ul>
+<li>faire histogramme et boxplot de <code>CI</code></li>
+<li>voir qu’un des composÃ©s a une valeur extreme (beaucoup plus Ã©levÃ©e que les autres)</li>
+<li>on enlÃ¨ve ce composÃ©</li>
+</ul></li>
+<li>y a t’il des donnÃ©es manquantes (999 dans le fichier) ?
 <ul>
 <li>comment traiter ces valeurs manquantes ?</li>
+<li>remplacer “-999” par NA (`which(, arr.ind))</li>
+<li>compter le nombre de NA par colonne (<code>apply</code> et <code>sum</code> et <code>is.na</code>)</li>
+<li>on enlÃ¨ve les descripteurs ayant des donnÃ©es manquantes, quelque soit ce nombre (<code>na.omit</code>)</li>
+<li>on vÃ©rifie qu’il n’y a plus de NA (ou de -999)</li>
 </ul></li>
-<li>y a t’il des variables “constantes” ?
+<li>y a t’il des variables “constantes” (variance nulle) ?
 <ul>
-<li>si oui, on les enlève</li>
+<li>si oui, on les enlÃ¨ve =&gt; 3 lignes de programme</li>
+<li>calcul de la variance de toutes les colonnes (descripteurs) (<code>apply</code>)</li>
+<li>ne garder que celles de variance non nulle (<code>which</code>)</li>
+<li>on vÃ©rifie qu’il n’y a plus de constante</li>
 </ul></li>
+<li>Au final, combien de lignes et de colonnes reste t-il ?</li>
 </ul>
 </div>
-<div id="etape-3-regarder-les-donnees-dans-le-sens-multivarie" class="section level3">
-<h3>Etape 3 : regarder les données dans le sens “multivarié”</h3>
+<div id="etape-3-regarder-les-donnaes-dans-le-sens-multivaria" class="section level3">
+<h3>Etape 3 : regarder les donnÃ©es dans le sens “multivariÃ©”</h3>
 <ul>
-<li>ACP</li>
-<li>classification (clustering), classification hiérarchique ascendante (<code>hclust</code>) et <code>kmeans</code></li>
+<li>ACP, multidimensional scaling</li>
+<li>classification (clustering), classification hiÃ©rarchique ascendante (<code>hclust</code>) et <code>kmeans</code></li>
 </ul>
 </div>
-<div id="etape-4-faire-des-modeles" class="section level3">
-<h3>Etape 4 : faire des modèles</h3>
+<div id="etape-4-faire-des-modales" class="section level3">
+<h3>Etape 4 : faire des modÃ¨les</h3>
 <ul>
-<li>apprendre la méthode choisie (SVM ou NN) sur un jeu “facile”, type iris de Fisher.</li>
-<li>appliquer à nos données …</li>
+<li>apprendre la mÃ©thode choisie (SVM ou NN) sur un jeu “facile”, type iris de Fisher.</li>
+<li>appliquer Ã  nos donnÃ©es …</li>
 </ul>
+</div>
+</div>
+<div id="en-parallale-les-iris-de-fisher" class="section level2">
+<h2>En parallÃ¨le : les iris de Fisher</h2>
+<div id="comprendre-ces-donnaes" class="section level3">
+<h3>Comprendre ces donnÃ©es</h3>
+<p>cf programme de L2S5</p>
+</div>
+<div id="appliquer-nn-ou-svm-sur-ces-donnaes" class="section level3">
+<h3>Appliquer NN ou SVM sur ces donnÃ©es</h3>
 </div>
 </div>
 </div>
