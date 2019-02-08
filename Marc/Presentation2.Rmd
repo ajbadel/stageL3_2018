@@ -1,0 +1,92 @@
+---
+title: "Stage - Essaie 2"
+author: "Marc XU"
+date: "8 février 2019"
+output: ioslides_presentation
+---
+## Construire un réseau de neurone avec R
+
+```{r}
+#fix(iris)
+head(iris, 5)
+```
+
+Utilisation de la librarie "neuronal"
+```{r}
+library(neuralnet)
+```
+
+## Trainset
+
+La fonction "fix" permet d'ouvrir les données un fichier
+
+```{r}
+ind2 <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
+trainset = iris[ind2 == 1, ]
+head(trainset,6)
+```
+
+## Testset
+```{r}
+testset = iris[ind2 == 2, ]
+head(testset,6)
+```
+
+## Créer trois colonnes
+
+Ajout de trois colonnes versicolor, setosa and virginica dans trainset
+```{r}
+trainset$setosa = trainset$Species == "setosa"
+trainset$virginica = trainset$Species == "virginica"
+trainset$versicolor = trainset$Species == "versicolor"
+head(trainset, 2)
+# fix(trainset)
+
+```
+
+## Crée le réseau de neurones
+
+Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
+```{r}
+network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, trainset, hidden = 3)
+informations = network$result.matrix
+informations1 = informations[4,1]
+```
+
+## Plot
+```{r}
+plot(network)
+```
+## Prediction
+
+```{r}
+output_2 <- compute(network, trainset[, -c(5:9)])
+head(output_2$net.result)
+head(trainset[1,])
+```
+## Prediction - setosa
+```{r}
+in_setosa5 <- 0.9153 + (informations[4,1]*4.9) + (-0.08392*3) + (0.12399*1.4) + (0.17598*0.2)
+out_setosa5 <- 1/(1+exp(-in_setosa5))
+in_setosa6 <- -0.2563 + (0.29969*out_setosa5)
+out_setosa6 <- 1/(1+exp(-in_setosa6))
+```
+
+## Prediction - virginica
+```{r}
+in_virginica5 <- 24.99606 + (0.90004*4.9) + (3.8815*3) + (-4.65807*1.4) + (-11.28548*0.2)
+out_virginica5 <- 1/(1+exp(-in_virginica5))
+in_virginica6 <- -0.2563 + (0.29969*out_virginica5)
+out_virginica6 <- 1/(1+exp(-in_virginica6))
+```
+
+## Prediction - versicolor
+```{r}
+in_versicolor5 <- 0.9153 + (0.03427*4.9) + (-0.08392*3) + (0.12399*1.4) + (0.17598*0.2)
+out_versicolor5 <- 1/(1+exp(-in_versicolor5))
+in_versicolor6 <- -0.2563 + (0.29969*out_versicolor5)
+out_versicolor6 <- 1/(1+exp(-in_versicolor6))
+```
+## Lien
+
+https://www.youtube.com/watch?v=YQgVgYcoJHY
