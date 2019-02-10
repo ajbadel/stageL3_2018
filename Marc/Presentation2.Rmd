@@ -8,7 +8,9 @@ output: ioslides_presentation
 
 Neuron Network est une modélisation de la stimulation des neurones sur machine.
 
-Elle est réalisée des outils statistiques
+Elle est réalisée des outils statistiques.
+
+Il faut installer le 
 
 ## Construire un réseau de neurone avec R
 
