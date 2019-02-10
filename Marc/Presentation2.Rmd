@@ -4,14 +4,20 @@ author: "Marc XU"
 date: "8 février 2019"
 output: ioslides_presentation
 ---
+## Neuron Network
+
+Neuron Network est une modélisation de la stimulation des neurones sur machine.
+
+Elle est réalisée des outils statistiques
+
 ## Construire un réseau de neurone avec R
 
 ```{r}
-#fix(iris)
 head(iris, 5)
 ```
 
-La fonction "fix" permet d'ouvrir les données un fichier
+La fonction "fix" permet d'ouvrir les données un fichier.  
+Utilisation : fix(iris)
 
 Utilisation de la librarie "neuronal"
 ```{r}
