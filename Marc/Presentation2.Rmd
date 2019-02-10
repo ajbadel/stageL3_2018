@@ -20,7 +20,6 @@ library(neuralnet)
 
 ## Trainset
 
-
 ```{r}
 ind2 <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
 trainset = iris[ind2 == 1, ]
