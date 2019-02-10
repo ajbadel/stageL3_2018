@@ -11,6 +11,8 @@ output: ioslides_presentation
 head(iris, 5)
 ```
 
+La fonction "fix" permet d'ouvrir les données un fichier
+
 Utilisation de la librarie "neuronal"
 ```{r}
 library(neuralnet)
@@ -18,7 +20,6 @@ library(neuralnet)
 
 ## Trainset
 
-La fonction "fix" permet d'ouvrir les données un fichier
 
 ```{r}
 ind2 <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
@@ -50,7 +51,7 @@ Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonn
 ```{r}
 network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, trainset, hidden = 3)
 informations = network$result.matrix
-informations1 = informations[4,1]
+informations <- as.data.frame(informations)
 ```
 
 ## Plot
@@ -62,31 +63,42 @@ plot(network)
 ```{r}
 output_2 <- compute(network, trainset[, -c(5:9)])
 head(output_2$net.result)
-head(trainset[1,])
-```
-## Prediction - setosa
-```{r}
-in_setosa5 <- 0.9153 + (informations[4,1]*4.9) + (-0.08392*3) + (0.12399*1.4) + (0.17598*0.2)
-out_setosa5 <- 1/(1+exp(-in_setosa5))
-in_setosa6 <- -0.2563 + (0.29969*out_setosa5)
-out_setosa6 <- 1/(1+exp(-in_setosa6))
-```
-
-## Prediction - virginica
-```{r}
-in_virginica5 <- 24.99606 + (0.90004*4.9) + (3.8815*3) + (-4.65807*1.4) + (-11.28548*0.2)
-out_virginica5 <- 1/(1+exp(-in_virginica5))
-in_virginica6 <- -0.2563 + (0.29969*out_virginica5)
-out_virginica6 <- 1/(1+exp(-in_virginica6))
+somme <- apply(output_2$neurons[[1]], 2, mean)
+somme <- stack(somme)
 ```
 
 ## Prediction - versicolor
 ```{r}
-in_versicolor5 <- 0.9153 + (0.03427*4.9) + (-0.08392*3) + (0.12399*1.4) + (0.17598*0.2)
+in_versicolor5 <- informations[4,1] + (informations[5,1]*somme[2,1]) + (informations[6,1]*somme[3,1]) + (informations[7,1]*somme[4,1]) + (informations[8,1]*somme[5,1])
 out_versicolor5 <- 1/(1+exp(-in_versicolor5))
-in_versicolor6 <- -0.2563 + (0.29969*out_versicolor5)
-out_versicolor6 <- 1/(1+exp(-in_versicolor6))
+out_versicolor5
+
+in_versicolor6 <- informations[19,1] + (informations[20,1]*out_versicolor5) + (informations[21,1]*out_versicolor5) + (informations[22,1]*out_versicolor5)
+out_versicolor6 <- 1/(1+exp(in_versicolor6))
+out_versicolor6
 ```
+
+## Prediction - virginica
+```{r}
+in_virginica5 <- informations[9,1] + (informations[10,1]*somme[2,1]) + (informations[11,1]*somme[3,1]) + (informations[12,1]*somme[4,1]) + (informations[13,1]*somme[5,1])
+out_virginica5 <- 1/(1+exp(-in_virginica5))
+out_virginica5
+
+in_virginica6 <- informations[23,1] + (informations[24,1]*out_virginica5) + (informations[25,1]*out_virginica5) + (informations[26,1]*out_virginica5)
+out_virginica6 <- 1/(1+exp(in_virginica6))
+out_virginica6
+```
+
+## Prediction - setosa
+```{r}
+  in_setosa5 <- informations[14,1] + (informations[15,1]*somme[2,1]) + (informations[16,1]*somme[3,1]) + (informations[17,1]*somme[4,1]) + (informations[18,1]*somme[5,1])
+out_setosa5 <- 1/(1+exp(-in_setosa5))
+
+in_setosa6 <- informations[27,1] + (informations[28,1]*out_setosa5) + (informations[29,1]*out_setosa5) + (informations[30,1]*out_setosa5)
+out_setosa6 <- 1/(1+exp(in_setosa6))
+out_setosa6
+```
+
 ## Lien
 
 https://www.youtube.com/watch?v=YQgVgYcoJHY

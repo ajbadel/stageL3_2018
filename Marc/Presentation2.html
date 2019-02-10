@@ -62,6 +62,10 @@
       font-style: italic;
     }
 
+    summary {
+      display: list-item;
+    }
+
     slides > slide {
       -webkit-transition: all 0.4s ease-in-out;
       -moz-transition: all 0.4s ease-in-out;
@@ -124,8 +128,8 @@ head(trainset,6)</pre>
 <pre >##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
 ## 1           5.1         3.5          1.4         0.2  setosa
 ## 3           4.7         3.2          1.3         0.2  setosa
-## 6           5.4         3.9          1.7         0.4  setosa
-## 7           4.6         3.4          1.4         0.3  setosa
+## 4           4.6         3.1          1.5         0.2  setosa
+## 5           5.0         3.6          1.4         0.2  setosa
 ## 8           5.0         3.4          1.5         0.2  setosa
 ## 10          4.9         3.1          1.5         0.1  setosa</pre>
 
@@ -136,11 +140,11 @@ head(testset,6)</pre>
 
 <pre >##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
 ## 2           4.9         3.0          1.4         0.2  setosa
-## 4           4.6         3.1          1.5         0.2  setosa
-## 5           5.0         3.6          1.4         0.2  setosa
+## 6           5.4         3.9          1.7         0.4  setosa
+## 7           4.6         3.4          1.4         0.3  setosa
 ## 9           4.4         2.9          1.4         0.2  setosa
-## 17          5.4         3.9          1.3         0.4  setosa
-## 21          5.4         3.4          1.7         0.2  setosa</pre>
+## 12          4.8         3.4          1.6         0.2  setosa
+## 13          4.8         3.0          1.4         0.1  setosa</pre>
 
 </article></slide><slide class=""><hgroup><h2>Créer trois colonnes</h2></hgroup><article  id="creer-trois-colonnes">
 
@@ -165,18 +169,67 @@ head(trainset, 2)</pre>
 <p>Créer le réseau de neurone utilisant la fonction &quot;neuralnet&quot; avec les 3 colonnes dans chaque couche</p>
 
 <pre class = 'prettyprint lang-r'>network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, trainset, hidden = 3)
-head(network$result.matrix, 5)</pre>
-
-<pre >##                                           1
-## error                        1.051812960968
-## reached.threshold            0.009873343323
-## steps                    54899.000000000000
-## Intercept.to.1layhid1       -7.974729975627
-## Sepal.Length.to.1layhid1    -3.799007969122</pre>
+informations = network$result.matrix
+informations &lt;- as.data.frame(informations)</pre>
 
 </article></slide><slide class=""><hgroup><h2>Plot</h2></hgroup><article  id="plot">
 
 <pre class = 'prettyprint lang-r'>plot(network)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Prediction</h2></hgroup><article  id="prediction">
+
+<pre class = 'prettyprint lang-r'>output_2 &lt;- compute(network, trainset[, -c(5:9)])
+head(output_2$net.result)</pre>
+
+<pre >##            [,1]          [,2] [,3]
+## 1  1.026905e-05 -1.365943e-05    1
+## 3  1.026905e-05 -1.365943e-05    1
+## 4  1.026906e-05 -1.365943e-05    1
+## 5  1.026905e-05 -1.365943e-05    1
+## 8  1.026905e-05 -1.365943e-05    1
+## 10 1.026905e-05 -1.365943e-05    1</pre>
+
+<pre class = 'prettyprint lang-r'>somme &lt;- apply(output_2$neurons[[1]], 2, mean)
+somme &lt;- stack(somme)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Prediction - versicolor</h2></hgroup><article  id="prediction---versicolor">
+
+<pre class = 'prettyprint lang-r'>in_versicolor5 &lt;- informations[4,1] + (informations[5,1]*somme[2,1]) + (informations[6,1]*somme[3,1]) + (informations[7,1]*somme[4,1]) + (informations[8,1]*somme[5,1])
+out_versicolor5 &lt;- 1/(1+exp(-in_versicolor5))
+out_versicolor5</pre>
+
+<pre >## [1] 0.0001290089</pre>
+
+<pre class = 'prettyprint lang-r'>in_versicolor6 &lt;- informations[19,1] + (informations[20,1]*out_versicolor5) + (informations[21,1]*out_versicolor5) + (informations[22,1]*out_versicolor5)
+out_versicolor6 &lt;- 1/(1+exp(in_versicolor6))
+out_versicolor6</pre>
+
+<pre >## [1] 0.4999972</pre>
+
+</article></slide><slide class=""><hgroup><h2>Prediction - virginica</h2></hgroup><article  id="prediction---virginica">
+
+<pre class = 'prettyprint lang-r'>in_virginica5 &lt;- informations[9,1] + (informations[10,1]*somme[2,1]) + (informations[11,1]*somme[3,1]) + (informations[12,1]*somme[4,1]) + (informations[13,1]*somme[5,1])
+out_virginica5 &lt;- 1/(1+exp(-in_virginica5))
+out_virginica5</pre>
+
+<pre >## [1] 1.258108e-06</pre>
+
+<pre class = 'prettyprint lang-r'>in_virginica6 &lt;- informations[23,1] + (informations[24,1]*out_virginica5) + (informations[25,1]*out_virginica5) + (informations[26,1]*out_virginica5)
+out_virginica6 &lt;- 1/(1+exp(in_virginica6))
+out_virginica6</pre>
+
+<pre >## [1] 0.5000031</pre>
+
+</article></slide><slide class=""><hgroup><h2>Prediction - setosa</h2></hgroup><article  id="prediction---setosa">
+
+<pre class = 'prettyprint lang-r'>  in_setosa5 &lt;- informations[14,1] + (informations[15,1]*somme[2,1]) + (informations[16,1]*somme[3,1]) + (informations[17,1]*somme[4,1]) + (informations[18,1]*somme[5,1])
+out_setosa5 &lt;- 1/(1+exp(-in_setosa5))
+
+in_setosa6 &lt;- informations[27,1] + (informations[28,1]*out_setosa5) + (informations[29,1]*out_setosa5) + (informations[30,1]*out_setosa5)
+out_setosa6 &lt;- 1/(1+exp(in_setosa6))
+out_setosa6</pre>
+
+<pre >## [1] 0.5</pre>
 
 </article></slide><slide class=""><hgroup><h2>Lien</h2></hgroup><article  id="lien">
 
