@@ -30,12 +30,11 @@ Utilisation : fix(iris)
 
 ```{r}
 ind2 <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
-trainset_essaie = iris[ind2 == 1, ]
-head(trainset_essaie,3)
-testset_essaie = iris[ind2 == 2, ]
-head(testset_essaie,3)
-
-trainset = iris
+trainset = iris[ind2 == 1, ]
+head(trainset,3)
+testset = iris[ind2 == 2, ]
+head(testset,3)
+table(trainset$Species)
 ```
 
 ## Créer trois colonnes
@@ -52,12 +51,15 @@ head(trainset, 2)
 
 Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
 ```{r}
-network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, trainset, hidden = 3, algorithm = "rprop+")
+network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data=trainset, hidden = 3, algorithm = "rprop+")
+# ou
+nn = neuralnet(Species ~ ., data=trainset[,1:5], hidden=1)
+plot(nn)
 informations = network$result.matrix
 informations <- as.data.frame(informations)
 ```
 
-L'argument "hidden" spécifie le nombre de neurones cachés.
+L'argument "hidden" spécifie le nombre de neurones cachés par couche.
 
 hidden = # : On peut changer le nombres de neurones cachées.  
 hidden = c(#, #...) : On peut changer le nombre de couches de neurones (+ nombres de neurones de la couche).
