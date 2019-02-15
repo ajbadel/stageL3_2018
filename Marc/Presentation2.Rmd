@@ -2,17 +2,26 @@
 title: "Stage - Essaie 2"
 author: "Marc XU"
 date: "8 février 2019"
-output: ioslides_presentation
+output:
+  revealjs::revealjs_presentation:
+    theme: league
+    highlight: kate
+    center: true
+    transition: zoom
+    # css: styles.css
 ---
-## Neuron Network
+# Neuron Network {data-background="neurone.jpg"}
 
+## Neuron Network 
 Neuron Network est une modélisation de la stimulation des neurones sur machine.
 
 Elle est réalisée des outils statistiques.
 
-Avant tout :  
-  - installer le packages neuralnet :  (install.packages(neuralnet))
-  - utiliser la librairie : library(neuralnet)
+Durant la réalisation du projet, nous avions besoin de différents packages  
+  - neuralnet :  (install.packages(neuralnet))  
+  - caret;  
+  - nnet;  
+  - clues
 
 ## Construire un réseau de neurone avec R
 
@@ -20,98 +29,166 @@ Nous allons reproduire un réseau de neurone avec les données d'iris.
 
 ```{r}
 library(neuralnet)
-head(iris, 5)
+library(nnet)
+library(mclust)
+library(caret)
 ```
-
-La fonction "fix" permet d'ouvrir les données un fichier.  
-Utilisation : fix(iris)
 
 ## Trainset & Testset
 
 ```{r}
-ind2 <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
-trainset = iris[ind2 == 1, ]
-head(trainset,3)
-testset = iris[ind2 == 2, ]
-head(testset,3)
+set.seed(25)
+
+iris$setosa = iris$Species == "setosa"
+iris$virginica = iris$Species == "virginica"
+iris$versicolor = iris$Species == "versicolor"
+
+ind <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
+
+trainset = iris[ind == 1, ]
+testset = iris[ind == 2, ]
 table(trainset$Species)
+table(testset$Species)
 ```
 
-## Créer trois colonnes
-
-Ajout de trois colonnes versicolor, setosa and virginica dans trainset
-```{r}
-trainset$setosa = trainset$Species == "setosa"
-trainset$virginica = trainset$Species == "virginica"
-trainset$versicolor = trainset$Species == "versicolor"
-head(trainset, 2)
-```
+Dans trainset : 70% des individus choisis aléatoirement dans l'échantillon.  
+Dans testset : 30% des individus choisis aléatoirement dans l'échantillon. 
 
 ## Crée le réseau de neurones
 
 Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
 ```{r}
-network = neuralnet(versicolor + virginica + setosa ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data=trainset, hidden = 3, algorithm = "rprop+")
-# ou
-nn = neuralnet(Species ~ ., data=trainset[,1:5], hidden=1)
-plot(nn)
+set.seed(333)
+forme = setosa + versicolor + virginica ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
+#forme = Espece ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
+
+network = neuralnet(forme, data=trainset, hidden= c(1,2))
 informations = network$result.matrix
 informations <- as.data.frame(informations)
+
+network2 = neuralnet(forme, data = testset, hidden=1)
+informations2 = network2$result.matrix
+informations2 <- as.data.frame(informations2)
 ```
 
 L'argument "hidden" spécifie le nombre de neurones cachés par couche.
 
-hidden = # : On peut changer le nombres de neurones cachées.  
-hidden = c(#, #...) : On peut changer le nombre de couches de neurones (+ nombres de neurones de la couche).
-
-lifesign : une chaîne spécifiant combien de fois la fonction imprimera lors du calcul du réseau de neurones.
-
 ## Plot
 ```{r}
 plot(network)
+plot(network2)
 ```
 
-## Prediction
+## Prediction (1)
 
 ```{r}
 output1 <- compute(network, trainset[, -c(5:9)])
-head(output1$net.result)
-amicalement <- apply(output1$net.result, 2, mean)
+moy_output1 <- apply(output1$net.result, 2, mean)
 moy_col <- apply(output1$neurons[[1]], 2, mean)
 moy_col <- stack(moy_col)
+
+output2 <- compute(network, testset[, -c(5:9)])
+moy_output2 <- apply(output2$net.result, 2, mean)
+moy_col2 <- apply(output2$neurons[[1]], 2, mean)
+moy_col2 <- stack(moy_col2)
+
+head(output1$net.result, 3)
 ```
 
-## Prediction - versicolor
+## Prediction (2)
 ```{r}
-in_versicolor5 <- informations[4,1] + (informations[5,1]*moy_col[2,1]) + (informations[6,1]*moy_col[3,1]) + (informations[7,1]*moy_col[4,1]) + (informations[8,1]*moy_col[5,1])
-out_versicolor5 <- 1/(1+exp(-in_versicolor5))
-out_versicolor5
+in_general1 <- informations[4,1] + (informations[5,1]*moy_col[2,1]) + (informations[6,1]*moy_col[3,1]) + (informations[7,1]*moy_col[4,1]) + (informations[8,1]*moy_col[5,1])
+out_general1 <- 1/(1+exp(-in_general1))
+out_general1
 
-in_versicolor6 <- informations[19,1] + (informations[20,1]*out_versicolor5) + (informations[21,1]*out_versicolor5) + (informations[22,1]*out_versicolor5)
-out_versicolor6 <- 1/(1+exp(-in_versicolor6))
-out_versicolor6
+in_general2 <- informations2[4,1] + (informations2[5,1]*moy_col2[2,1]) + (informations2[6,1]*moy_col2[3,1]) + (informations2[7,1]*moy_col2[4,1]) + (informations2[8,1]*moy_col2[5,1])
+out_general2 <- 1/(1+exp(-in_general2))
+out_general2
 ```
 
-## Prediction - virginica
-```{r}
-in_virginica5 <- informations[9,1] + (informations[10,1]*moy_col[2,1]) + (informations[11,1]*moy_col[3,1]) + (informations[12,1]*moy_col[4,1]) + (informations[13,1]*moy_col[5,1])
-out_virginica5 <- 1/(1+exp(-in_virginica5))
-out_virginica5
 
-in_virginica6 <- informations[23,1] + (informations[24,1]*out_virginica5) + (informations[25,1]*out_virginica5) + (informations[26,1]*out_virginica5)
-out_virginica6 <- 1/(1+exp(-in_virginica6))
-out_virginica6
+## Prediction (3) - versicolor
+Trainset
+```{r}
+in_versicolor1 <- informations[9,1] + (informations[10,1]*out_general1)
+out_versicolor1 <- 1/(1+exp(-in_versicolor1))
+out_versicolor1
+```
+Testset
+```{r}
+in_versicolor2 <- informations2[9,1] + (informations2[10,1]*out_general2)
+out_versicolor2 <- 1/(1+exp(-in_versicolor2))
+out_versicolor2
 ```
 
-## Prediction - setosa
-```{r}
-in_setosa5 <- informations[14,1] + (informations[15,1]*moy_col[2,1]) + (informations[16,1]*moy_col[3,1]) + (informations[17,1]*moy_col[4,1]) + (informations[18,1]*moy_col[5,1])
-out_setosa5 <- 1/(1+exp(-in_setosa5))
-out_setosa5
 
-in_setosa6 <- informations[27,1] + (informations[28,1]*out_setosa5) + (informations[29,1]*out_setosa5) + (informations[30,1]*out_setosa5)
-out_setosa6 <- 1/(1+exp(-in_setosa6))
-out_setosa6
+## Prediction (4) - virginica
+Trainset
+```{r}
+in_virginica1 <- informations[11,1] + (informations[12,1]*out_general1) 
+out_virginica1 <- 1/(1+exp(-in_virginica1))
+out_virginica1
+```
+Testset
+```{r}
+in_virginica2 <- informations2[11,1] + (informations2[12,1]*out_general2) 
+out_virginica2 <- 1/(1+exp(-in_virginica2))
+out_virginica2
+```
+
+
+## Prediction (5) - setosa
+Trainset
+```{r}
+in_setosa1 <- informations[13,1] + (informations[14,1]*out_general1)
+out_setosa1 <- 1/(1+exp(-in_setosa1))
+out_setosa1
+```
+Testset
+```{r}
+in_setosa2 <- informations2[13,1] + (informations2[14,1]*out_general2)
+out_setosa2 <- 1/(1+exp(-in_setosa2))
+out_setosa2
+```
+
+
+## Table de confusion (1)
+
+```{r}
+set.seed(123)
+iris.nn <- nnet(Species ~ .,data = trainset, size = 3)
+```
+
+## Table de confusion (2)
+```{r}
+iris.predict <- predict(iris.nn, trainset, type = 'class')
+nn.table <- table(iris.predict, trainset$Species)
+nn.table
+
+
+iris.predict2 <- predict(iris.nn, testset, type = 'class')
+nn.table2 <- table(iris.predict2, testset$Species)
+nn.table2
+adjustedRandIndex(iris.predict2, testset$Species)
+
+```
+
+## Adjusted Rand Index
+
+Trainset
+```{r}
+adjustedRandIndex(iris.predict, trainset$Species)
+```
+Testset
+```{r}
+adjustedRandIndex(iris.predict2, testset$Species)
+```
+
+
+
+
+```{r}
+
 ```
 
 ## Lien
