@@ -4,11 +4,12 @@ author: "Marc XU"
 date: "8 février 2019"
 output:
   revealjs::revealjs_presentation:
-    theme: league
+    center: yes
     highlight: kate
-    center: true
+    theme: league
     transition: zoom
-    # css: styles.css
+  ioslides_presentation:
+    highlight: kate
 ---
 # Neuron Network {data-background="neurone.jpg"}
 
