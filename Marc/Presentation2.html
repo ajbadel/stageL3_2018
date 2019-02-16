@@ -508,29 +508,13 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <p>Nous allons reproduire un réseau de neurone avec les données d’iris.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(neuralnet)
 <span class="kw">library</span>(nnet)
-<span class="kw">library</span>(mclust)</code></pre></div>
-<pre><code>## Package 'mclust' version 5.4.2
-## Type 'citation(&quot;mclust&quot;)' for citing this R package in publications.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(caret)</code></pre></div>
-<pre><code>## Loading required package: lattice</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
+<span class="kw">library</span>(mclust)
+<span class="kw">library</span>(caret)</code></pre></div>
 </section><section id="trainset-testset" class="slide level2">
 <h2>Trainset &amp; Testset</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">25</span>)
-
-iris<span class="op">$</span>setosa =<span class="st"> </span>iris<span class="op">$</span>Species <span class="op">==</span><span class="st"> &quot;setosa&quot;</span>
-iris<span class="op">$</span>virginica =<span class="st"> </span>iris<span class="op">$</span>Species <span class="op">==</span><span class="st"> &quot;virginica&quot;</span>
-iris<span class="op">$</span>versicolor =<span class="st"> </span>iris<span class="op">$</span>Species <span class="op">==</span><span class="st"> &quot;versicolor&quot;</span>
-
-ind &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">2</span>, <span class="kw">nrow</span>(iris), <span class="dt">replace =</span> T, <span class="dt">prob =</span> <span class="kw">c</span>(<span class="fl">0.7</span>, <span class="fl">0.3</span>))
-
-trainset =<span class="st"> </span>iris[ind <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, ]
-testset =<span class="st"> </span>iris[ind <span class="op">==</span><span class="st"> </span><span class="dv">2</span>, ]
-<span class="kw">table</span>(trainset<span class="op">$</span>Species)</code></pre></div>
 <pre><code>## 
 ##     setosa versicolor  virginica 
 ##         37         39         39</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(testset<span class="op">$</span>Species)</code></pre></div>
 <pre><code>## 
 ##     setosa versicolor  virginica 
 ##         13         11         11</code></pre>

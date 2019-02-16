@@ -28,7 +28,7 @@ Durant la réalisation du projet, nous avions besoin de différents packages
 
 Nous allons reproduire un réseau de neurone avec les données d'iris. 
 
-```{r}
+```{r message=FALSE}
 library(neuralnet)
 library(nnet)
 library(mclust)
@@ -37,7 +37,7 @@ library(caret)
 
 ## Trainset & Testset
 
-```{r}
+```{r, echo=FALSE}
 set.seed(25)
 
 iris$setosa = iris$Species == "setosa"
@@ -48,7 +48,13 @@ ind <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
 
 trainset = iris[ind == 1, ]
 testset = iris[ind == 2, ]
+```
+Trainset
+```{r, echo=FALSE}
 table(trainset$Species)
+```
+Testset
+```{r, echo=FALSE}
 table(testset$Species)
 ```
 
@@ -58,7 +64,7 @@ Dans testset : 30% des individus choisis aléatoirement dans l'échantillon.
 ## Crée le réseau de neurones
 
 Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
-```{r}
+```{r, echo=FALSE}
 set.seed(333)
 forme = setosa + versicolor + virginica ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
 #forme = Espece ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
@@ -75,14 +81,14 @@ informations2 <- as.data.frame(informations2)
 L'argument "hidden" spécifie le nombre de neurones cachés par couche.
 
 ## Plot
-```{r}
+```{r, echo=FALSE}
 plot(network)
 plot(network2)
 ```
 
 ## Prediction (1)
 
-```{r}
+```{r, echo=FALSE}
 output1 <- compute(network, trainset[, -c(5:9)])
 moy_output1 <- apply(output1$net.result, 2, mean)
 moy_col <- apply(output1$neurons[[1]], 2, mean)
@@ -97,7 +103,7 @@ head(output1$net.result, 3)
 ```
 
 ## Prediction (2)
-```{r}
+```{r, echo=FALSE}
 in_general1 <- informations[4,1] + (informations[5,1]*moy_col[2,1]) + (informations[6,1]*moy_col[3,1]) + (informations[7,1]*moy_col[4,1]) + (informations[8,1]*moy_col[5,1])
 out_general1 <- 1/(1+exp(-in_general1))
 out_general1
@@ -110,13 +116,13 @@ out_general2
 
 ## Prediction (3) - versicolor
 Trainset
-```{r}
+```{r, echo=FALSE}
 in_versicolor1 <- informations[9,1] + (informations[10,1]*out_general1)
 out_versicolor1 <- 1/(1+exp(-in_versicolor1))
 out_versicolor1
 ```
 Testset
-```{r}
+```{r, echo=FALSE}
 in_versicolor2 <- informations2[9,1] + (informations2[10,1]*out_general2)
 out_versicolor2 <- 1/(1+exp(-in_versicolor2))
 out_versicolor2
@@ -125,13 +131,13 @@ out_versicolor2
 
 ## Prediction (4) - virginica
 Trainset
-```{r}
+```{r, echo=FALSE}
 in_virginica1 <- informations[11,1] + (informations[12,1]*out_general1) 
 out_virginica1 <- 1/(1+exp(-in_virginica1))
 out_virginica1
 ```
 Testset
-```{r}
+```{r, echo=FALSE}
 in_virginica2 <- informations2[11,1] + (informations2[12,1]*out_general2) 
 out_virginica2 <- 1/(1+exp(-in_virginica2))
 out_virginica2
@@ -140,13 +146,13 @@ out_virginica2
 
 ## Prediction (5) - setosa
 Trainset
-```{r}
+```{r, echo=FALSE}
 in_setosa1 <- informations[13,1] + (informations[14,1]*out_general1)
 out_setosa1 <- 1/(1+exp(-in_setosa1))
 out_setosa1
 ```
 Testset
-```{r}
+```{r, echo=FALSE}
 in_setosa2 <- informations2[13,1] + (informations2[14,1]*out_general2)
 out_setosa2 <- 1/(1+exp(-in_setosa2))
 out_setosa2
@@ -155,13 +161,13 @@ out_setosa2
 
 ## Table de confusion (1)
 
-```{r}
+```{r, echo=FALSE}
 set.seed(123)
 iris.nn <- nnet(Species ~ .,data = trainset, size = 3)
 ```
 
 ## Table de confusion (2)
-```{r}
+```{r, echo=FALSE}
 iris.predict <- predict(iris.nn, trainset, type = 'class')
 nn.table <- table(iris.predict, trainset$Species)
 nn.table
@@ -171,24 +177,25 @@ iris.predict2 <- predict(iris.nn, testset, type = 'class')
 nn.table2 <- table(iris.predict2, testset$Species)
 nn.table2
 adjustedRandIndex(iris.predict2, testset$Species)
-
 ```
 
 ## Adjusted Rand Index
 
 Trainset
-```{r}
+```{r, echo=FALSE}
 adjustedRandIndex(iris.predict, trainset$Species)
 ```
 Testset
-```{r}
+```{r, echo=FALSE}
 adjustedRandIndex(iris.predict2, testset$Species)
 ```
 
 
+```{r, echo=FALSE}
 
+```
 
-```{r}
+```{r, echo=FALSE}
 
 ```
 
