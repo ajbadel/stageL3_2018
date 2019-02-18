@@ -509,12 +509,15 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(neuralnet)
 <span class="kw">library</span>(nnet)
 <span class="kw">library</span>(mclust)
-<span class="kw">library</span>(caret)</code></pre></div>
+<span class="kw">library</span>(caret)
+<span class="kw">library</span>(plotly)</code></pre></div>
 </section><section id="trainset-testset" class="slide level2">
 <h2>Trainset &amp; Testset</h2>
+<p>Trainset</p>
 <pre><code>## 
 ##     setosa versicolor  virginica 
 ##         37         39         39</code></pre>
+<p>Testset</p>
 <pre><code>## 
 ##     setosa versicolor  virginica 
 ##         13         11         11</code></pre>
@@ -523,89 +526,39 @@ Dans testset : 30% des individus choisis aléatoirement dans l’échantillon.</
 </section><section id="cree-le-reseau-de-neurones" class="slide level2">
 <h2>Crée le réseau de neurones</h2>
 <p>Créer le réseau de neurone utilisant la fonction “neuralnet” avec les 3 colonnes dans chaque couche</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">333</span>)
-forme =<span class="st"> </span>setosa <span class="op">+</span><span class="st"> </span>versicolor <span class="op">+</span><span class="st"> </span>virginica <span class="op">~</span><span class="st"> </span>Sepal.Length <span class="op">+</span><span class="st"> </span>Sepal.Width <span class="op">+</span><span class="st"> </span>Petal.Length <span class="op">+</span><span class="st"> </span>Petal.Width
-<span class="co">#forme = Espece ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width</span>
-
-network =<span class="st"> </span><span class="kw">neuralnet</span>(forme, <span class="dt">data=</span>trainset, <span class="dt">hidden=</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-informations =<span class="st"> </span>network<span class="op">$</span>result.matrix
-informations &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(informations)
-
-network2 =<span class="st"> </span><span class="kw">neuralnet</span>(forme, <span class="dt">data =</span> testset, <span class="dt">hidden=</span><span class="dv">1</span>)
-informations2 =<span class="st"> </span>network2<span class="op">$</span>result.matrix
-informations2 &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(informations2)</code></pre></div>
 <p>L’argument “hidden” spécifie le nombre de neurones cachés par couche.</p>
 </section><section id="plot" class="slide level2">
 <h2>Plot</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(network)
-<span class="kw">plot</span>(network2)</code></pre></div>
 </section><section id="prediction-1" class="slide level2">
 <h2>Prediction (1)</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output1 &lt;-<span class="st"> </span><span class="kw">compute</span>(network, trainset[, <span class="op">-</span><span class="kw">c</span>(<span class="dv">5</span><span class="op">:</span><span class="dv">9</span>)])
-moy_output1 &lt;-<span class="st"> </span><span class="kw">apply</span>(output1<span class="op">$</span>net.result, <span class="dv">2</span>, mean)
-moy_col &lt;-<span class="st"> </span><span class="kw">apply</span>(output1<span class="op">$</span>neurons[[<span class="dv">1</span>]], <span class="dv">2</span>, mean)
-moy_col &lt;-<span class="st"> </span><span class="kw">stack</span>(moy_col)
-
-output2 &lt;-<span class="st"> </span><span class="kw">compute</span>(network, testset[, <span class="op">-</span><span class="kw">c</span>(<span class="dv">5</span><span class="op">:</span><span class="dv">9</span>)])
-moy_output2 &lt;-<span class="st"> </span><span class="kw">apply</span>(output2<span class="op">$</span>net.result, <span class="dv">2</span>, mean)
-moy_col2 &lt;-<span class="st"> </span><span class="kw">apply</span>(output2<span class="op">$</span>neurons[[<span class="dv">1</span>]], <span class="dv">2</span>, mean)
-moy_col2 &lt;-<span class="st"> </span><span class="kw">stack</span>(moy_col2)
-
-<span class="kw">head</span>(output1<span class="op">$</span>net.result, <span class="dv">3</span>)</code></pre></div>
 <pre><code>##       [,1]          [,2]         [,3]
 ## 1 1.001747 -0.0017518907 1.551690e-06
 ## 2 0.999670  0.0003266120 4.756928e-07
 ## 3 1.000808 -0.0008117535 1.065001e-06</code></pre>
 </section><section id="prediction-2" class="slide level2">
 <h2>Prediction (2)</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_general1 &lt;-<span class="st"> </span>informations[<span class="dv">4</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">5</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col[<span class="dv">2</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">6</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col[<span class="dv">3</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">7</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col[<span class="dv">4</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">8</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col[<span class="dv">5</span>,<span class="dv">1</span>])
-out_general1 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_general1))
-out_general1</code></pre></div>
 <pre><code>## [1] 0.01700031</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_general2 &lt;-<span class="st"> </span>informations2[<span class="dv">4</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">5</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col2[<span class="dv">2</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">6</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col2[<span class="dv">3</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">7</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col2[<span class="dv">4</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">8</span>,<span class="dv">1</span>]<span class="op">*</span>moy_col2[<span class="dv">5</span>,<span class="dv">1</span>])
-out_general2 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_general2))
-out_general2</code></pre></div>
 <pre><code>## [1] 0.945722</code></pre>
 </section><section id="prediction-3---versicolor" class="slide level2">
 <h2>Prediction (3) - versicolor</h2>
 <p>Trainset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_versicolor1 &lt;-<span class="st"> </span>informations[<span class="dv">9</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">10</span>,<span class="dv">1</span>]<span class="op">*</span>out_general1)
-out_versicolor1 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_versicolor1))
-out_versicolor1</code></pre></div>
 <pre><code>## [1] 1.827401e-62</code></pre>
 <p>Testset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_versicolor2 &lt;-<span class="st"> </span>informations2[<span class="dv">9</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">10</span>,<span class="dv">1</span>]<span class="op">*</span>out_general2)
-out_versicolor2 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_versicolor2))
-out_versicolor2</code></pre></div>
 <pre><code>## [1] 0.5129945</code></pre>
 </section><section id="prediction-4---virginica" class="slide level2">
 <h2>Prediction (4) - virginica</h2>
 <p>Trainset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_virginica1 &lt;-<span class="st"> </span>informations[<span class="dv">11</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">12</span>,<span class="dv">1</span>]<span class="op">*</span>out_general1) 
-out_virginica1 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_virginica1))
-out_virginica1</code></pre></div>
 <pre><code>## [1] 1.4411e-05</code></pre>
 <p>Testset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_virginica2 &lt;-<span class="st"> </span>informations2[<span class="dv">11</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">12</span>,<span class="dv">1</span>]<span class="op">*</span>out_general2) 
-out_virginica2 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_virginica2))
-out_virginica2</code></pre></div>
 <pre><code>## [1] 0.6160362</code></pre>
 </section><section id="prediction-5---setosa" class="slide level2">
 <h2>Prediction (5) - setosa</h2>
 <p>Trainset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_setosa1 &lt;-<span class="st"> </span>informations[<span class="dv">13</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations[<span class="dv">14</span>,<span class="dv">1</span>]<span class="op">*</span>out_general1)
-out_setosa1 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_setosa1))
-out_setosa1</code></pre></div>
 <pre><code>## [1] 0.4999148</code></pre>
 <p>Testset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">in_setosa2 &lt;-<span class="st"> </span>informations2[<span class="dv">13</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>(informations2[<span class="dv">14</span>,<span class="dv">1</span>]<span class="op">*</span>out_general2)
-out_setosa2 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>in_setosa2))
-out_setosa2</code></pre></div>
 <pre><code>## [1] 0.6166794</code></pre>
 </section><section id="table-de-confusion-1" class="slide level2">
 <h2>Table de confusion (1)</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">123</span>)
-iris.nn &lt;-<span class="st"> </span><span class="kw">nnet</span>(Species <span class="op">~</span><span class="st"> </span>.,<span class="dt">data =</span> trainset, <span class="dt">size =</span> <span class="dv">3</span>)</code></pre></div>
 <pre><code>## # weights:  36
 ## initial  value 129.386774 
 ## iter  10 value 3.480242
@@ -614,34 +567,24 @@ iris.nn &lt;-<span class="st"> </span><span class="kw">nnet</span>(Species <span
 ## converged</code></pre>
 </section><section id="table-de-confusion-2" class="slide level2">
 <h2>Table de confusion (2)</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.predict &lt;-<span class="st"> </span><span class="kw">predict</span>(iris.nn, trainset, <span class="dt">type =</span> <span class="st">'class'</span>)
-nn.table &lt;-<span class="st"> </span><span class="kw">table</span>(iris.predict, trainset<span class="op">$</span>Species)
-nn.table</code></pre></div>
 <pre><code>##             
 ## iris.predict setosa versicolor virginica
 ##   setosa         37          0         0
 ##   versicolor      0         39         0
 ##   virginica       0          0        39</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.predict2 &lt;-<span class="st"> </span><span class="kw">predict</span>(iris.nn, testset, <span class="dt">type =</span> <span class="st">'class'</span>)
-nn.table2 &lt;-<span class="st"> </span><span class="kw">table</span>(iris.predict2, testset<span class="op">$</span>Species)
-nn.table2</code></pre></div>
 <pre><code>##              
 ## iris.predict2 setosa versicolor virginica
 ##    setosa         13          0         0
 ##    versicolor      0         11         0
 ##    virginica       0          0        11</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">adjustedRandIndex</span>(iris.predict2, testset<span class="op">$</span>Species)</code></pre></div>
-<pre><code>## [1] 1</code></pre>
 </section><section id="adjusted-rand-index" class="slide level2">
 <h2>Adjusted Rand Index</h2>
 <p>Trainset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">adjustedRandIndex</span>(iris.predict, trainset<span class="op">$</span>Species)</code></pre></div>
 <pre><code>## [1] 1</code></pre>
 <p>Testset</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">adjustedRandIndex</span>(iris.predict2, testset<span class="op">$</span>Species)</code></pre></div>
 <pre><code>## [1] 1</code></pre>
-</section><section id="lien" class="slide level2">
-<h2>Lien</h2>
+</section><section id="references" class="slide level2">
+<h2>References:</h2>
 <p><a href="https://www.youtube.com/watch?v=YQgVgYcoJHY" class="uri">https://www.youtube.com/watch?v=YQgVgYcoJHY</a> (début)</p>
 <p><a href="https://www.youtube.com/watch?v=-Vs9Vae2KI0" class="uri">https://www.youtube.com/watch?v=-Vs9Vae2KI0</a> (compléter)</p>
 </section></section>

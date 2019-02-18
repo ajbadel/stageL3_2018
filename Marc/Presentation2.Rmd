@@ -33,6 +33,7 @@ library(neuralnet)
 library(nnet)
 library(mclust)
 library(caret)
+library(plotly)
 ```
 
 ## Trainset & Testset
@@ -82,7 +83,7 @@ L'argument "hidden" spécifie le nombre de neurones cachés par couche.
 
 ## Plot
 ```{r, echo=FALSE}
-plot(network)
+p <-plot(network)
 plot(network2)
 ```
 
@@ -176,7 +177,6 @@ nn.table
 iris.predict2 <- predict(iris.nn, testset, type = 'class')
 nn.table2 <- table(iris.predict2, testset$Species)
 nn.table2
-adjustedRandIndex(iris.predict2, testset$Species)
 ```
 
 ## Adjusted Rand Index
@@ -199,7 +199,7 @@ adjustedRandIndex(iris.predict2, testset$Species)
 
 ```
 
-## Lien
+##References:
 
 https://www.youtube.com/watch?v=YQgVgYcoJHY (début)
 
