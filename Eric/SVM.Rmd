@@ -2,7 +2,14 @@
 title: "SVM"
 author: "Eric"
 date: "8 février 2019"
-output:revealjs::revealjs_presentation
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
+  ioslides_presentation:
+    highlight: kate
 
 ---
 
@@ -14,6 +21,9 @@ knitr::opts_chunk$set(echo = FALSE)
 install.packages("revealjs")
 ```
 
+```{r}
+library("revealjs")
+```
 
 ```{r, eval = F}
 install.packages("e1071")
@@ -119,12 +129,15 @@ summary (mon_modele)
 
 ```{r}
 ech = sample(150,100)
-col = c("Sepal.Length","Petal.Width", "Species")
+col = c("Sepal.Length","Sepal.Width", "Species")
+#Je n'arrive pas à inserer les "Petal.Length", "Petal.Width" dans col. 
 col2 = c("Petal.Length", "Petal.Width", "Species")
 iris1 = iris[ech,col]
 iris2 = iris[ech,col2]
 ```
 
+***
+Voici les résultats d'un échantillon de "modèle test" issus de données aléatoires
 ```{r, fig.align= "center"}
 svm1 = svm(Species ~., data = iris2, kernel = "linear", cost = 10)
 #plot(svm1, iris2[,col2])
