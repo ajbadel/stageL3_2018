@@ -65,7 +65,7 @@ Dans testset : 30% des individus choisis aléatoirement dans l'échantillon.
 
 Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
 ```{r, echo=FALSE}
-set.seed(333)
+set.seed(25)
 forme = setosa + versicolor + virginica ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
 #forme = Espece ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
 
@@ -162,7 +162,7 @@ out_setosa2
 ## Table de confusion (1)
 
 ```{r, echo=FALSE}
-set.seed(123)
+set.seed(25)
 iris.nn <- nnet(Species ~ .,data = trainset, size = 3)
 ```
 
@@ -192,7 +192,10 @@ adjustedRandIndex(iris.predict2, testset$Species)
 
 
 ```{r, echo=FALSE}
-
+roundedresults<- sapply(x = 2,FUN = round,digits=0)
+#roundedresultsdf=data.frame(roundedresults)
+#attach(roundedresultsdf)
+#table(actual,prediction)
 ```
 
 ```{r, echo=FALSE}
@@ -204,3 +207,5 @@ adjustedRandIndex(iris.predict2, testset$Species)
 https://www.youtube.com/watch?v=YQgVgYcoJHY (début)
 
 https://www.youtube.com/watch?v=-Vs9Vae2KI0 (compléter)
+
+https://datascienceplus.com/neuralnet-train-and-test-neural-networks-using-r/ (accuracy)
