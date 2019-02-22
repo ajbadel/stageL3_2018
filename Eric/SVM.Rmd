@@ -2,16 +2,22 @@
 title: "SVM"
 author: "Eric"
 date: "8 février 2019"
-output: ioslides_presentation
+output:revealjs::revealjs_presentation
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+```{r, eval=F}
+install.packages("revealjs")
+```
+
 
 ```{r, eval = F}
 install.packages("e1071")
+set.seed(1)
 ```
 
 ```{r,}
@@ -57,46 +63,49 @@ Nous allons utiliser les données sur la taille des pétales (generation d'echan
 
 ```{r, eval = F}
 ech = sample(150,100)
-col = c("Petal.Length", "Petal.Width", "Species")
+col = c("Petal.Length", "Petal.Width","Species")
 iris1 = iris[ech,col]
 iris2 = iris[-ech,col]
 ```
 
-```{r, fig.align= "center", eval = F}
-svm1 = svm(Species ~., data = iris1, kernel = "linear", cost = .1, scale = F)
+```{r, eval = F, fig.align= "center"}
+svm1 = svm(Species ~., data = iris1, kernel = "linear", cost = 10, scale = F)
 plot(svm1, iris1[,col])
 ```
 
 ***
+
 Si on utilise les 4 variables aléatoires avec un kernel linéaire.
 
 ```{r, fig.align = "center", comment = ""}
-model = svm(Species~., data = iris, kernel = "linear")
+model = svm(Species~., data = iris, type = "C-classification", kernel = "linear", cost = .1)
 ```
+
+```{r, eval=F}
+summary(model)
+```
+
 
 ```{r, fig.align = "center"}
 plot (model, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
 ```
 
 Les croix correspondent aux vecteurs de soutient pour chaque classe
-
-##Erreurs de classifications et prediction
-
-On compare les predictions du modèle avec les données actuelles
-
-```{r, fig.align= "center"}
-pred = predict(model, iris)
-tab = table(predit = pred, actuel = iris$Species)
-tab
-```
-
-On remarque des erreurs de classification avec le model lineaire.
+Ce sont les données qui se trouvent à la limite de la marge.
 
 ##Tuning et optimisation de modèle
 
 ```{r, fig.align="center"}
-model_t = tune(svm, Species~., data = iris, ranges= list(eps = seq(0,1,0.1), cost = 2^(2:9)))
+set.seed(1)
+model_t = tune(svm, Species~., data = iris, kernel = "linear", ranges= list(eps = seq(0,1,0.1), cost = 2^(1:5)))
+```
+
+```{r, fig.align= "center"}
 plot (model_t)
+```
+
+```{r}
+summary(model_t)
 ```
 
 ##Le meilleur modèle
@@ -106,3 +115,29 @@ mon_modele = model_t$best.model
 summary (mon_modele)
 ```
 
+##Creation de données de tests pour verifier notre modèle
+
+```{r}
+ech = sample(150,100)
+col = c("Sepal.Length","Petal.Width", "Species")
+col2 = c("Petal.Length", "Petal.Width", "Species")
+iris1 = iris[ech,col]
+iris2 = iris[ech,col2]
+```
+
+```{r, fig.align= "center"}
+svm1 = svm(Species ~., data = iris2, kernel = "linear", cost = 10)
+#plot(svm1, iris2[,col2])
+```
+
+##Erreurs de classifications et prediction
+
+On compare les predictions du modèle avec les données actuelles
+
+```{r, fig.align= "center"}
+pred = predict(svm1, iris)
+tab = table(predit = pred, actuel = iris$Species)
+tab
+```
+
+On remarque des erreurs de classification avec le model lineaire.
