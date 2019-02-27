@@ -26,6 +26,14 @@ library("revealjs")
 ```
 
 ```{r, eval = F}
+install.packages("caret")
+```
+
+```{r}
+library("caret")
+```
+
+```{r, eval = F}
 install.packages("e1071")
 set.seed(1)
 ```
@@ -69,39 +77,80 @@ plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species)
 
 ***
 On remarque que les individus d'une espece sont très differents des deux autres espèces.
-Nous allons utiliser les données sur la taille des pétales (generation d'echantillons aleatoires)
+Nous allons generer des données aléatoires à partir des données issus de la réalité.
 
-```{r, eval = F}
+***
+Voici un modèle test généré à partir de donnée aléatoires issus des échantillons
+```{r, eval}
 ech = sample(150,100)
-col = c("Petal.Length", "Petal.Width","Species")
-iris1 = iris[ech,col]
-iris2 = iris[-ech,col]
+column = c("Petal.Length", "Petal.Width", "Sepal.Length", "Sepal.Width", "Species")
+iris1 = iris[ech,column]
 ```
 
-```{r, eval = F, fig.align= "center"}
+```{r, fig.align= "center"}
 svm1 = svm(Species ~., data = iris1, kernel = "linear", cost = 10, scale = F)
-plot(svm1, iris1[,col])
+#plot(cmdscale(dist(iris1 [,-5])), col= as.integer(iris1[,5]))
+```
+
+***
+```{r}
+plot(svm1, data = iris1,Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+```
+
+***
+Résumé du modele test:
+```{r}
+summary(svm1)
+```
+
+
+```{r, fig.align = "center", comment = ""}
+model = svm(Species~., data = iris, type = "C-classification", kernel = "linear", cost = .1, scale = F)
+```
+
+***
+Voici un modèle de référence généré à partir de donnée issus des échantillions
+```{r, fig.align = "center"}
+plot (model, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+```
+Les croix correspondent aux vecteurs de soutient pour chaque classe
+Ce sont les données qui se trouvent à la limite de la marge.
+
+***
+Résumé du modèle de référence:
+```{r}
+summary(model)
+```
+
+##Erreurs de classifications et prediction
+***
+Comparaisons des résultats de prediction du modèle avec les données actuelles
+
+```{r, fig.align= "center"}
+pred = predict(svm1, iris1)
+pred
+tab = table(predit = pred, observe = iris1$Species)
+tab
 ```
 
 ***
 
-Si on utilise les 4 variables aléatoires avec un kernel linéaire.
 
-```{r, fig.align = "center", comment = ""}
-model = svm(Species~., data = iris, type = "C-classification", kernel = "linear", cost = .1)
+***
+Comparaisons des résultats du modèle de référence avec les données observées (Creation d'une matrice de confusion)
+```{r}
+pred2 = predict(model, iris)
+tab = table(predit = pred2, observe = iris$Species)
+tab
 ```
 
-```{r, eval=F}
-summary(model)
+***
+```{r}
+
 ```
 
-
-```{r, fig.align = "center"}
-plot (model, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
-```
-
-Les croix correspondent aux vecteurs de soutient pour chaque classe
-Ce sont les données qui se trouvent à la limite de la marge.
+***
+On remarque que les deux modèles font des erreurs de classifications. Même avec les données  C'est peut être dû au noyau qui est lineaire.
 
 ##Tuning et optimisation de modèle
 
@@ -109,7 +158,7 @@ Ce sont les données qui se trouvent à la limite de la marge.
 set.seed(1)
 model_t = tune(svm, Species~., data = iris, kernel = "linear", ranges= list(eps = seq(0,1,0.1), cost = 2^(1:5)))
 ```
-
+ 
 ```{r, fig.align= "center"}
 plot (model_t)
 ```
@@ -124,33 +173,3 @@ summary(model_t)
 mon_modele = model_t$best.model
 summary (mon_modele)
 ```
-
-##Creation de données de tests pour verifier notre modèle
-
-```{r}
-ech = sample(150,100)
-col = c("Sepal.Length","Sepal.Width", "Species")
-#Je n'arrive pas à inserer les "Petal.Length", "Petal.Width" dans col. 
-col2 = c("Petal.Length", "Petal.Width", "Species")
-iris1 = iris[ech,col]
-iris2 = iris[ech,col2]
-```
-
-***
-Voici les résultats d'un échantillon de "modèle test" issus de données aléatoires
-```{r, fig.align= "center"}
-svm1 = svm(Species ~., data = iris2, kernel = "linear", cost = 10)
-#plot(svm1, iris2[,col2])
-```
-
-##Erreurs de classifications et prediction
-
-On compare les predictions du modèle avec les données actuelles
-
-```{r, fig.align= "center"}
-pred = predict(svm1, iris)
-tab = table(predit = pred, actuel = iris$Species)
-tab
-```
-
-On remarque des erreurs de classification avec le model lineaire.
