@@ -509,8 +509,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(neuralnet)
 <span class="kw">library</span>(nnet)
 <span class="kw">library</span>(mclust)
-<span class="kw">library</span>(caret)
-<span class="kw">library</span>(plotly)</code></pre></div>
+<span class="kw">library</span>(caret)</code></pre></div>
 </section><section id="trainset-testset" class="slide level2">
 <h2>Trainset &amp; Testset</h2>
 <p>Trainset</p>
@@ -531,62 +530,138 @@ Dans testset : 30% des individus choisis aléatoirement dans l’échantillon.</
 <h2>Plot</h2>
 </section><section id="prediction-1" class="slide level2">
 <h2>Prediction (1)</h2>
-<pre><code>##       [,1]          [,2]         [,3]
-## 1 1.001747 -0.0017518907 1.551690e-06
-## 2 0.999670  0.0003266120 4.756928e-07
-## 3 1.000808 -0.0008117535 1.065001e-06</code></pre>
+<pre><code>##           [,1]         [,2]         [,3]
+## 1 0.3217409280 0.3390451668 0.3391677120
+## 2 0.3217397970 0.3390282336 0.3391817556
+## 3 0.3217394888 0.3390236198 0.3391855821</code></pre>
 </section><section id="prediction-2" class="slide level2">
 <h2>Prediction (2)</h2>
-<pre><code>## [1] 0.01700031</code></pre>
-<pre><code>## [1] 0.945722</code></pre>
-</section><section id="prediction-3---versicolor" class="slide level2">
-<h2>Prediction (3) - versicolor</h2>
+<pre><code>## [1] 0.4999999793</code></pre>
+<pre><code>## [1] 0.1917950744</code></pre>
+</section><section id="prediction-3---setosa" class="slide level2">
+<h2>Prediction (3) - setosa</h2>
 <p>Trainset</p>
-<pre><code>## [1] 1.827401e-62</code></pre>
+<pre><code>## [1] 0.5773604397</code></pre>
 <p>Testset</p>
-<pre><code>## [1] 0.5129945</code></pre>
+<pre><code>## [1] 0.5921301938</code></pre>
+</section><section id="prediction-4---versicolor" class="slide level2">
+<h2>Prediction (4) - versicolor</h2>
+<p>Trainset</p>
+<pre><code>## [1] 0.5479554878</code></pre>
+<p>Testset</p>
+<pre><code>## [1] 0.5292283044</code></pre>
 </section><section id="prediction-4---virginica" class="slide level2">
 <h2>Prediction (4) - virginica</h2>
 <p>Trainset</p>
-<pre><code>## [1] 1.4411e-05</code></pre>
+<pre><code>## [1] 0.6131985592</code></pre>
 <p>Testset</p>
-<pre><code>## [1] 0.6160362</code></pre>
-</section><section id="prediction-5---setosa" class="slide level2">
-<h2>Prediction (5) - setosa</h2>
-<p>Trainset</p>
-<pre><code>## [1] 0.4999148</code></pre>
-<p>Testset</p>
-<pre><code>## [1] 0.6166794</code></pre>
-</section><section id="table-de-confusion-1" class="slide level2">
-<h2>Table de confusion (1)</h2>
-<pre><code>## # weights:  36
-## initial  value 129.386774 
-## iter  10 value 3.480242
-## iter  20 value 0.005251
-## final  value 0.000092 
-## converged</code></pre>
-</section><section id="table-de-confusion-2" class="slide level2">
-<h2>Table de confusion (2)</h2>
+<pre><code>## [1] 0.5626909203</code></pre>
+</section></section>
+<section><section id="matrice-de-confusion" class="titleslide slide level1"><h1>Matrice de confusion</h1></section><section id="matrice-de-confusion-1" class="slide level2">
+<h2>Matrice de confusion (1)</h2>
+<p>(ou tableau de contingence)</p>
+<p>La matrice de confusion est un outil permettant de mesurer les performances d’un modèle de Machine Learning en vérifiant notamment à quelle fréquence ses prédictions sont exactes par rapport à la réalité dans des problèmes de classification.</p>
+</section><section id="matrice-de-confusion-2" class="slide level2">
+<h2>Matrice de confusion (2)</h2>
 <pre><code>##             
 ## iris.predict setosa versicolor virginica
 ##   setosa         37          0         0
-##   versicolor      0         39         0
-##   virginica       0          0        39</code></pre>
+##   versicolor      0         15        19
+##   virginica       0         24        20</code></pre>
 <pre><code>##              
 ## iris.predict2 setosa versicolor virginica
 ##    setosa         13          0         0
-##    versicolor      0         11         0
-##    virginica       0          0        11</code></pre>
+##    versicolor      0          5         5
+##    virginica       0          6         6</code></pre>
 </section><section id="adjusted-rand-index" class="slide level2">
 <h2>Adjusted Rand Index</h2>
 <p>Trainset</p>
-<pre><code>## [1] 1</code></pre>
+<pre><code>## [1] 0.4804727719</code></pre>
 <p>Testset</p>
-<pre><code>## [1] 1</code></pre>
-</section><section id="references" class="slide level2">
-<h2>References:</h2>
+<pre><code>## [1] 0.5302151373</code></pre>
+</section></section>
+<section><section id="table-de-confusion" class="titleslide slide level1"><h1>Table de confusion</h1></section><section id="table-de-confusion-pour-setosa" class="slide level2">
+<h2>Table de confusion pour SETOSA</h2>
+<pre><code>## The following objects are masked _by_ .GlobalEnv:
+## 
+##     observe.setosa, prediction.setosa</code></pre>
+<pre><code>##        prediction
+## observe  0  1
+##       0 78  0
+##       1  0 37</code></pre>
+<p>Prediction = 0 et Observé = 0<br />
+TEST NEGATIF (TN) : pas prédit et pas présent dans l’observé</p>
+<p>Prediction = 0 et Observé = 1<br />
+FAUX POSITIF (FP) : pas prédit mais présent dans l’observé</p>
+<p>Prediction = 1 et Observé = 0<br />
+FAUX NEGATIF (FN) : prédit mais pas présent dans l’observé</p>
+<p>Prediction = 1 et Observé = 1<br />
+TEST POSITIF (TP) : prédit et présent dans l’observé</p>
+</section><section id="criteres-devaluation-setosa" class="slide level2">
+<h2>Critères d’évaluation SETOSA</h2>
+</section><section id="table-de-confusion-pour-versicolor" class="slide level2">
+<h2>Table de confusion pour VERSICOLOR</h2>
+<pre><code>## The following objects are masked _by_ .GlobalEnv:
+## 
+##     observe.versicolor, prediction.versicolor</code></pre>
+<pre><code>##        prediction
+## observe  0 0.5
+##       0 37  39
+##       1  0  39</code></pre>
+</section><section id="criteres-devaluation-versicolor" class="slide level2">
+<h2>Critères d’évaluation VERSICOLOR</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Précision</span>
+accuracy.versicolor =<span class="st"> </span>(table.versicolor[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">2</span>,<span class="dv">2</span>]) <span class="op">/</span><span class="st"> </span>(table.versicolor[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">1</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">2</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">2</span>,<span class="dv">2</span>])
+<span class="co"># Sensibilité</span>
+sensibilite.versicolor =<span class="st"> </span>table.versicolor[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">/</span><span class="st"> </span>(table.versicolor[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">1</span>,<span class="dv">2</span>])
+<span class="co"># Sensitivité</span>
+sensitivite.versicolor =<span class="st"> </span>table.versicolor[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">/</span><span class="st"> </span>(table.versicolor[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.versicolor[<span class="dv">2</span>,<span class="dv">1</span>])</code></pre></div>
+</section><section id="table-de-confusion-pour-virginica" class="slide level2">
+<h2>Table de confusion pour VIRGINICA</h2>
+<pre><code>## The following objects are masked _by_ .GlobalEnv:
+## 
+##     observe.virginica, prediction.virginica</code></pre>
+<pre><code>##        prediction
+## observe  0 0.5
+##       0 37  39
+##       1  0  39</code></pre>
+</section><section id="criteres-devaluation-virginica" class="slide level2">
+<h2>Critères d’évaluation VIRGINICA</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Précision</span>
+accuracy.virginica =<span class="st"> </span>(table.virginica[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">2</span>,<span class="dv">2</span>]) <span class="op">/</span><span class="st"> </span>(table.virginica[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">1</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">2</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">2</span>,<span class="dv">2</span>])
+<span class="co"># Sensibilité</span>
+sensibilite.virginica =<span class="st"> </span>table.virginica[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">/</span><span class="st"> </span>(table.virginica[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">1</span>,<span class="dv">2</span>])
+<span class="co"># Sensitivité</span>
+sensitivite.virginica =<span class="st"> </span>table.virginica[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">/</span><span class="st"> </span>(table.virginica[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table.virginica[<span class="dv">2</span>,<span class="dv">1</span>])</code></pre></div>
+</section><section id="taux-derreur-global" class="slide level2">
+<h2>Taux d’erreur global</h2>
+<p>Cela correspond à la proportion d’observations mal classées, qui dépend du ratio entre la trace de la matrice de confusion (c’est-à-dire la somme des coefficients diagonaux, donc le nombre de bonnes prédictions), et la somme de tous les coefficients (autrement dit le nombre total de prédictions)</p>
+</section><section id="sensibilite" class="slide level2">
+<h2>Sensibilité</h2>
+<p>Sensibilité : correspond à la qualité d’une classe. Il y en a une par classe donc. On va diviser le nombre d’éléments bien classés dans la classe par le nombre total d’individus appartenant réellement à la classe.</p>
+<p>FORMULE : TP / (TP + FN) = TP / P.</p>
+</section><section id="sensitivite" class="slide level2">
+<h2>Sensitivité</h2>
+<p>La spécificité indique la probabilité qu’un individu n’appartienne pas à la classe à juste titre.</p>
+<p>FORMULE : TN / (TN + FP) = TN / N.</p>
+</section><section id="tableau-des-criteres" class="slide level2">
+<h2>Tableau des critères</h2>
+<pre><code>##        espece setosa   versicolor    virginica
+## 1   Précision      1 0.6608695652 0.6608695652
+## 2 Sensibilité      1 0.5000000000 0.5000000000
+## 3 Sensitivité      1 1.0000000000 1.0000000000</code></pre>
+</section><section id="lien" class="slide level2">
+<h2>Lien</h2>
 <p><a href="https://www.youtube.com/watch?v=YQgVgYcoJHY" class="uri">https://www.youtube.com/watch?v=YQgVgYcoJHY</a> (début)</p>
 <p><a href="https://www.youtube.com/watch?v=-Vs9Vae2KI0" class="uri">https://www.youtube.com/watch?v=-Vs9Vae2KI0</a> (compléter)</p>
+<p><a href="https://datascienceplus.com/neuralnet-train-and-test-neural-networks-using-r/" class="uri">https://datascienceplus.com/neuralnet-train-and-test-neural-networks-using-r/</a> (accuracy)</p>
+<p><a href="http://mediamining.univ-lyon2.fr/people/guille/m4101/evaluation_supervisee.html" class="uri">http://mediamining.univ-lyon2.fr/people/guille/m4101/evaluation_supervisee.html</a> (Evaluation de la classification supervisée)</p>
+<p><a href="https://jcrisch.wordpress.com/2015/05/04/valider-un-modele-statistique-avec-la-cross-validation/" class="uri">https://jcrisch.wordpress.com/2015/05/04/valider-un-modele-statistique-avec-la-cross-validation/</a> (Critères d’évaluation)</p>
+</section><section id="cmdscale-reduction-de-la-taille-des-donnees" class="slide level2">
+<h2>cmdscale : réduction de la taille des données</h2>
+</section><section id="acp-analyse-en-composante-principale" class="slide level2">
+<h2>ACP : analyse en composante principale</h2>
+<p>prcomp définir des composantes itérativement (biplot) ?biplot</p>
 </section></section>
     </div>
   </div>

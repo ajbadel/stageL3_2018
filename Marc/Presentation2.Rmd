@@ -28,22 +28,25 @@ Durant la réalisation du projet, nous avions besoin de différents packages
 
 Nous allons reproduire un réseau de neurone avec les données d'iris. 
 
-```{r message=FALSE}
+```{r message = FALSE}
 library(neuralnet)
 library(nnet)
 library(mclust)
 library(caret)
-library(plotly)
+library(pROC)
 ```
 
 ## Trainset & Testset
 
 ```{r, echo=FALSE}
 set.seed(25)
-
 iris$setosa = iris$Species == "setosa"
-iris$virginica = iris$Species == "virginica"
 iris$versicolor = iris$Species == "versicolor"
+iris$virginica = iris$Species == "virginica"
+
+iris$setosa = as.numeric(iris$setosa)
+iris$versicolor = as.numeric(iris$versicolor)
+iris$virginica = as.numeric(iris$virginica)
 
 ind <- sample(2, nrow(iris), replace = T, prob = c(0.7, 0.3))
 
@@ -51,7 +54,7 @@ trainset = iris[ind == 1, ]
 testset = iris[ind == 2, ]
 ```
 Trainset
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 table(trainset$Species)
 ```
 Testset
@@ -66,15 +69,14 @@ Dans testset : 30% des individus choisis aléatoirement dans l'échantillon.
 
 Créer le réseau de neurone utilisant la fonction "neuralnet" avec les 3 colonnes dans chaque couche
 ```{r, echo=FALSE}
-set.seed(333)
+set.seed(25)
 forme = setosa + versicolor + virginica ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
-#forme = Espece ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width
 
-network = neuralnet(forme, data=trainset, hidden= c(1,2))
+network = neuralnet(forme, data=trainset, hidden= c(1,1))
 informations = network$result.matrix
 informations <- as.data.frame(informations)
 
-network2 = neuralnet(forme, data = testset, hidden=1)
+network2 = neuralnet(forme, data = testset, hidden= c(1,1))
 informations2 = network2$result.matrix
 informations2 <- as.data.frame(informations2)
 ```
@@ -83,13 +85,14 @@ L'argument "hidden" spécifie le nombre de neurones cachés par couche.
 
 ## Plot
 ```{r, echo=FALSE}
-p <-plot(network)
+plot(network)
 plot(network2)
 ```
 
 ## Prediction (1)
 
 ```{r, echo=FALSE}
+set.seed(25)
 output1 <- compute(network, trainset[, -c(5:9)])
 moy_output1 <- apply(output1$net.result, 2, mean)
 moy_col <- apply(output1$neurons[[1]], 2, mean)
@@ -105,26 +108,52 @@ head(output1$net.result, 3)
 
 ## Prediction (2)
 ```{r, echo=FALSE}
+# Pour trainset
 in_general1 <- informations[4,1] + (informations[5,1]*moy_col[2,1]) + (informations[6,1]*moy_col[3,1]) + (informations[7,1]*moy_col[4,1]) + (informations[8,1]*moy_col[5,1])
+out_general1 <- 1/(1+exp(-in_general1))
+
+# Cas de deux couches mais seulement avec un neurone
+in_general1 = informations[9,1] * out_general1 * informations[10,1]
 out_general1 <- 1/(1+exp(-in_general1))
 out_general1
 
+
+# Pour testset
 in_general2 <- informations2[4,1] + (informations2[5,1]*moy_col2[2,1]) + (informations2[6,1]*moy_col2[3,1]) + (informations2[7,1]*moy_col2[4,1]) + (informations2[8,1]*moy_col2[5,1])
+out_general2 <- 1/(1+exp(-in_general2))
+
+# Cas de deux couches mais seulement avec un neurone
+in_general2 = informations2[9,1] * out_general2 * informations2[10,1]
 out_general2 <- 1/(1+exp(-in_general2))
 out_general2
 ```
 
 
-## Prediction (3) - versicolor
+## Prediction (3) - setosa
 Trainset
 ```{r, echo=FALSE}
-in_versicolor1 <- informations[9,1] + (informations[10,1]*out_general1)
+in_setosa1 <- informations[nrow(informations)-5,1] + (informations[nrow(informations)-4,1]*out_general1)
+out_setosa1 <- 1/(1+exp(-in_setosa1))
+out_setosa1
+```
+Testset
+```{r, echo=FALSE}
+in_setosa2 <- informations2[nrow(informations2)-5,1] + (informations2[nrow(informations2)-4,1]*out_general2)
+out_setosa2 <- 1/(1+exp(-in_setosa2))
+out_setosa2
+```
+
+
+## Prediction (4) - versicolor
+Trainset
+```{r, echo=FALSE}
+in_versicolor1 <- informations[nrow(informations)-3,1] + (informations[nrow(informations)-2,1]*out_general1)
 out_versicolor1 <- 1/(1+exp(-in_versicolor1))
 out_versicolor1
 ```
 Testset
 ```{r, echo=FALSE}
-in_versicolor2 <- informations2[9,1] + (informations2[10,1]*out_general2)
+in_versicolor2 <- informations2[nrow(informations2)-3,1] + (informations2[nrow(informations2)-2,1]*out_general2)
 out_versicolor2 <- 1/(1+exp(-in_versicolor2))
 out_versicolor2
 ```
@@ -133,46 +162,35 @@ out_versicolor2
 ## Prediction (4) - virginica
 Trainset
 ```{r, echo=FALSE}
-in_virginica1 <- informations[11,1] + (informations[12,1]*out_general1) 
+in_virginica1 <- informations[nrow(informations)-1,1] + (informations[nrow(informations),1]*out_general1) 
 out_virginica1 <- 1/(1+exp(-in_virginica1))
 out_virginica1
 ```
 Testset
 ```{r, echo=FALSE}
-in_virginica2 <- informations2[11,1] + (informations2[12,1]*out_general2) 
+in_virginica2 <- informations2[nrow(informations2)-1,1] + (informations2[nrow(informations2),1]*out_general2) 
 out_virginica2 <- 1/(1+exp(-in_virginica2))
 out_virginica2
 ```
 
 
-## Prediction (5) - setosa
-Trainset
-```{r, echo=FALSE}
-in_setosa1 <- informations[13,1] + (informations[14,1]*out_general1)
-out_setosa1 <- 1/(1+exp(-in_setosa1))
-out_setosa1
+# Matrice de confusion
+
+## Matrice de confusion (1)
+```{r, echo=FALSE, results='hide'}
+set.seed(25)
+iris.nn <- nnet(Species ~ .,data = trainset, size = 2)
 ```
-Testset
+(ou tableau de contingence)
+
+La matrice de confusion est un outil permettant de mesurer les performances d’un modèle de Machine Learning en vérifiant notamment à quelle fréquence ses prédictions sont exactes par rapport à la réalité dans des problèmes de classification.
+
+## Matrice de confusion (2)
 ```{r, echo=FALSE}
-in_setosa2 <- informations2[13,1] + (informations2[14,1]*out_general2)
-out_setosa2 <- 1/(1+exp(-in_setosa2))
-out_setosa2
-```
-
-
-## Table de confusion (1)
-
-```{r, echo=FALSE}
-set.seed(123)
-iris.nn <- nnet(Species ~ .,data = trainset, size = 3)
-```
-
-## Table de confusion (2)
-```{r, echo=FALSE}
+set.seed(25)
 iris.predict <- predict(iris.nn, trainset, type = 'class')
 nn.table <- table(iris.predict, trainset$Species)
 nn.table
-
 
 iris.predict2 <- predict(iris.nn, testset, type = 'class')
 nn.table2 <- table(iris.predict2, testset$Species)
@@ -190,17 +208,160 @@ Testset
 adjustedRandIndex(iris.predict2, testset$Species)
 ```
 
+# Table de confusion
+
+## Table de confusion pour SETOSA
+```{r, echo=FALSE}
+
+temp_train <- subset(trainset, select = c("Sepal.Length","Sepal.Width", "Petal.Length", "Petal.Width"))
+
+prediction = predict(iris.nn, trainset)
+
+observe.setosa = trainset$setosa
+prediction.setosa = prediction[,1]
+network.results <- compute(network, temp_train)
+results.setosa <- data.frame(observe.setosa, prediction.setosa)
+
+roundedresults.setosa <- sapply(X = results.setosa, FUN = round, digits=2)
+roundedresultsdf.setosa = data.frame(roundedresults.setosa)
+attach(roundedresultsdf.setosa)
+table.setosa = table(observe = roundedresultsdf.setosa$observe.setosa, prediction = roundedresultsdf.setosa$prediction.setosa)
+table.setosa
+```
+Prediction = 0 et Observé = 0  
+TEST NEGATIF (TN) : pas prédit et pas présent dans l'observé
+
+Prediction = 0 et Observé = 1  
+FAUX POSITIF (FP) : pas prédit mais présent dans l'observé
+
+Prediction = 1 et Observé = 0  
+FAUX NEGATIF (FN) : prédit mais pas présent dans l'observé
+
+Prediction = 1 et Observé = 1  
+TEST POSITIF (TP) : prédit et présent dans l'observé
+
+
+## Critères d'évaluation SETOSA
+
+```{r, echo=FALSE}
+# Précision
+accuracy.setosa = (table.setosa[1,1] + table.setosa[2,2]) / (table.setosa[1,1] + table.setosa[1,2] + table.setosa[2,1] + table.setosa[2,2])
+# Sensibilité
+sensibilite.setosa = table.setosa[2,2] / (table.setosa[2,2] + table.setosa[1,2])
+# Sensitivité
+sensitivite.setosa = table.setosa[1,1] / (table.setosa[1,1] + table.setosa[2,1])
+```
+
+## Table de confusion pour VERSICOLOR
+```{r, echo=FALSE}
+observe.versicolor = trainset$versicolor
+prediction.versicolor = prediction[,2]
+results.versicolor <- data.frame(observe.versicolor, prediction.versicolor)
+
+roundedresults.versicolor <- sapply(X = results.versicolor, FUN = round, digits=2)
+roundedresultsdf.versicolor = data.frame(roundedresults.versicolor)
+attach(roundedresultsdf.versicolor)
+table.versicolor = table(observe = roundedresultsdf.versicolor$observe.versicolor, prediction = roundedresultsdf.versicolor$prediction.versicolor)
+table.versicolor
+```
+## Critères d'évaluation VERSICOLOR
+
+```{r}
+# Précision
+accuracy.versicolor = (table.versicolor[1,1] + table.versicolor[2,2]) / (table.versicolor[1,1] + table.versicolor[1,2] + table.versicolor[2,1] + table.versicolor[2,2])
+# Sensibilité
+sensibilite.versicolor = table.versicolor[2,2] / (table.versicolor[2,2] + table.versicolor[1,2])
+# Sensitivité
+sensitivite.versicolor = table.versicolor[1,1] / (table.versicolor[1,1] + table.versicolor[2,1])
+```
+
+## Table de confusion pour VIRGINICA
+```{r, echo=FALSE}
+observe.virginica = trainset$virginica
+prediction.virginica = prediction[,3]
+results.virginica <- data.frame(observe.virginica, prediction.virginica)
+
+roundedresults.virginica <- sapply(X = results.virginica, FUN = round, digits=2)
+roundedresultsdf.virginica = data.frame(roundedresults.virginica)
+attach(roundedresultsdf.virginica)
+table.virginica = table(observe = roundedresultsdf.virginica$observe.virginica, prediction = roundedresultsdf.virginica$prediction.virginica)
+table.virginica
+```
+
+## Critères d'évaluation VIRGINICA
+
+```{r}
+# Précision
+accuracy.virginica = (table.virginica[1,1] + table.virginica[2,2]) / (table.virginica[1,1] + table.virginica[1,2] + table.virginica[2,1] + table.virginica[2,2])
+# Sensibilité
+sensibilite.virginica = table.virginica[2,2] / (table.virginica[2,2] + table.virginica[1,2])
+# Sensitivité
+sensitivite.virginica = table.virginica[1,1] / (table.virginica[1,1] + table.virginica[2,1])
+
+```
+
+## Taux d'erreur global
+Cela correspond à la proportion d'observations mal classées, qui dépend du ratio entre la trace de la matrice de confusion (c'est-à-dire la somme des coefficients diagonaux, donc le nombre de bonnes prédictions), et la somme de tous les coefficients (autrement dit le nombre total de prédictions)
+
+
+## Sensibilité
+Sensibilité : correspond à la qualité d’une classe. Il y en a une par classe donc. On va diviser le nombre d’éléments bien classés dans la classe par le nombre total d’individus appartenant réellement à la classe.
+
+FORMULE : TP / (TP + FN)
+
+## Sensitivité
+La spécificité indique la probabilité qu’un individu n’appartienne pas à la classe à juste titre.
+
+FORMULE : TN / (TN + FP)
+
+## Tableau des critères
+
+```{r, echo=FALSE}
+espece = c("Précision", "Sensibilité", "Sensitivité")
+setosa = c(accuracy.setosa, sensibilite.setosa, sensitivite.setosa)
+versicolor = c(accuracy.versicolor, sensibilite.versicolor, sensitivite.versicolor)
+virginica = c(accuracy.virginica, sensibilite.virginica, sensitivite.virginica)
+
+tableau.critere = data.frame(espece, setosa, versicolor, virginica)
+tableau.critere
+
+```
+
+La courbe de ROC
+```{r, echo=FALSE}
+forest.model <- train(Species ~., data = trainset)
+network
+result.predicted.prob <- predict(network, data.test, type="prob") # Prediction
+
+result.roc <- roc(trainset$Species, prediction$versicolor) # Draw ROC curve.
+plot(result.roc, print.thres="best", print.thres.best.method="closest.topleft")
+
+result.coords <- coords(result.roc, "best", best.method="closest.topleft", ret=c("threshold", "accuracy"))
+print(result.coords)
+```
+
 
 ```{r, echo=FALSE}
 
 ```
-
-```{r, echo=FALSE}
-
-```
-
-##References:
+## Lien
 
 https://www.youtube.com/watch?v=YQgVgYcoJHY (début)
 
 https://www.youtube.com/watch?v=-Vs9Vae2KI0 (compléter)
+
+https://datascienceplus.com/neuralnet-train-and-test-neural-networks-using-r/ (accuracy)
+
+http://mediamining.univ-lyon2.fr/people/guille/m4101/evaluation_supervisee.html (Evaluation de la classification supervisée)
+
+https://jcrisch.wordpress.com/2015/05/04/valider-un-modele-statistique-avec-la-cross-validation/ (Critères d'évaluation)
+
+https://stackoverflow.com/questions/30366143/how-to-compute-roc-and-auc-under-roc-after-training-using-caret-in-r (courbe ROC)
+
+## cmdscale : réduction de la taille des données
+
+## ACP : analyse en composante principale
+prcomp
+définir des composantes itérativement
+(biplot)
+?biplot
