@@ -11,7 +11,13 @@ les données et le reste pour mes stagiaires de l'année 2018-2019, Marc Xu et E
   - dans vos répertoires respectifs, créez, avec un Rstudio, un projet ("xx.Rproj") ce sera votre projet principal de travail.
   - à partir de ce projet, créez autant de fichiers .Rmd (c'est à dire Rmarkdown, on oublie les fichiers scripts simples .R) que nécessaires
   
+### Le git est créé, ca marche plus ou moins
+  - alors que Git est installé sur les machines de l'UFR, Marc et Eric ne parviennent pas à le lancer.
+  
 ## Apprendre le Markdown
+
+- apparemment OK
+- Marc et Eric ont commencé une présentation en reveal.json
 
 ## Le sujet
 Etablir un modèle de prédiction de la clairance à partir de descripteurs géométriques et physico-chimiques de petits composés. Deux méthodes seront utilisées :
@@ -25,12 +31,18 @@ Etablir un modèle de prédiction de la clairance à partir de descripteurs géo
   - un article sur les SVM : [SVM](https://towardsdatascience.com/demystifying-maths-of-svm-13ccfe00091e)
   
 ## Les données
-Il y a deux fichiers :
+Il y a trois fichiers :
 
   - le premier [data edragon](https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_edragon_91mol.csv) provient d'un logiciel libre, 
   	- c'est celui là que nous allons utiliser.
   - le second [data MOE](https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta_MOE_2D_192.csv) provient d'un logiciel payant (cher), 
   	- nous n'allons donc pas l'utiliser. 
+  - le fichier "propre" à utiliser pour faire les modèles [data](https://github.com/ajbadel/stageL3_2018/blob/master/data/placenta90.138.txt). Ce fichier a été créé à partir des deux précédents en :
+    - enlevant l'individu abérrant
+    - enlevant les descripteurs ayant des données manquantes
+    - enlevant les descripteurs non ou peu variants, car non informatifs
+    - enlevant les descripteurs trop corrélés entre eux
+    - sélectionnant des descripteurs corrélés à la variable d'intéret, la clairance
   
 Cependant, ce second fichier (MOE) contient une données très importante pour nous, la Clairance (CI).
 
