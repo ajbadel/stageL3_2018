@@ -29,6 +29,7 @@ Etablir un modèle de prédiction de la clairance à partir de descripteurs géo
 
   - une référence dans le domaine dumachine learning (apprentissage supervisé) : [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/index.html) par Hastie, Tibshirani & Friedman
   - un article sur les SVM : [SVM](https://towardsdatascience.com/demystifying-maths-of-svm-13ccfe00091e)
+  - les SVM vu par Tanagra (en français) : [SVM](https://eric.univ-lyon2.fr/~ricco/tanagra/fichiers/fr_Tanagra_SVM_R_Python.pdf)
   
 ## Les données
 Il y a trois fichiers :

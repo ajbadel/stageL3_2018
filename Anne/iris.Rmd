@@ -21,6 +21,7 @@ output:
 library(GGally)
 library(RColorBrewer)
 library(e1071)
+library(knitr)
 
 ## Location of the shared folder on the current install
 data.folder <- "~/Anne/data/"
@@ -40,6 +41,25 @@ knitr::opts_chunk$set(
   comment = "")
 
 options(scipen = 12) ## Max number of digits for non-scientific notation
+```
+
+```{r mes.fonctions}
+tx.bon <- function(table) {
+  return(sum(diag(table)) / sum(table))
+}
+
+tx.erreur <- function(table) {
+  acc <- (sum(diag(table)) / sum(table))
+  return(1 - acc)
+}
+
+sensibilite <- function(table) {
+  return(table[1,1] / (table[1,1] + table[2,1]))
+}
+
+specificite <- function(table) {
+  return(table[2,2] / (table[2,2] + table[1,2]))
+}
 ```
 
 # Les données
@@ -136,8 +156,111 @@ plot(iris.acp.pred[, 1:2], col = "red", xlim = c(-4, 4), ylim = c(-2, 2))
 
 ## SVM
 
-### Calcul du modèle
+### Paramètres par défaut
+
+#### Calcul du modèle
 ```{r modele.svm}
-iris.svm <- e1071::svm(Species ~ ., data = iris.app)
+iris.svm <- e1071::svm(Species ~ ., data = iris.app, scale = F)
 ```
+
+#### Résumé du modèle
+```{r resume.svm}
+summary(iris.svm)
+```
+
+#### Représentation graphique du modèle
+```{r visualisation.svm}
+plot(iris.svm, iris.app, Petal.Width ~ Petal.Length,
+     slice = list(Sepal.Width = 3, Sepal.Length = 4))
+plot(iris.svm, iris.app, Sepal.Width ~ Sepal.Length,
+     slice = list(Petal.Width = 4, Petal.Length = 8))
+```
+
+#### Tables de confusion et performances du modèle
+
+##### Sur l'échantillon d'apprentissage
+```{r svm.conf.app}
+#iris.app.pred <- predict(iris.svm, newdata = iris.app)
+#iris.app.conf <- table(iris.app.pred, iris.app$Species, dnn=c("predit","observe"))
+iris.app.conf <- table(iris.svm$fitted, iris.app$Species, dnn = c("predit", "observe"))
+knitr::kable(iris.app.conf)
+acc.app <- tx.bon(iris.app.conf)
+err.app <- tx.erreur(iris.app.conf)
+perf.app <- c(acc.app, err.app)
+names(perf.app) <- c("accuracy", "erreur")
+knitr::kable(perf.app)
+```
+
+##### Sur l'échantillon de validation
+```{r svm.conf.val}
+iris.val.pred <- predict(iris.svm, newdata = iris.val)
+iris.val.conf <- table(iris.val.pred, iris.val$Species, dnn=c("predit","observe"))
+knitr::kable(iris.val.conf)
+acc.val <- tx.bon(iris.val.conf)
+err.val <- tx.erreur(iris.val.conf)
+perf.val <- c(acc.val, err.val)
+names(perf.val) <- c("accuracy", "erreur")
+knitr::kable(perf.val)
+```
+
+### Recherche des paramètres optimaux
+
+#### Test des différents `kernel` avec leurs paramètres par défaut
+```{r svm.kernel}
+iris.svm.radial <- e1071::svm(Species ~ ., data = iris.app, scale = F)
+summary(iris.svm.radial)
+iris.app.conf.radial <- table(iris.svm.radial$fitted, 
+                              iris.app$Species, 
+                              dnn = c("predit", "observe"))
+iris.svm.linear <- e1071::svm(Species ~ ., data = iris.app, scale = F, kernel="linear")
+summary(iris.svm.linear)
+iris.app.conf.linear <- table(iris.svm.linear$fitted, 
+                              iris.app$Species, 
+                              dnn = c("predit", "observe"))
+iris.svm.poly <- e1071::svm(Species ~ ., data = iris.app, scale = F, kernel="polynomial")
+summary(iris.svm.poly)
+iris.app.conf.poly <- table(iris.svm.poly$fitted, 
+                              iris.app$Species, 
+                              dnn = c("predit", "observe"))
+iris.svm.sig <- e1071::svm(Species ~ ., data = iris.app, scale = F, kernel="sigmoid")
+summary(iris.svm.sig)
+iris.app.conf.sig <- table(iris.svm.sig$fitted, 
+                              iris.app$Species, 
+                              dnn = c("predit", "observe"))
+knitr::kable(iris.app.conf.radial)
+acc.app.radial <- tx.bon(iris.app.conf.radial)
+err.app.radial <- tx.erreur(iris.app.conf.radial)
+perf.app.radial <- c(acc.app.radial, err.app.radial)
+names(perf.app.radial) <- c("accuracy", "erreur")
+knitr::kable(perf.app.radial)
+knitr::kable(iris.app.conf.linear)
+acc.app.linear <- tx.bon(iris.app.conf.linear)
+err.app.linear <- tx.erreur(iris.app.conf.linear)
+perf.app.linear <- c(acc.app.linear, err.app.linear)
+names(perf.app.linear) <- c("accuracy", "erreur")
+knitr::kable(perf.app.linear)
+knitr::kable(iris.app.conf.poly)
+acc.app.poly <- tx.bon(iris.app.conf.poly)
+err.app.poly <- tx.erreur(iris.app.conf.poly)
+perf.app.poly <- c(acc.app.poly, err.app.poly)
+names(perf.app.poly) <- c("accuracy", "erreur")
+knitr::kable(perf.app.poly)
+knitr::kable(iris.app.conf.sig)
+acc.app.sig <- tx.bon(iris.app.conf.sig)
+err.app.sig <- tx.erreur(iris.app.conf.sig)
+perf.app.sig <- c(acc.app.sig, err.app.sig)
+names(perf.app.sig) <- c("accuracy", "erreur")
+knitr::kable(perf.app.sig)
+```
+
+#### En laissant faire par la fonction `tune`
+##### Avec me `kernel`par défaut, `radial`
+```{r svm.tune}
+iris.app.tune <- e1071::tune(svm, Species ~ ., data = iris.app,
+                             ranges = list(gamma = 2^(-1:1), cost = 2^(2:4)))
+summary(iris.app.tune)
+plot(iris.app.tune)
+```
+
+
 
