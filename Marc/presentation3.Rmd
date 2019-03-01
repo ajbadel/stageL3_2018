@@ -1,0 +1,201 @@
+---
+title: "Presentation 3"
+author: "Marc XU"
+date: "1 mars 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
+---
+# Neuron Network {data-background="pikachu.png"}
+
+```{r message = FALSE}
+library(neuralnet)
+library(nnet)
+library(mclust)
+library(caret)
+library(pROC)
+library(knitr)
+library(MLmetrics) # calcul de F1.Score
+library(mltools) # calcul du coeff de correl. de Matthiew
+```
+
+```{r echo = FALSE}
+set.seed(245)
+table(iris$Species)
+```
+
+## Création des 3 vecteurs
+```{r, echo = FALSE}
+set.seed(24)
+
+seto = as.numeric(iris$Species == "setosa")
+versi = as.numeric(iris$Species == "versicolor")
+virgi = as.numeric(iris$Species == "virginica")
+```
+
+## Création de 3 dataframe
+
+```{r, echo = FALSE}
+data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
+#data.seto = data.frame(iris[,c(1:4)], seto)
+#data.versi = data.frame(iris[,c(1:4)], versi)
+#data.virgi = data.frame(iris[,c(1:4)], virgi)
+```
+
+```{r, echo = FALSE}
+set.seed(24)
+formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
+
+reseau1 = neuralnet(formule, data = data.iris, hidden = c(1,1))
+resultat_matrice1 <- as.data.frame(reseau1$result.matrix)
+```
+
+# Prediction
+```{r, echo = FALSE, results = 'hide'}
+set.seed(24)
+iris.nn <- nnet(Species ~ .,data = iris, size = 10)
+temp_train <- subset(iris, select = c(1:4))
+prediction = predict(iris.nn, iris)
+```
+
+## 
+
+### Matrice de confusion
+```{r, echo = FALSE}
+matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
+kable(matrice_confusion.ex)
+
+predit = prediction
+observe = data.iris[,c(5:7)]
+
+# La fonction pour la matrice de confusion
+matrice_confusion = function (observation, prediction) {
+  resultats1 = sapply(X = data.frame(observe = observation,
+                                     predit = prediction),
+                      FUN = round, digits=1)
+  resultats.df = data.frame(resultats1)
+  attach(resultats.df)
+  table.resultat = table(
+    observe = resultats.df$observe,
+    prediction =  resultats.df$predit)
+  return(table.resultat)
+}
+```
+
+## Formule mathématiques (1)
+
+Taux d'erreur (accuracy) : ACC = $\frac{TP+TN} {TP+TN+FP+TF}$
+
+Sensibilité (sensibility) : TPR = $\frac{TP} {TP+FN}$
+
+Specificité (specificity) : TNR = $\frac{TN} {TN+FP}$
+
+## Formule mathématiques (2)
+
+F1 score : F1 = $\frac{2*TP} {2*TP+FP+FN}$
+
+Coefficient de corrélation de Matthews : MCC =  
+
+$\frac{TP*TN-FP*FN} {((TP+FP)(TP+FN)(TN+FP)(TN+FN))^{-1}}$
+
+```{r, echo = FALSE}
+# La fonction accuracy
+acc = function (resultats) {
+  acc_cal = (resultats[1,1] + resultats[2,2]) /
+    (resultats[1,1] + resultats[1,2] + resultats[2,1] + resultats[2,2])
+  return(acc_cal)
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  sens_cal = resultats[1,1] / (resultats[1,1] + resultats[2,1])
+  return(sens_cal)
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  spec_cal = resultats[2,2] /(resultats[1,2] + resultats[2,2])
+  return(spec_cal)
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  scor_cal = (2 * resultats[1,1]) / (2 * resultats[1,1] + resultats[1,2] + resultats[2,1])
+  return(scor_cal)
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  ccm1_cal = (resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1])))
+  return(ccm1_cal)
+}
+```
+
+# Le modèle SETOSA
+
+## Le modèle SETOSA (1)
+
+Matrice de confusion de l'espèce SETOSA
+```{r, echo = FALSE, message = FALSE}
+kable(matrice_confusion(observe[,1], predit[,1]))
+
+```
+
+## Le modèle SETOSA (2)
+```{r, eval = FALSE, echo = FALSE}
+# Calculé directement par les fonctions de RStudio
+matrice.setosa = confusionMatrix(table.resultat.seto)
+acc.seto = matrice.setosa$overall["Accuracy"]
+sen.seto = matrice.setosa$byClass["Sensitivity"]
+spe.seto = matrice.setosa$byClass["Specificity"]
+F1S_seto = F1_Score(resultats.df.seto$observe, resultats.df.seto$prediction, positive= NULL)
+mcc.seto = mcc(actuals = resultats.df.seto$observe, preds = resultats.df.seto$prediction)
+```
+
+Accurancy : `r acc(matrice_confusion(observe[,1], predit[,1]))`  
+Sensibilité : `r sens(matrice_confusion(observe[,1], predit[,1]))`  
+Specifité :  `r spec(matrice_confusion(observe[,1], predit[,1]))`  
+F1_Score : `r scor(matrice_confusion(observe[,1], predit[,1]))`  
+Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,1], predit[,1]))`  
+
+# Le modèle VERSICOLOR
+
+## Le modèle VERSICOLOR (1)
+```{r, echo = FALSE, message = FALSE}
+kable(matrice_confusion(observe[,2], predit[,2]))
+```
+
+## Le modèle VERSICOLOR (2)
+
+Accurancy : `r acc(matrice_confusion(observe[,2], predit[,2]))`  
+Sensibilité : `r sens(matrice_confusion(observe[,2], predit[,2]))`  
+Specifité :  `r spec(matrice_confusion(observe[,2], predit[,2]))`  
+F1_Score : `r scor(matrice_confusion(observe[,2], predit[,2]))`  
+Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,2], predit[,2]))`  
+
+# Le modèle VIRGINICA
+
+## Le modèle VIRGINICA (1)
+```{r, echo = FALSE, message = FALSE}
+kable(matrice_confusion(observe[,3], predit[,3]))
+```
+
+## Le modèle VIRGINICA (2)
+
+Accurancy : `r acc(matrice_confusion(observe[,3], predit[,3]))`  
+Sensibilité : `r sens(matrice_confusion(observe[,3], predit[,3]))`  
+Specifité :  `r spec(matrice_confusion(observe[,3], predit[,3]))`  
+F1_Score : `r scor(matrice_confusion(observe[,3], predit[,3]))`  
+Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,3], predit[,3]))`  
+
+```{r}
+```
+
+
+# Bibliographie
+
+## Sites consultés
+https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html (formules mathématiques)
