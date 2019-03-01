@@ -467,26 +467,51 @@ GGally<span class="op">::</span><span class="kw">ggpairs</span>(iris, <span clas
 <div id="par-des-images" class="section level3">
 <h3><span class="header-section-number">1.3.3</span> Par des images</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">image</span>(<span class="dv">1</span><span class="op">:</span>(<span class="kw">ncol</span>(iris)<span class="op">-</span><span class="dv">1</span>), <span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(iris) ,<span class="kw">t</span>(<span class="kw">as.matrix</span>(iris[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>])), <span class="dt">xlab =</span> <span class="st">&quot;variables&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;Observations&quot;</span>, <span class="dt">las =</span> <span class="dv">1</span>)</code></pre></div>
-<p><img src="figures/iris_unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figures/iris_visualisation.species.image-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap</span>(<span class="kw">as.matrix</span>(iris[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]), <span class="dt">margins =</span> <span class="kw">c</span>(<span class="dv">7</span>,<span class="dv">4</span>), <span class="dt">cexCol =</span> <span class="fl">1.4</span>, <span class="dt">cexRow =</span> <span class="fl">0.5</span>)</code></pre></div>
-<p><img src="figures/iris_unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figures/iris_visualisation.species.image-2.png" width="672" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_group &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">as.factor</span>(<span class="kw">substr</span>(iris<span class="op">$</span>Species, <span class="dv">1</span> , <span class="dv">2</span>)))
 my_col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">3</span>, <span class="st">&quot;Set1&quot;</span>)[my_group]
 <span class="kw">heatmap</span>(<span class="kw">as.matrix</span>(iris[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]), <span class="dt">RowSideColors =</span> my_col, 
         <span class="dt">margins =</span> <span class="kw">c</span>(<span class="dv">7</span>,<span class="dv">4</span>), <span class="dt">cexCol =</span> <span class="fl">1.4</span>, <span class="dt">cexRow =</span> <span class="fl">0.5</span>)</code></pre></div>
-<p><img src="figures/iris_unnamed-chunk-2-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figures/iris_visualisation.species.image-3.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="par-une-projection" class="section level3">
 <h3><span class="header-section-number">1.3.4</span> Par une projection</h3>
-<div id="par-une-acp" class="section level4">
-<h4><span class="header-section-number">1.3.4.1</span> Par une ACP</h4>
+<div id="par-une-analyse-en-composantes-principales" class="section level4">
+<h4><span class="header-section-number">1.3.4.1</span> Par une Analyse en Composantes Principales</h4>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.acp &lt;-<span class="st"> </span><span class="kw">prcomp</span>(<span class="kw">as.matrix</span>(iris[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]))
 <span class="kw">plot</span>(iris.acp)</code></pre></div>
-<p><img src="figures/iris_unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figures/iris_acp-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">biplot</span>(iris.acp)</code></pre></div>
-<p><img src="figures/iris_unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figures/iris_acp-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="par-un-multi-dimensional-scaling-mds" class="section level4">
+<h4><span class="header-section-number">1.3.4.2</span> Par un Multi Dimensional Scaling (MDS)</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.dist &lt;-<span class="st"> </span><span class="kw">dist</span>(iris[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>])
+iris.mds &lt;-<span class="st"> </span><span class="kw">cmdscale</span>(iris.dist)
+<span class="kw">plot</span>(iris.mds, <span class="dt">col =</span> iris<span class="op">$</span>Species)</code></pre></div>
+<p><img src="figures/iris_mds-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
+</div>
+</div>
+<div id="classification-supervisee" class="section level1">
+<h1><span class="header-section-number">2</span> Classification supervisée</h1>
+<div id="echantillon-dapprentissage-validation" class="section level2">
+<h2><span class="header-section-number">2.1</span> Echantillon d’apprentissage / validation</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ind.app &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(iris), <span class="dv">100</span>)
+iris.app &lt;-<span class="st"> </span>iris[ind.app,]
+iris.val &lt;-<span class="st"> </span>iris[<span class="op">-</span>ind.app,]
+iris.acp &lt;-<span class="st"> </span><span class="kw">prcomp</span>(<span class="kw">as.matrix</span>(iris.app[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]))
+iris.acp.pred &lt;-<span class="st"> </span><span class="kw">predict</span>(iris.acp, <span class="dt">newdata =</span> <span class="kw">as.matrix</span>(iris.val[,<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]))
+<span class="kw">plot</span>(iris.acp<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>], <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">par</span>(<span class="dt">new=</span>T)
+<span class="kw">plot</span>(iris.acp.pred[, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>], <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">2</span>))</code></pre></div>
+<p><img src="figures/iris_app_val-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="svm" class="section level2">
+<h2><span class="header-section-number">2.2</span> SVM</h2>
 </div>
 </div>
 

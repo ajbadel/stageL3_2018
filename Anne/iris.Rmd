@@ -20,6 +20,7 @@ output:
 ```{r include=FALSE, echo=FALSE, eval=TRUE}
 library(GGally)
 library(RColorBrewer)
+library(e1071)
 
 ## Location of the shared folder on the current install
 data.folder <- "~/Anne/data/"
@@ -94,7 +95,7 @@ GGally::ggpairs(iris, mapping = aes(color = Species))
 ```
 
 ### Par des images
-```{r}
+```{r visualisation.species.image}
 image(1:(ncol(iris)-1), 1:nrow(iris) ,t(as.matrix(iris[,1:4])), xlab = "variables", ylab = "Observations", las = 1)
 heatmap(as.matrix(iris[,1:4]), margins = c(7,4), cexCol = 1.4, cexRow = 0.5)
 my_group <- as.numeric(as.factor(substr(iris$Species, 1 , 2)))
@@ -105,11 +106,38 @@ heatmap(as.matrix(iris[,1:4]), RowSideColors = my_col,
 
 ### Par une projection
 
-#### Par une ACP
-```{r}
+#### Par une Analyse en Composantes Principales
+```{r acp}
 iris.acp <- prcomp(as.matrix(iris[,1:4]))
 plot(iris.acp)
 biplot(iris.acp)
 ```
 
+#### Par un Multi Dimensional Scaling (MDS)
+```{r mds}
+iris.dist <- dist(iris[,1:4])
+iris.mds <- cmdscale(iris.dist)
+plot(iris.mds, col = iris$Species)
+```
+
+# Classification supervisée
+## Echantillon d'apprentissage / validation
+
+```{r app_val}
+ind.app <- sample(1:nrow(iris), 100)
+iris.app <- iris[ind.app,]
+iris.val <- iris[-ind.app,]
+iris.acp <- prcomp(as.matrix(iris.app[,1:4]))
+iris.acp.pred <- predict(iris.acp, newdata = as.matrix(iris.val[,1:4]))
+plot(iris.acp$x[,1:2], xlim = c(-4, 4), ylim = c(-2, 2))
+par(new=T)
+plot(iris.acp.pred[, 1:2], col = "red", xlim = c(-4, 4), ylim = c(-2, 2))
+```
+
+## SVM
+
+### Calcul du modèle
+```{r modele.svm}
+iris.svm <- e1071::svm(Species ~ ., data = iris.app)
+```
 
