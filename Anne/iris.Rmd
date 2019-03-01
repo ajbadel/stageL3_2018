@@ -1,0 +1,115 @@
+---
+title: "Les Iris"
+author: "Anne Badel"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    self_contained: no
+    fig_caption: yes
+    theme: cerulean
+    toc_depth: 3
+    toc_float: yes
+    toc: true
+    code_folding: hide # show 
+    number_sections: true
+    highlight: pygments
+    keep_md: false
+    df_print: paged
+---
+
+```{r include=FALSE, echo=FALSE, eval=TRUE}
+library(GGally)
+library(RColorBrewer)
+
+## Location of the shared folder on the current install
+data.folder <- "~/Anne/data/"
+
+# options(encoding = 'UTF-8')
+
+knitr::opts_chunk$set(
+  fig.width = 7, fig.height = 7, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = TRUE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
+
+options(scipen = 12) ## Max number of digits for non-scientific notation
+```
+
+# Les données
+
+## Lecture
+
+```{r lecture}
+data("iris")
+summary(iris)
+```
+
+## Résumés
+
+```{r resume}
+summary(iris)
+head(iris)
+tail(iris)
+str(iris)
+```
+
+## Visualisation
+
+### Sans tenir compte des espèces
+```{r visualisation}
+plot(iris)
+boxplot(iris[,1:4])
+par(mfrow=c(2,2)) 
+for (i in 1:4) {
+  titre.hist <- paste("histogramme de :", colnames(iris)[i])
+  hist(iris[,i], main = titre.hist)
+}
+par(mfrow=c(1,1))
+GGally::ggpairs(iris)
+```
+
+### Connaissant les espèces
+```{r visualisation.species}
+plot(iris, col = iris$Species)
+par(mfrow=c(2,2))
+for (i in 1:4) {
+  titre.boxplot <- paste("boxplot de :", colnames(iris)[i])
+  boxplot(iris[,i] ~ iris[,5])
+  title(titre.boxplot)
+}
+par(mfrow=c(1,1))
+par(mfrow=c(4,3))
+for (i in 1:4) {
+  titre.histogramme <- paste("histogramme de :", colnames(iris)[i])
+  by(iris[,i], iris[,5], hist, main = titre.histogramme, breaks = 15)
+}
+par(mfrow=c(1,1))
+GGally::ggpairs(iris, mapping = aes(color = Species))
+```
+
+### Par des images
+```{r}
+image(1:(ncol(iris)-1), 1:nrow(iris) ,t(as.matrix(iris[,1:4])), xlab = "variables", ylab = "Observations", las = 1)
+heatmap(as.matrix(iris[,1:4]), margins = c(7,4), cexCol = 1.4, cexRow = 0.5)
+my_group <- as.numeric(as.factor(substr(iris$Species, 1 , 2)))
+my_col <- brewer.pal(3, "Set1")[my_group]
+heatmap(as.matrix(iris[,1:4]), RowSideColors = my_col, 
+        margins = c(7,4), cexCol = 1.4, cexRow = 0.5)
+```
+
+### Par une projection
+
+#### Par une ACP
+```{r}
+iris.acp <- prcomp(as.matrix(iris[,1:4]))
+plot(iris.acp)
+biplot(iris.acp)
+```
+
+
