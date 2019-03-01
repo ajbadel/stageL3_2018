@@ -2,6 +2,7 @@
 title: "SVM"
 author: "Eric"
 date: "8 février 2019"
+<<<<<<< HEAD
 output:
   revealjs::revealjs_presentation:
     center: yes
@@ -11,18 +12,27 @@ output:
   ioslides_presentation:
     highlight: kate
 
+=======
+output: ioslides_presentation
+>>>>>>> 3a27b4ca210a4528d0e940c834d1dfba77ec97a0
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+<<<<<<< HEAD
 ```{r, eval=F}
 install.packages("revealjs")
 install.packages("caret")
 install.packages("e1071")
 install.packages("ggvis")
 set.seed(1)
+=======
+
+```{r, eval = F}
+install.packages("e1071")
+>>>>>>> 3a27b4ca210a4528d0e940c834d1dfba77ec97a0
 ```
 
 ```{r}
@@ -76,6 +86,7 @@ plot(cmdscale(dist(iris [,-5])), col= as.integer(iris[,5]))
 
 ***
 On remarque que les individus d'une espece sont très differents des deux autres espèces.
+<<<<<<< HEAD
 Les setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
 
 ***
@@ -135,20 +146,60 @@ tab
 
 ***
 On remarque que les deux modèles font des erreurs de classifications. Même avec les données  C'est peut être dû au noyau qui est lineaire.
+=======
+Nous allons utiliser les données sur la taille des pétales (generation d'echantillons aleatoires)
+
+```{r, eval = F}
+ech = sample(150,100)
+col = c("Petal.Length", "Petal.Width", "Species")
+iris1 = iris[ech,col]
+iris2 = iris[-ech,col]
+```
+
+```{r, fig.align= "center", eval = F}
+svm1 = svm(Species ~., data = iris1, kernel = "linear", cost = .1, scale = F)
+plot(svm1, iris1[,col])
+```
+
+***
+Si on utilise les 4 variables aléatoires avec un kernel linéaire.
+
+```{r, fig.align = "center", comment = ""}
+model = svm(Species~., data = iris, kernel = "linear")
+```
+
+```{r, fig.align = "center"}
+plot (model, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+```
+
+Les croix correspondent aux vecteurs de soutient pour chaque classe
+
+##Erreurs de classifications et prediction
+
+On compare les predictions du modèle avec les données actuelles
+
+```{r, fig.align= "center"}
+pred = predict(model, iris)
+tab = table(predit = pred, actuel = iris$Species)
+tab
+```
+
+On remarque des erreurs de classification avec le model lineaire.
+>>>>>>> 3a27b4ca210a4528d0e940c834d1dfba77ec97a0
 
 ##Tuning et optimisation du modèle
 
 ```{r, fig.align="center"}
+<<<<<<< HEAD
 set.seed(1)
 model_t = tune(svm, Species~., data = iris, kernel = "polynomial", ranges= list(eps = seq(0,1,0.1), cost = 2^(1:5)))
 ```
  
 ```{r, fig.align= "center"}
+=======
+model_t = tune(svm, Species~., data = iris, ranges= list(eps = seq(0,1,0.1), cost = 2^(2:9)))
+>>>>>>> 3a27b4ca210a4528d0e940c834d1dfba77ec97a0
 plot (model_t)
-```
-
-```{r}
-summary(model_t)
 ```
 
 ##Le meilleur modèle
@@ -157,3 +208,4 @@ summary(model_t)
 mon_modele = model_t$best.model
 summary (mon_modele)
 ```
+
