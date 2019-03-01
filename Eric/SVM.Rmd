@@ -7,7 +7,7 @@ output:
     center: yes
     highlight: kate
     theme: league
-    transition: zoom
+    transition: fade
   ioslides_presentation:
     highlight: kate
 
@@ -19,27 +19,17 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r, eval=F}
 install.packages("revealjs")
+install.packages("caret")
+install.packages("e1071")
+install.packages("ggvis")
+set.seed(1)
 ```
 
 ```{r}
 library("revealjs")
-```
-
-```{r, eval = F}
-install.packages("caret")
-```
-
-```{r}
-library("caret")
-```
-
-```{r, eval = F}
-install.packages("e1071")
-set.seed(1)
-```
-
-```{r,}
-library(e1071)
+#library("caret")
+library("e1071")
+#library ("ggvis")
 ```
 
 ```{r}
@@ -63,10 +53,12 @@ Il y a **3** **especes** d'iris :
 
 La longueur et la largeur des pétales et sépales ont été mesurés sur 50 individus de chaque espèce.
 
+##Visualisons graphiquement les données (data exploration)
+
 ##Répartition des individus selon la taille des sépales
 
 ```{r, comment="", fig.align = "center", fig.cap = "Plot"}
-plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species)
+plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, xlab = "Longueur des sépales", ylab = "Largeur des sépales")
 ```
 
 ##Répartition des individus selon la taille des pétales
@@ -76,87 +68,79 @@ plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species)
 ```
 
 ***
-On remarque que les individus d'une espece sont très differents des deux autres espèces.
-Nous allons generer des données aléatoires à partir des données issus de la réalité.
+##Répartition des individus selon la taille des pétales et la taille des sépales (cmdscale)
+```{r}
+plot(cmdscale(dist(iris [,-5])), col= as.integer(iris[,5]))
+```
+
 
 ***
-Voici un modèle test généré à partir de donnée aléatoires issus des échantillons
-```{r, eval}
+On remarque que les individus d'une espece sont très differents des deux autres espèces.
+Les setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
+
+***
+Notre but est de créer un modèle qui puisse déterminer à quelle espèce appartient l'individu testé grace aux donnée sur la taille des pétales et la taille des sépales.
+Nous allons donc creer un **modèle test** qui sera optimisé grace à un **modèle d'apprentissage**
+
+***
+Voici un modèle test 
+```{r, eval = F, fig.align="center"}
 ech = sample(150,100)
 column = c("Petal.Length", "Petal.Width", "Sepal.Length", "Sepal.Width", "Species")
 iris1 = iris[ech,column]
-```
 
-```{r, fig.align= "center"}
-svm1 = svm(Species ~., data = iris1, kernel = "linear", cost = 10, scale = F)
-#plot(cmdscale(dist(iris1 [,-5])), col= as.integer(iris1[,5]))
-```
+modeltest = svm(Species ~., data = iris1, kernel = "linear", cost = 10, scale = F)
 
-***
-```{r}
-plot(svm1, data = iris1,Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+plot(modeltest, data = iris1,Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
 ```
 
 ***
 Résumé du modele test:
-```{r}
-summary(svm1)
+```{r, eval = F}
+summary(modeltest)
 ```
 
-
+***
+Voici un modèle d'apprentisage
 ```{r, fig.align = "center", comment = ""}
-model = svm(Species~., data = iris, type = "C-classification", kernel = "linear", cost = .1, scale = F)
+modelref = svm(Species~., data = iris, type = "C-classification", kernel = "polynomial", cost = 1, scale = F)
+
+plot (modelref, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
 ```
 
 ***
-Voici un modèle de référence généré à partir de donnée issus des échantillions
-```{r, fig.align = "center"}
-plot (model, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
-```
-Les croix correspondent aux vecteurs de soutient pour chaque classe
-Ce sont les données qui se trouvent à la limite de la marge.
-
-***
-Résumé du modèle de référence:
+Résumé du modèle de d'apprentissage:
 ```{r}
-summary(model)
+summary(modelref)
 ```
 
-##Erreurs de classifications et prediction
+##Determination de la precision de prediction du modèle par observation d'une matrice de confusion (accuracy check)
 ***
 Comparaisons des résultats de prediction du modèle avec les données actuelles
+(Determination de la precision du modèle (accuracy check))
 
-```{r, fig.align= "center"}
-pred = predict(svm1, iris1)
-pred
-tab = table(predit = pred, observe = iris1$Species)
+```{r, eval = F, fig.align= "center"}
+pred = predict(modeltest, iris)
+tab = table(predit = pred, observe = iris$Species)
 tab
 ```
 
 ***
-
-
-***
-Comparaisons des résultats du modèle de référence avec les données observées (Creation d'une matrice de confusion)
+Comparaisons des résultats du modèle de référence avec les données observées
 ```{r}
-pred2 = predict(model, iris)
+pred2 = predict(modelref, iris)
 tab = table(predit = pred2, observe = iris$Species)
 tab
 ```
 
 ***
-```{r}
-
-```
-
-***
 On remarque que les deux modèles font des erreurs de classifications. Même avec les données  C'est peut être dû au noyau qui est lineaire.
 
-##Tuning et optimisation de modèle
+##Tuning et optimisation du modèle
 
 ```{r, fig.align="center"}
 set.seed(1)
-model_t = tune(svm, Species~., data = iris, kernel = "linear", ranges= list(eps = seq(0,1,0.1), cost = 2^(1:5)))
+model_t = tune(svm, Species~., data = iris, kernel = "polynomial", ranges= list(eps = seq(0,1,0.1), cost = 2^(1:5)))
 ```
  
 ```{r, fig.align= "center"}
