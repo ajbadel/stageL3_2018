@@ -16,7 +16,7 @@ library(neuralnet)
 library(nnet)
 library(mclust)
 library(caret)
-library(pROC)
+library(ROCR)
 library(knitr)
 library(MLmetrics) # calcul de F1.Score
 library(mltools) # calcul du coeff de correl. de Matthiew
@@ -155,45 +155,121 @@ F1S_seto = F1_Score(resultats.df.seto$observe, resultats.df.seto$prediction, pos
 mcc.seto = mcc(actuals = resultats.df.seto$observe, preds = resultats.df.seto$prediction)
 ```
 
-Accurancy : `r acc(matrice_confusion(observe[,1], predit[,1]))`  
-Sensibilité : `r sens(matrice_confusion(observe[,1], predit[,1]))`  
-Specifité :  `r spec(matrice_confusion(observe[,1], predit[,1]))`  
-F1_Score : `r scor(matrice_confusion(observe[,1], predit[,1]))`  
-Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,1], predit[,1]))`  
+```{r, echo = FALSE, message = FALSE}
+Paramètres = c("Accurancy", "Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
+Valeurs.seto = c(acc(matrice_confusion(observe[,1], predit[,1])),
+                 sens(matrice_confusion(observe[,1], predit[,1])),
+                 spec(matrice_confusion(observe[,1], predit[,1])),
+                 scor(matrice_confusion(observe[,1], predit[,1])),
+                 ccm1(matrice_confusion(observe[,1], predit[,1])))
+kable(data.frame(Paramètres, Valeurs.seto))
+```
 
 # Le modèle VERSICOLOR
 
 ## Le modèle VERSICOLOR (1)
+
+Matrice de confusion de l'espèce VERSICOLOR
 ```{r, echo = FALSE, message = FALSE}
 kable(matrice_confusion(observe[,2], predit[,2]))
 ```
 
 ## Le modèle VERSICOLOR (2)
 
-Accurancy : `r acc(matrice_confusion(observe[,2], predit[,2]))`  
-Sensibilité : `r sens(matrice_confusion(observe[,2], predit[,2]))`  
-Specifité :  `r spec(matrice_confusion(observe[,2], predit[,2]))`  
-F1_Score : `r scor(matrice_confusion(observe[,2], predit[,2]))`  
-Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,2], predit[,2]))`  
+```{r, echo = FALSE, message = FALSE}
+Valeurs.versi = c(acc(matrice_confusion(observe[,2], predit[,2])),
+                 sens(matrice_confusion(observe[,2], predit[,2])),
+                 spec(matrice_confusion(observe[,2], predit[,2])),
+                 scor(matrice_confusion(observe[,2], predit[,2])),
+                 ccm1(matrice_confusion(observe[,2], predit[,2])))
+kable(data.frame(Paramètres, Valeurs.versi))
+```
 
 # Le modèle VIRGINICA
 
 ## Le modèle VIRGINICA (1)
+
+Matrice de confusion de l'espèce VIRGINICA
 ```{r, echo = FALSE, message = FALSE}
 kable(matrice_confusion(observe[,3], predit[,3]))
 ```
 
 ## Le modèle VIRGINICA (2)
 
-Accurancy : `r acc(matrice_confusion(observe[,3], predit[,3]))`  
-Sensibilité : `r sens(matrice_confusion(observe[,3], predit[,3]))`  
-Specifité :  `r spec(matrice_confusion(observe[,3], predit[,3]))`  
-F1_Score : `r scor(matrice_confusion(observe[,3], predit[,3]))`  
-Coeff. de cor. de Matthew :  `r ccm1(matrice_confusion(observe[,3], predit[,3]))`  
-
-```{r}
+```{r, echo = FALSE, message = FALSE}
+Valeurs.virgi = c(acc(matrice_confusion(observe[,3], predit[,3])),
+                 sens(matrice_confusion(observe[,3], predit[,3])),
+                 spec(matrice_confusion(observe[,3], predit[,3])),
+                 scor(matrice_confusion(observe[,3], predit[,3])),
+                 ccm1(matrice_confusion(observe[,3], predit[,3])))
+kable(data.frame(Paramètres, Valeurs.virgi)) 
 ```
 
+# Courbe ROC
+
+```{r, eval = FALSE}
+roc1 = function (resultats) {
+  roc1_cal = 1 - (resultats[1,1] / (resultats[1,1] + resultats[2,2]))
+  return(roc1_cal)
+}
+
+roc2 = function (resultats) {
+  roc2_cal = 1 - (resultats[2,1] / (resultats[2,1] + resultats[2,1]))
+  return(roc2_cal)
+}
+```
+
+```{r, echo = FALSE}
+prob = compute(reseau1, data.iris[, -c(5:7)])
+prob.result = prob$net.result
+
+rocfun = function (prob.result.entry, data.iris.entry) {
+  pred = prediction(prob.result.entry, data.iris.entry)
+  perf = performance(pred, "sens", "spec")
+  return(perf)
+}
+
+aucfun = function(prob.result.entry, data.iris.entry) {
+  pred = prediction(prob.result.entry, data.iris.entry)
+  auc = performance(pred, "auc")@y.values[[1]]
+  return(auc)
+}
+```
+
+## Courbe ROC (1)
+
+SETOSA  
+```{r, echo = FALSE}
+perf.seto = rocfun(prob.result[,1], data.iris$seto)
+plot(perf.seto, colorize = TRUE, main = "ROC apprentissage")
+
+```
+
+## Courbe ROC (2)
+
+VERSICOLOR
+```{r, echo = FALSE}
+perf.versi = rocfun(prob.result[,2], data.iris$versi)
+plot(perf.versi, colorize = TRUE, main = "ROC apprentissage")
+```
+
+## Courbe ROC (3)
+
+VIRGINICA
+```{r, echo = FALSE}
+perf.virgi = rocfun(prob.result[,3], data.iris$virgi)
+plot(perf.virgi, colorize = TRUE, main = "ROC apprentissage")
+```
+
+## Valeurs AUC
+
+```{r, echo = FALSE}
+Auc = c("AUC setosa", "AUC versicolor", "AUC virginica")
+Calcul_AUC = c(aucfun(prob.result[,1], data.iris$seto),
+               aucfun(prob.result[,2], data.iris$versi),
+               aucfun(prob.result[,3], data.iris$virgi))
+kable(data.frame(Auc, Calcul_AUC))
+```
 
 # Bibliographie
 
