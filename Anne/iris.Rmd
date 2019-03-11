@@ -19,6 +19,7 @@ library(GGally)
 library(RColorBrewer)
 library(e1071)
 library(knitr)
+library(nnet)
 
 ## Location of the shared folder on the current install
 data.folder <- "~/Anne/data/"
@@ -159,7 +160,7 @@ par(new=T)
 plot(iris.acp.pred[, 1:2], col = "red", xlim = c(-4, 4), ylim = c(-2, 2))
 ```
 
-## SVM
+## SVM : Support Vector Machine (Support à Vaste Marge)
 
 ### Paramètres par défaut
 
@@ -322,5 +323,15 @@ summary(iris.app.tune)
 plot(iris.app.tune)
 ```
 
+#### En utilisant la librairie `caret`
+
+## NN, réseaux de neurones
+
+### Perceptron, une couche cachée
+
+#### Calcul du modèle
+```{r modele.nn}
+iris.nn <- nnet::nnet(Species ~ ., data = iris.app, size = 1, )
+```
 
 

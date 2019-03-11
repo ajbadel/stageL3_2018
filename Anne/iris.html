@@ -374,11 +374,19 @@ tx.erreur &lt;-<span class="st"> </span><span class="cf">function</span>(table) 
 }
 
 sensibilite &lt;-<span class="st"> </span><span class="cf">function</span>(table) {
-  <span class="kw">return</span>(table[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">/</span><span class="st"> </span>(table[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table[<span class="dv">2</span>,<span class="dv">1</span>]))
+  <span class="cf">if</span> (<span class="kw">nrow</span>(table) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">2</span>) {
+    <span class="kw">return</span>(table[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">/</span><span class="st"> </span>(table[<span class="dv">1</span>,<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>table[<span class="dv">2</span>,<span class="dv">1</span>]))
+  } <span class="cf">else</span> {
+    <span class="kw">return</span>(<span class="ot">NA</span>)
+  }
 }
 
 specificite &lt;-<span class="st"> </span><span class="cf">function</span>(table) {
-  <span class="kw">return</span>(table[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">/</span><span class="st"> </span>(table[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table[<span class="dv">1</span>,<span class="dv">2</span>]))
+  <span class="cf">if</span> (<span class="kw">nrow</span>(table) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">2</span>) {
+    <span class="kw">return</span>(table[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">/</span><span class="st"> </span>(table[<span class="dv">2</span>,<span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>table[<span class="dv">1</span>,<span class="dv">2</span>]))
+  } <span class="cf">else</span> {
+    <span class="kw">return</span>(<span class="ot">NA</span>)
+  }
 }</code></pre></div>
 <div id="les-donnees" class="section level1">
 <h1><span class="header-section-number">1</span> Les données</h1>
@@ -528,20 +536,23 @@ iris.acp.pred &lt;-<span class="st"> </span><span class="kw">predict</span>(iris
 <span class="kw">plot</span>(iris.acp.pred[, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>], <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">2</span>))</code></pre></div>
 <p><img src="figures/iris_app_val-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
-<div id="svm" class="section level2">
-<h2><span class="header-section-number">2.2</span> SVM</h2>
+<div id="svm-support-vector-machine-support-a-vaste-marge" class="section level2">
+<h2><span class="header-section-number">2.2</span> SVM : Support Vector Machine (Support à Vaste Marge)</h2>
 <div id="parametres-par-defaut" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Paramètres par défaut</h3>
 <div id="calcul-du-modele" class="section level4">
 <h4><span class="header-section-number">2.2.1.1</span> Calcul du modèle</h4>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">probability =</span> <span class="ot">TRUE</span>)</code></pre></div>
 </div>
 <div id="resume-du-modele" class="section level4">
 <h4><span class="header-section-number">2.2.1.2</span> Résumé du modèle</h4>
+<div id="resume" class="section level5">
+<h5><span class="header-section-number">2.2.1.2.1</span> Résumé</h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(iris.svm)</code></pre></div>
 <pre><code>
 Call:
-svm(formula = Species ~ ., data = iris.app, scale = F)
+svm(formula = Species ~ ., data = iris.app, probability = TRUE, 
+    scale = F)
 
 
 Parameters:
@@ -550,15 +561,30 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  32
+Number of Support Vectors:  37
 
- ( 13 5 14 )
+ ( 17 4 16 )
 
 
 Number of Classes:  3 
 
 Levels: 
  setosa versicolor virginica</code></pre>
+</div>
+<div id="les-vecteurs-supports" class="section level5">
+<h5><span class="header-section-number">2.2.1.2.2</span> Les vecteurs supports</h5>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm<span class="op">$</span>tot.nSV</code></pre></div>
+<pre><code>[1] 37</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(iris.svm<span class="op">$</span>coefs)</code></pre></div>
+<pre><code>     [,1]      [,2]
+[1,]    0 1.0000000
+[2,]    1 0.0000000
+[3,]    0 1.0000000
+[4,]    0 0.5097764
+[5,]    0 1.0000000
+[6,]    0 1.0000000</code></pre>
+<p>Les vecteurs supports représentent 0.2466667 du nombre total d’individus.</p>
+</div>
 </div>
 <div id="representation-graphique-du-modele" class="section level4">
 <h4><span class="header-section-number">2.2.1.3</span> Représentation graphique du modèle</h4>
@@ -573,9 +599,14 @@ Levels:
 <h4><span class="header-section-number">2.2.1.4</span> Tables de confusion et performances du modèle</h4>
 <div id="sur-lechantillon-dapprentissage" class="section level5">
 <h5><span class="header-section-number">2.2.1.4.1</span> Sur l’échantillon d’apprentissage</h5>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#iris.app.pred &lt;- predict(iris.svm, newdata = iris.app)</span>
-<span class="co">#iris.app.conf &lt;- table(iris.app.pred, iris.app$Species, dnn=c(&quot;predit&quot;,&quot;observe&quot;))</span>
-iris.app.conf &lt;-<span class="st"> </span><span class="kw">table</span>(iris.svm<span class="op">$</span>fitted, iris.app<span class="op">$</span>Species, <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))
+<div id="les-predictions" class="section level6">
+<h6><span class="header-section-number">2.2.1.4.1.1</span> Les prédictions</h6>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.pred &lt;-<span class="st"> </span><span class="kw">predict</span>(iris.svm, <span class="dt">newdata =</span> iris.app, <span class="dt">probability =</span> <span class="ot">TRUE</span>)
+iris.app.prob &lt;-<span class="st"> </span><span class="kw">attr</span>(iris.app.pred, <span class="dt">which =</span> <span class="st">&quot;probabilities&quot;</span>)</code></pre></div>
+</div>
+<div id="les-performances" class="section level6">
+<h6><span class="header-section-number">2.2.1.4.1.2</span> Les performances</h6>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.conf &lt;-<span class="st"> </span><span class="kw">table</span>(iris.svm<span class="op">$</span>fitted, iris.app<span class="op">$</span>Species, <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))
 knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf)</code></pre></div>
 <table>
 <thead>
@@ -589,21 +620,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">31</td>
+<td align="right">33</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">31</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">37</td>
+<td align="right">34</td>
 </tr>
 </tbody>
 </table>
@@ -631,6 +662,23 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app)</code></p
 </tbody>
 </table>
 </div>
+<div id="la-courbe-roc" class="section level6">
+<h6><span class="header-section-number">2.2.1.4.1.3</span> La courbe ROC</h6>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.prob.setosa &lt;-<span class="st"> </span>iris.app.prob[, <span class="st">&quot;setosa&quot;</span>]
+iris.app.setosa &lt;-<span class="st"> </span>iris.app<span class="op">$</span>Species <span class="op">==</span><span class="st"> &quot;setosa&quot;</span>
+seuil &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">length.out =</span> <span class="dv">100</span>)
+vsens &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100</span>)
+vspe &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">100</span>)
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>) {
+  iris.pred &lt;-<span class="st"> </span>iris.app.prob.setosa <span class="op">&gt;=</span><span class="st"> </span>seuil[i]
+  vsens[i] &lt;-<span class="st"> </span><span class="kw">sensibilite</span>(<span class="kw">table</span>(iris.pred, iris.app.setosa))
+  vspe[i] &lt;-<span class="st"> </span><span class="kw">specificite</span>(<span class="kw">table</span>(iris.pred, iris.app.setosa))
+}
+<span class="kw">plot</span>(<span class="dv">1</span><span class="op">-</span>vspe, vsens, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>,
+     <span class="dt">xlab =</span> <span class="st">&quot;FPR = 1-Spe&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;TPR = Sens&quot;</span>)</code></pre></div>
+<p><img src="figures/iris_svm.pred.app.roc-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="sur-lechantillon-de-validation" class="section level5">
 <h5><span class="header-section-number">2.2.1.4.2</span> Sur l’échantillon de validation</h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.val.pred &lt;-<span class="st"> </span><span class="kw">predict</span>(iris.svm, <span class="dt">newdata =</span> iris.val)
@@ -648,21 +696,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.val.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">19</td>
+<td align="right">17</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">17</td>
-<td align="right">2</td>
+<td align="right">16</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">11</td>
+<td align="right">16</td>
 </tr>
 </tbody>
 </table>
@@ -681,11 +729,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.val)</code></p
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.94</td>
+<td align="right">0.98</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.06</td>
+<td align="right">0.02</td>
 </tr>
 </tbody>
 </table>
@@ -711,9 +759,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  32
+Number of Support Vectors:  37
 
- ( 13 5 14 )
+ ( 17 4 16 )
 
 
 Number of Classes:  3 
@@ -740,9 +788,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  21
+Number of Support Vectors:  23
 
- ( 8 2 11 )
+ ( 11 2 10 )
 
 
 Number of Classes:  3 
@@ -771,9 +819,9 @@ Parameters:
       gamma:  0.25 
      coef.0:  0 
 
-Number of Support Vectors:  10
+Number of Support Vectors:  8
 
- ( 4 3 3 )
+ ( 3 2 3 )
 
 
 Number of Classes:  3 
@@ -801,9 +849,9 @@ Parameters:
       gamma:  0.25 
      coef.0:  0 
 
-Number of Support Vectors:  95
+Number of Support Vectors:  100
 
- ( 32 31 32 )
+ ( 33 33 34 )
 
 
 Number of Classes:  3 
@@ -826,27 +874,27 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf.radia
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">31</td>
+<td align="right">33</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">31</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">37</td>
+<td align="right">34</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div id="les-performances" class="section level4">
+<div id="les-performances-1" class="section level4">
 <h4><span class="header-section-number">2.2.2.2</span> Les performances</h4>
 <div id="en-apprentissage" class="section level5">
 <h5><span class="header-section-number">2.2.2.2.1</span> en apprentissage</h5>
@@ -886,7 +934,7 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.radial)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">31</td>
+<td align="right">33</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
@@ -899,8 +947,8 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.radial)</c
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">1</td>
-<td align="right">37</td>
+<td align="right">2</td>
+<td align="right">34</td>
 </tr>
 </tbody>
 </table>
@@ -919,11 +967,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.99</td>
+<td align="right">0.98</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.01</td>
+<td align="right">0.02</td>
 </tr>
 </tbody>
 </table>
@@ -940,21 +988,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">31</td>
+<td align="right">33</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">32</td>
+<td align="right">33</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">37</td>
+<td align="right">34</td>
 </tr>
 </tbody>
 </table>
@@ -1006,9 +1054,9 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.poly)</cod
 </tr>
 <tr class="odd">
 <td>virginica</td>
-<td align="right">31</td>
-<td align="right">32</td>
-<td align="right">37</td>
+<td align="right">33</td>
+<td align="right">33</td>
+<td align="right">34</td>
 </tr>
 </tbody>
 </table>
@@ -1027,11 +1075,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.sig)</code
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.37</td>
+<td align="right">0.34</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.63</td>
+<td align="right">0.66</td>
 </tr>
 </tbody>
 </table>
@@ -1039,10 +1087,12 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.sig)</code
 </div>
 <div id="en-laissant-faire-par-la-fonction-tune" class="section level4">
 <h4><span class="header-section-number">2.2.2.3</span> En laissant faire par la fonction <code>tune</code></h4>
-<div id="avec-me-kernelpar-defaut-radial" class="section level5">
-<h5><span class="header-section-number">2.2.2.3.1</span> Avec me <code>kernel</code>par défaut, <code>radial</code></h5>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.tune &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">tune</span>(svm, Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app,
-                             <span class="dt">ranges =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span><span class="op">^</span>(<span class="op">-</span><span class="dv">1</span><span class="op">:</span><span class="dv">1</span>), <span class="dt">cost =</span> <span class="dv">2</span><span class="op">^</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>)))
+<div id="avec-le-kernelpar-defaut-radial" class="section level5">
+<h5><span class="header-section-number">2.2.2.3.1</span> Avec le <code>kernel</code>par défaut, <code>radial</code></h5>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.tune &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">tune</span>(svm, Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">validation.x =</span> iris.val,
+                             <span class="dt">ranges =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span><span class="op">^</span>(<span class="op">-</span><span class="dv">5</span><span class="op">:</span><span class="dv">1</span>), <span class="dt">cost =</span> <span class="dv">2</span><span class="op">^</span>(<span class="op">-</span><span class="dv">2</span><span class="op">:</span><span class="dv">2</span>)),
+                             <span class="dt">sampling =</span> <span class="st">&quot;fix&quot;</span>,
+                             <span class="dt">tunecontrol =</span> <span class="kw">tune.control</span>())
 <span class="kw">summary</span>(iris.app.tune)</code></pre></div>
 <pre><code>
 Parameter tuning of &#39;svm&#39;:
@@ -1050,25 +1100,60 @@ Parameter tuning of &#39;svm&#39;:
 - sampling method: 10-fold cross validation 
 
 - best parameters:
- gamma cost
-   0.5    4
+  gamma cost
+ 0.0625    2
 
-- best performance: 0.02 
+- best performance: 0.03 
 
 - Detailed performance results:
-  gamma cost error dispersion
-1   0.5    4  0.02 0.04216370
-2   1.0    4  0.05 0.05270463
-3   2.0    4  0.05 0.05270463
-4   0.5    8  0.02 0.04216370
-5   1.0    8  0.04 0.05163978
-6   2.0    8  0.05 0.05270463
-7   0.5   16  0.03 0.04830459
-8   1.0   16  0.04 0.05163978
-9   2.0   16  0.05 0.05270463</code></pre>
+     gamma cost error dispersion
+1  0.03125 0.25  0.24 0.21186998
+2  0.06250 0.25  0.14 0.09660918
+3  0.12500 0.25  0.12 0.09189366
+4  0.25000 0.25  0.06 0.06992059
+5  0.50000 0.25  0.05 0.05270463
+6  1.00000 0.25  0.07 0.06749486
+7  2.00000 0.25  0.09 0.07378648
+8  0.03125 0.50  0.14 0.10749677
+9  0.06250 0.50  0.07 0.06749486
+10 0.12500 0.50  0.06 0.06992059
+11 0.25000 0.50  0.05 0.05270463
+12 0.50000 0.50  0.06 0.06992059
+13 1.00000 0.50  0.08 0.07888106
+14 2.00000 0.50  0.08 0.07888106
+15 0.03125 1.00  0.06 0.05163978
+16 0.06250 1.00  0.08 0.09189366
+17 0.12500 1.00  0.04 0.05163978
+18 0.25000 1.00  0.04 0.05163978
+19 0.50000 1.00  0.04 0.05163978
+20 1.00000 1.00  0.04 0.05163978
+21 2.00000 1.00  0.05 0.05270463
+22 0.03125 2.00  0.06 0.06992059
+23 0.06250 2.00  0.03 0.04830459
+24 0.12500 2.00  0.04 0.05163978
+25 0.25000 2.00  0.05 0.05270463
+26 0.50000 2.00  0.07 0.08232726
+27 1.00000 2.00  0.07 0.06749486
+28 2.00000 2.00  0.07 0.08232726
+29 0.03125 4.00  0.05 0.07071068
+30 0.06250 4.00  0.04 0.06992059
+31 0.12500 4.00  0.04 0.05163978
+32 0.25000 4.00  0.06 0.06992059
+33 0.50000 4.00  0.07 0.08232726
+34 1.00000 4.00  0.09 0.08755950
+35 2.00000 4.00  0.08 0.07888106</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(iris.app.tune)</code></pre></div>
 <p><img src="figures/iris_svm.tune-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
+</div>
+</div>
+</div>
+<div id="nn-reseaux-de-neurones" class="section level2">
+<h2><span class="header-section-number">2.3</span> NN, réseaux de neurones</h2>
+<div id="perceptron-une-couche-cachee" class="section level3">
+<h3><span class="header-section-number">2.3.1</span> Perceptron, une couche cachée</h3>
+<div id="calcul-du-modele-1" class="section level4">
+<h4><span class="header-section-number">2.3.1.1</span> Calcul du modèle</h4>
 </div>
 </div>
 </div>
