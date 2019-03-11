@@ -61,6 +61,7 @@ barplot(table(iris$Species)) # représentation en bâtons
 dotchart(table(iris$Species)) # représentation de Cleveland
 ```
 
+
 **Exercice**
 
 ```{r}
@@ -88,6 +89,7 @@ dotchart(table(collection2))
     - Cependant, nous savons pas à quoi cela correspond
   - Cleveland : pour chaque variable, il y a le nombre d'individus par variable
     - Nous avons les deux contraintes des deux précédentes représentation
+    - AB : cette repésentation ne me convainc pas dans ce cadre
 
 ## Représentation de la longueur du pétale
 
@@ -207,6 +209,8 @@ hist(iris$Petal.Length[iris$Species == "virginica"],
      xlab = "Longueur du petale",
      breaks = brk)
 ```
+
+suggestion : mettre ces trois histogrammes sur le même graphique, avec des couleurs différentes
 
 ```{r}
 par(mfrow = c(2, 2))
