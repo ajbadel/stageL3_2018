@@ -111,3 +111,16 @@ Cependant, ce second fichier (MOE) contient une données très importante pour n
 cf programme de L2S5
 
 ### Appliquer NN ou SVM sur ces données
+
+# Message du 11 mars
+
+- Essayez de prendre le temps de regarder ce que j'ai fait par rapport à ce que vous avez fait (pareil, différents, intéressants dans l'un), nous aurons ainsi une vue assez complète du sujet.
+
+- On peut alors passer à l'utilisation de ces méthodes sur le jeu de données.
+
+- Pour vendredi 22 mars, une présentation chacun présentant
+  - un résumé de la méthode choisie : je ne vous demande pas de me dire les formules mathématiques, mais d'essayer de m'expliquer ce qui se passe, les points + et -, les paramètres à optimiser
+  - l'un de vous présente la table de confusion et le calcul du taux de bien prédits, la sensibilité et la spécificité et l'autre présente la courbe ROC.
+  - l'application sur les données "iris"
+  - un début d'application sur les données "membranes", si possible
+j'ai réservé notre salle de réunion pour la présentation à partir de 14h.
