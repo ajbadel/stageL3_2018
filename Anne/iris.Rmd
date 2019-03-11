@@ -51,11 +51,19 @@ tx.erreur <- function(table) {
 }
 
 sensibilite <- function(table) {
-  return(table[1,1] / (table[1,1] + table[2,1]))
+  if (nrow(table) >= 2) {
+    return(table[1,1] / (table[1,1] + table[2,1]))
+  } else {
+    return(NA)
+  }
 }
 
 specificite <- function(table) {
-  return(table[2,2] / (table[2,2] + table[1,2]))
+  if (nrow(table) >= 2) {
+    return(table[2,2] / (table[2,2] + table[1,2]))
+  } else {
+    return(NA)
+  }
 }
 ```
 
@@ -157,13 +165,22 @@ plot(iris.acp.pred[, 1:2], col = "red", xlim = c(-4, 4), ylim = c(-2, 2))
 
 #### Calcul du modèle
 ```{r modele.svm}
-iris.svm <- e1071::svm(Species ~ ., data = iris.app, scale = F)
+iris.svm <- e1071::svm(Species ~ ., data = iris.app, scale = F, probability = TRUE)
 ```
 
 #### Résumé du modèle
+##### Résumé
 ```{r resume.svm}
 summary(iris.svm)
 ```
+
+##### Les vecteurs supports
+```{r svm.svm}
+iris.svm$tot.nSV
+head(iris.svm$coefs)
+```
+
+Les vecteurs supports représentent `r iris.svm$tot.nSV / nrow(iris)` du nombre total d'individus.
 
 #### Représentation graphique du modèle
 ```{r visualisation.svm}
@@ -176,9 +193,14 @@ plot(iris.svm, iris.app, Sepal.Width ~ Sepal.Length,
 #### Tables de confusion et performances du modèle
 
 ##### Sur l'échantillon d'apprentissage
-```{r svm.conf.app}
-#iris.app.pred <- predict(iris.svm, newdata = iris.app)
-#iris.app.conf <- table(iris.app.pred, iris.app$Species, dnn=c("predit","observe"))
+###### Les prédictions
+```{r svm.pred.app}
+iris.app.pred <- predict(iris.svm, newdata = iris.app, probability = TRUE)
+iris.app.prob <- attr(iris.app.pred, which = "probabilities")
+```
+
+###### Les performances
+```{r svm.pred.app.perf}
 iris.app.conf <- table(iris.svm$fitted, iris.app$Species, dnn = c("predit", "observe"))
 knitr::kable(iris.app.conf)
 acc.app <- tx.bon(iris.app.conf)
@@ -186,6 +208,22 @@ err.app <- tx.erreur(iris.app.conf)
 perf.app <- c(acc.app, err.app)
 names(perf.app) <- c("accuracy", "erreur")
 knitr::kable(perf.app)
+```
+
+###### La courbe ROC
+```{r svm.pred.app.roc}
+iris.app.prob.setosa <- iris.app.prob[, "setosa"]
+iris.app.setosa <- iris.app$Species == "setosa"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.setosa >= seuil[i]
+  vsens[i] <- sensibilite(table(iris.pred, iris.app.setosa))
+  vspe[i] <- specificite(table(iris.pred, iris.app.setosa))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
 ```
 
 ##### Sur l'échantillon de validation
