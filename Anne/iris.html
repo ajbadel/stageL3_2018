@@ -11,7 +11,7 @@
 
 <meta name="author" content="Anne Badel" />
 
-<meta name="date" content="2019-03-01" />
+<meta name="date" content="2019-03-11" />
 
 <title>Les Iris</title>
 
@@ -26,8 +26,6 @@
 <script src="iris_files/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="iris_files/navigation-1.1/tabsets.js"></script>
 <script src="iris_files/navigation-1.1/codefolding.js"></script>
-<link href="iris_files/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
-<script src="iris_files/pagedtable-1.1/js/pagedtable.js"></script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -361,7 +359,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Les Iris</h1>
 <h4 class="author"><em>Anne Badel</em></h4>
-<h4 class="date"><em>2019-03-01</em></h4>
+<h4 class="date"><em>2019-03-11</em></h4>
 
 </div>
 
@@ -421,17 +419,21 @@ specificite &lt;-<span class="st"> </span><span class="cf">function</span>(table
                 
                 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(iris)</code></pre></div>
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sepal.Length"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Sepal.Width"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Petal.Length"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Petal.Width"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Species"],"name":[5],"type":["fctr"],"align":["left"]}],"data":[{"1":"5.1","2":"3.5","3":"1.4","4":"0.2","5":"setosa","_rn_":"1"},{"1":"4.9","2":"3.0","3":"1.4","4":"0.2","5":"setosa","_rn_":"2"},{"1":"4.7","2":"3.2","3":"1.3","4":"0.2","5":"setosa","_rn_":"3"},{"1":"4.6","2":"3.1","3":"1.5","4":"0.2","5":"setosa","_rn_":"4"},{"1":"5.0","2":"3.6","3":"1.4","4":"0.2","5":"setosa","_rn_":"5"},{"1":"5.4","2":"3.9","3":"1.7","4":"0.4","5":"setosa","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+<pre><code>  Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+1          5.1         3.5          1.4         0.2  setosa
+2          4.9         3.0          1.4         0.2  setosa
+3          4.7         3.2          1.3         0.2  setosa
+4          4.6         3.1          1.5         0.2  setosa
+5          5.0         3.6          1.4         0.2  setosa
+6          5.4         3.9          1.7         0.4  setosa</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tail</span>(iris)</code></pre></div>
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sepal.Length"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Sepal.Width"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Petal.Length"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Petal.Width"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Species"],"name":[5],"type":["fctr"],"align":["left"]}],"data":[{"1":"6.7","2":"3.3","3":"5.7","4":"2.5","5":"virginica","_rn_":"145"},{"1":"6.7","2":"3.0","3":"5.2","4":"2.3","5":"virginica","_rn_":"146"},{"1":"6.3","2":"2.5","3":"5.0","4":"1.9","5":"virginica","_rn_":"147"},{"1":"6.5","2":"3.0","3":"5.2","4":"2.0","5":"virginica","_rn_":"148"},{"1":"6.2","2":"3.4","3":"5.4","4":"2.3","5":"virginica","_rn_":"149"},{"1":"5.9","2":"3.0","3":"5.1","4":"1.8","5":"virginica","_rn_":"150"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+<pre><code>    Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
+145          6.7         3.3          5.7         2.5 virginica
+146          6.7         3.0          5.2         2.3 virginica
+147          6.3         2.5          5.0         1.9 virginica
+148          6.5         3.0          5.2         2.0 virginica
+149          6.2         3.4          5.4         2.3 virginica
+150          5.9         3.0          5.1         1.8 virginica</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(iris)</code></pre></div>
 <pre><code>&#39;data.frame&#39;:   150 obs. of  5 variables:
  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
@@ -548,9 +550,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  33
+Number of Support Vectors:  32
 
- ( 14 5 14 )
+ ( 13 5 14 )
 
 
 Number of Classes:  3 
@@ -587,21 +589,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">38</td>
+<td align="right">31</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">29</td>
+<td align="right">31</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">32</td>
+<td align="right">37</td>
 </tr>
 </tbody>
 </table>
@@ -646,7 +648,7 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.val.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">12</td>
+<td align="right">19</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
@@ -654,13 +656,13 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.val.conf)</cod
 <td>versicolor</td>
 <td align="right">0</td>
 <td align="right">17</td>
-<td align="right">0</td>
+<td align="right">2</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">3</td>
-<td align="right">18</td>
+<td align="right">1</td>
+<td align="right">11</td>
 </tr>
 </tbody>
 </table>
@@ -694,6 +696,8 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.val)</code></p
 <h3><span class="header-section-number">2.2.2</span> Recherche des paramètres optimaux</h3>
 <div id="test-des-differents-kernel-avec-leurs-parametres-par-defaut" class="section level4">
 <h4><span class="header-section-number">2.2.2.1</span> Test des différents <code>kernel</code> avec leurs paramètres par défaut</h4>
+<div id="kernel-radial" class="section level5">
+<h5><span class="header-section-number">2.2.2.1.1</span> kernel = <code>radial</code></h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm.radial &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F)
 <span class="kw">summary</span>(iris.svm.radial)</code></pre></div>
 <pre><code>
@@ -707,9 +711,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  33
+Number of Support Vectors:  32
 
- ( 14 5 14 )
+ ( 13 5 14 )
 
 
 Number of Classes:  3 
@@ -718,8 +722,11 @@ Levels:
  setosa versicolor virginica</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.conf.radial &lt;-<span class="st"> </span><span class="kw">table</span>(iris.svm.radial<span class="op">$</span>fitted, 
                               iris.app<span class="op">$</span>Species, 
-                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))
-iris.svm.linear &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;linear&quot;</span>)
+                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))</code></pre></div>
+</div>
+<div id="kernel-linear" class="section level5">
+<h5><span class="header-section-number">2.2.2.1.2</span> kernel = <code>linear</code></h5>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm.linear &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;linear&quot;</span>)
 <span class="kw">summary</span>(iris.svm.linear)</code></pre></div>
 <pre><code>
 Call:
@@ -733,9 +740,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  20
+Number of Support Vectors:  21
 
- ( 9 2 9 )
+ ( 8 2 11 )
 
 
 Number of Classes:  3 
@@ -744,8 +751,11 @@ Levels:
  setosa versicolor virginica</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.conf.linear &lt;-<span class="st"> </span><span class="kw">table</span>(iris.svm.linear<span class="op">$</span>fitted, 
                               iris.app<span class="op">$</span>Species, 
-                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))
-iris.svm.poly &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;polynomial&quot;</span>)
+                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))</code></pre></div>
+</div>
+<div id="kernel-polynomial" class="section level5">
+<h5><span class="header-section-number">2.2.2.1.3</span> kernel = <code>polynomial</code></h5>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm.poly &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;polynomial&quot;</span>)
 <span class="kw">summary</span>(iris.svm.poly)</code></pre></div>
 <pre><code>
 Call:
@@ -763,7 +773,7 @@ Parameters:
 
 Number of Support Vectors:  10
 
- ( 3 3 4 )
+ ( 4 3 3 )
 
 
 Number of Classes:  3 
@@ -772,8 +782,11 @@ Levels:
  setosa versicolor virginica</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.conf.poly &lt;-<span class="st"> </span><span class="kw">table</span>(iris.svm.poly<span class="op">$</span>fitted, 
                               iris.app<span class="op">$</span>Species, 
-                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))
-iris.svm.sig &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;sigmoid&quot;</span>)
+                              <span class="dt">dnn =</span> <span class="kw">c</span>(<span class="st">&quot;predit&quot;</span>, <span class="st">&quot;observe&quot;</span>))</code></pre></div>
+</div>
+<div id="kernel-sigmoide" class="section level5">
+<h5><span class="header-section-number">2.2.2.1.4</span> kernel = <code>sigmoide</code></h5>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm.sig &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">svm</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">scale =</span> F, <span class="dt">kernel=</span><span class="st">&quot;sigmoid&quot;</span>)
 <span class="kw">summary</span>(iris.svm.sig)</code></pre></div>
 <pre><code>
 Call:
@@ -788,9 +801,9 @@ Parameters:
       gamma:  0.25 
      coef.0:  0 
 
-Number of Support Vectors:  94
+Number of Support Vectors:  95
 
- ( 30 32 32 )
+ ( 32 31 32 )
 
 
 Number of Classes:  3 
@@ -813,24 +826,30 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf.radia
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">38</td>
+<td align="right">31</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">29</td>
+<td align="right">31</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">32</td>
+<td align="right">37</td>
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+<div id="les-performances" class="section level4">
+<h4><span class="header-section-number">2.2.2.2</span> Les performances</h4>
+<div id="en-apprentissage" class="section level5">
+<h5><span class="header-section-number">2.2.2.2.1</span> en apprentissage</h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">acc.app.radial &lt;-<span class="st"> </span><span class="kw">tx.bon</span>(iris.app.conf.radial)
 err.app.radial &lt;-<span class="st"> </span><span class="kw">tx.erreur</span>(iris.app.conf.radial)
 perf.app.radial &lt;-<span class="st"> </span><span class="kw">c</span>(acc.app.radial, err.app.radial)
@@ -867,21 +886,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.radial)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">38</td>
+<td align="right">31</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">30</td>
+<td align="right">31</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">32</td>
+<td align="right">1</td>
+<td align="right">37</td>
 </tr>
 </tbody>
 </table>
@@ -900,11 +919,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">1</td>
+<td align="right">0.99</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0</td>
+<td align="right">0.01</td>
 </tr>
 </tbody>
 </table>
@@ -921,21 +940,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">38</td>
+<td align="right">31</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">30</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">32</td>
+<td align="right">37</td>
 </tr>
 </tbody>
 </table>
@@ -975,9 +994,9 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.poly)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">38</td>
-<td align="right">30</td>
-<td align="right">32</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
@@ -987,9 +1006,9 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.poly)</cod
 </tr>
 <tr class="odd">
 <td>virginica</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
+<td align="right">31</td>
+<td align="right">32</td>
+<td align="right">37</td>
 </tr>
 </tbody>
 </table>
@@ -1008,19 +1027,20 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.sig)</code
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.38</td>
+<td align="right">0.37</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.62</td>
+<td align="right">0.63</td>
 </tr>
 </tbody>
 </table>
 </div>
+</div>
 <div id="en-laissant-faire-par-la-fonction-tune" class="section level4">
-<h4><span class="header-section-number">2.2.2.2</span> En laissant faire par la fonction <code>tune</code></h4>
+<h4><span class="header-section-number">2.2.2.3</span> En laissant faire par la fonction <code>tune</code></h4>
 <div id="avec-me-kernelpar-defaut-radial" class="section level5">
-<h5><span class="header-section-number">2.2.2.2.1</span> Avec me <code>kernel</code>par défaut, <code>radial</code></h5>
+<h5><span class="header-section-number">2.2.2.3.1</span> Avec me <code>kernel</code>par défaut, <code>radial</code></h5>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.app.tune &lt;-<span class="st"> </span>e1071<span class="op">::</span><span class="kw">tune</span>(svm, Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app,
                              <span class="dt">ranges =</span> <span class="kw">list</span>(<span class="dt">gamma =</span> <span class="dv">2</span><span class="op">^</span>(<span class="op">-</span><span class="dv">1</span><span class="op">:</span><span class="dv">1</span>), <span class="dt">cost =</span> <span class="dv">2</span><span class="op">^</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>)))
 <span class="kw">summary</span>(iris.app.tune)</code></pre></div>
@@ -1033,19 +1053,19 @@ Parameter tuning of &#39;svm&#39;:
  gamma cost
    0.5    4
 
-- best performance: 0.04 
+- best performance: 0.02 
 
 - Detailed performance results:
   gamma cost error dispersion
-1   0.5    4  0.04 0.05163978
+1   0.5    4  0.02 0.04216370
 2   1.0    4  0.05 0.05270463
-3   2.0    4  0.07 0.08232726
-4   0.5    8  0.04 0.05163978
-5   1.0    8  0.05 0.05270463
-6   2.0    8  0.07 0.08232726
-7   0.5   16  0.04 0.05163978
-8   1.0   16  0.05 0.05270463
-9   2.0   16  0.07 0.08232726</code></pre>
+3   2.0    4  0.05 0.05270463
+4   0.5    8  0.02 0.04216370
+5   1.0    8  0.04 0.05163978
+6   2.0    8  0.05 0.05270463
+7   0.5   16  0.03 0.04830459
+8   1.0   16  0.04 0.05163978
+9   2.0   16  0.05 0.05270463</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(iris.app.tune)</code></pre></div>
 <p><img src="figures/iris_svm.tune-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
