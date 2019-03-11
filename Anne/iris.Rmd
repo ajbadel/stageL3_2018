@@ -12,6 +12,7 @@ output:
     theme: cerulean
     toc: yes
     toc_float: yes
+    toc_depth: 4
 ---
 
 ```{r include=FALSE, echo=FALSE, eval=TRUE}
@@ -160,6 +161,7 @@ par(new=T)
 plot(iris.acp.pred[, 1:2], col = "red", xlim = c(-4, 4), ylim = c(-2, 2))
 ```
 
+<p>&nbsp; </p>
 ## SVM : Support Vector Machine (Support à Vaste Marge)
 
 ### Paramètres par défaut
@@ -211,8 +213,8 @@ names(perf.app) <- c("accuracy", "erreur")
 knitr::kable(perf.app)
 ```
 
-###### La courbe ROC
-```{r svm.pred.app.roc}
+###### La courbe ROC "Setosa"
+```{r svm.pred.app.roc.setosa}
 iris.app.prob.setosa <- iris.app.prob[, "setosa"]
 iris.app.setosa <- iris.app$Species == "setosa"
 seuil <- seq(0, 1, length.out = 100)
@@ -222,6 +224,22 @@ for (i in 1:100) {
   iris.pred <- iris.app.prob.setosa >= seuil[i]
   vsens[i] <- sensibilite(table(iris.pred, iris.app.setosa))
   vspe[i] <- specificite(table(iris.pred, iris.app.setosa))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+```
+
+###### La courbe ROC "Versicolor"
+```{r svm.pred.app.roc.versicolor}
+iris.app.prob.versi <- iris.app.prob[, "versicolor"]
+iris.app.versi <- iris.app$Species == "versicolor"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.versi >= seuil[i]
+  vsens[i] <- sensibilite(table(iris.pred, iris.app.versi))
+  vspe[i] <- specificite(table(iris.pred, iris.app.versi))
 }
 plot(1-vspe, vsens, type = "l", col = "red",
      xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
@@ -325,13 +343,91 @@ plot(iris.app.tune)
 
 #### En utilisant la librairie `caret`
 
+<p>&nbsp; </p>
 ## NN, réseaux de neurones
 
 ### Perceptron, une couche cachée
 
 #### Calcul du modèle
 ```{r modele.nn}
-iris.nn <- nnet::nnet(Species ~ ., data = iris.app, size = 1, )
+# iris.nn <- nnet::nnet(Species ~ ., data = iris.app, size = 1)
+iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app,
+                      size = 1)
 ```
 
+#### Résumé du modèle
+```{r resume.nn}
+summary(iris.nn)
+```
+
+#### Tables de confusion et performances du modèle
+
+##### Sur l'échantillon d'apprentissage
+
+```{r app.pred.nn}
+iris.app.pred <- predict(iris.nn, newdata = iris.app, type = "class")
+iris.app.conf <- table(iris.app.pred, iris.app$Species, dnn = c("predit", "observe"))
+knitr::kable(iris.app.conf)
+acc.app <- tx.bon(iris.app.conf)
+err.app <- tx.erreur(iris.app.conf)
+perf.app <- c(acc.app, err.app)
+names(perf.app) <- c("accuracy", "erreur")
+knitr::kable(perf.app)
+```
+
+##### Sur l'échantillon de validation
+
+```{r val.pred.nn}
+iris.val.pred <- predict(iris.nn, newdata = iris.val, type = "class")
+iris.val.conf <- table(iris.val.pred, iris.val$Species, dnn = c("predit", "observe"))
+knitr::kable(iris.val.conf)
+acc.val <- tx.bon(iris.val.conf)
+err.val <- tx.erreur(iris.val.conf)
+perf.val <- c(acc.val, err.val)
+names(perf.val) <- c("accuracy", "erreur")
+knitr::kable(perf.val)
+```
+
+###### La courbe ROC "Setosa"
+```{r nn.pred.app.roc.setosa}
+iris.app.prob.setosa <- iris.nn$fitted.values[, "setosa"]
+iris.app.setosa <- iris.app$Species == "setosa"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.setosa >= seuil[i]
+  vsens[i] <- sensibilite(table(iris.pred, iris.app.setosa))
+  vspe[i] <- specificite(table(iris.pred, iris.app.setosa))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+```
+
+###### La courbe ROC "Versicolor"
+```{r nn.pred.app.roc.versicolor}
+iris.app.prob.versicolor <- iris.nn$fitted.values[, "versicolor"]
+iris.app.versicolor <- iris.app$Species == "versicolor"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.versicolor >= seuil[i]
+  vsens[i] <- sensibilite(table(iris.pred, iris.app.versicolor))
+  vspe[i] <- specificite(table(iris.pred, iris.app.versicolor))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+```
+
+### Recherche des paramètres optimaux
+
+#### En laissant faire par la fonction `tune`
+```{r nn.tune}
+iris.nn.tune <- tune.nnet(Species ~ ., data = iris.app, validation.x = iris.val,
+                     size = 1:4, sampling = "fix")
+summary(iris.nn.tune)
+best.iris.nn <- best.nnet(Species ~ ., data = iris.app, validation.x = iris.val,
+                     size = 1:4, sampling = "fix")
+```
 
