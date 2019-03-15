@@ -20,15 +20,65 @@ library(ROCR)
 library(knitr)
 library(MLmetrics) # calcul de F1.Score
 library(mltools) # calcul du coeff de correl. de Matthiew
+
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = FALSE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
 ```
 
 ```{r echo = FALSE}
 set.seed(245)
 table(iris$Species)
 ```
+# Données IRIS
 
-## Création des 3 vecteurs
-```{r, echo = FALSE}
+## Les données IRIS
+
+```{r}
+head(iris)
+```
+
+## Résumés des données
+```{r}
+data("iris")
+summary(iris)
+```
+
+## Visualisation des données (plot)
+```{r}
+plot(iris, col = iris$Species)
+```
+
+## Visualisation des données (boxplot)
+```{r}
+par(mfrow=c(2,2))
+for (i in 1:4) {
+  titre.boxplot <- paste("boxplot de :", colnames(iris)[i])
+  boxplot(iris[,i] ~ iris[,5])
+  title(titre.boxplot)
+}
+par(mfrow=c(1,1))
+```
+
+## Visualisation des données (histogramme)
+```{r}
+par(mfrow=c(4,3))
+for (i in 1:4) {
+  titre.histogramme <- paste("Histogramme de :", colnames(iris)[i])
+  by(iris[,i], iris[,5], hist, main = titre.histogramme, breaks = 15, xlab = "cm")
+}
+par(mfrow=c(1,1))
+```
+
+```{r}
 set.seed(24)
 
 seto = as.numeric(iris$Species == "setosa")
@@ -36,16 +86,14 @@ versi = as.numeric(iris$Species == "versicolor")
 virgi = as.numeric(iris$Species == "virginica")
 ```
 
-## Création de 3 dataframe
-
-```{r, echo = FALSE}
+```{r}
 data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
 #data.seto = data.frame(iris[,c(1:4)], seto)
 #data.versi = data.frame(iris[,c(1:4)], versi)
 #data.virgi = data.frame(iris[,c(1:4)], virgi)
 ```
 
-```{r, echo = FALSE}
+```{r}
 set.seed(24)
 formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
 
@@ -54,9 +102,13 @@ resultat_matrice1 <- as.data.frame(reseau1$result.matrix)
 ```
 
 # Prediction
-```{r, echo = FALSE, results = 'hide'}
+```{r, results = 'hide'}
 set.seed(24)
-iris.nn <- nnet(Species ~ .,data = iris, size = 10)
+ind.app <- sample(1:nrow(iris), 100)
+iris.app <- iris[ind.app,]
+iris.test <- iris[-ind.app,]
+iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app,
+                      size = 1)
 temp_train <- subset(iris, select = c(1:4))
 prediction = predict(iris.nn, iris)
 ```
@@ -64,7 +116,7 @@ prediction = predict(iris.nn, iris)
 ## 
 
 ### Matrice de confusion
-```{r, echo = FALSE}
+```{r}
 matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
 kable(matrice_confusion.ex)
 
@@ -101,7 +153,7 @@ Coefficient de corrélation de Matthews : MCC =
 
 $\frac{TP*TN-FP*FN} {((TP+FP)(TP+FN)(TN+FP)(TN+FN))^{-1}}$
 
-```{r, echo = FALSE}
+```{r}
 # La fonction accuracy
 acc = function (resultats) {
   acc_cal = (resultats[1,1] + resultats[2,2]) /
@@ -139,13 +191,13 @@ ccm1 = function (resultats) {
 ## Le modèle SETOSA (1)
 
 Matrice de confusion de l'espèce SETOSA
-```{r, echo = FALSE, message = FALSE}
+```{r}
 kable(matrice_confusion(observe[,1], predit[,1]))
 
 ```
 
 ## Le modèle SETOSA (2)
-```{r, eval = FALSE, echo = FALSE}
+```{r, eval = FALSE}
 # Calculé directement par les fonctions de RStudio
 matrice.setosa = confusionMatrix(table.resultat.seto)
 acc.seto = matrice.setosa$overall["Accuracy"]
@@ -155,7 +207,7 @@ F1S_seto = F1_Score(resultats.df.seto$observe, resultats.df.seto$prediction, pos
 mcc.seto = mcc(actuals = resultats.df.seto$observe, preds = resultats.df.seto$prediction)
 ```
 
-```{r, echo = FALSE, message = FALSE}
+```{r, message = FALSE}
 Paramètres = c("Accurancy", "Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
 Valeurs.seto = c(acc(matrice_confusion(observe[,1], predit[,1])),
                  sens(matrice_confusion(observe[,1], predit[,1])),
@@ -170,13 +222,13 @@ kable(data.frame(Paramètres, Valeurs.seto))
 ## Le modèle VERSICOLOR (1)
 
 Matrice de confusion de l'espèce VERSICOLOR
-```{r, echo = FALSE, message = FALSE}
+```{r}
 kable(matrice_confusion(observe[,2], predit[,2]))
 ```
 
 ## Le modèle VERSICOLOR (2)
 
-```{r, echo = FALSE, message = FALSE}
+```{r}
 Valeurs.versi = c(acc(matrice_confusion(observe[,2], predit[,2])),
                  sens(matrice_confusion(observe[,2], predit[,2])),
                  spec(matrice_confusion(observe[,2], predit[,2])),
@@ -190,13 +242,13 @@ kable(data.frame(Paramètres, Valeurs.versi))
 ## Le modèle VIRGINICA (1)
 
 Matrice de confusion de l'espèce VIRGINICA
-```{r, echo = FALSE, message = FALSE}
+```{r}
 kable(matrice_confusion(observe[,3], predit[,3]))
 ```
 
 ## Le modèle VIRGINICA (2)
 
-```{r, echo = FALSE, message = FALSE}
+```{r}
 Valeurs.virgi = c(acc(matrice_confusion(observe[,3], predit[,3])),
                  sens(matrice_confusion(observe[,3], predit[,3])),
                  spec(matrice_confusion(observe[,3], predit[,3])),
@@ -219,14 +271,16 @@ roc2 = function (resultats) {
 }
 ```
 
-```{r, echo = FALSE}
+```{r}
 prob = compute(reseau1, data.iris[, -c(5:7)])
 prob.result = prob$net.result
 
 rocfun = function (prob.result.entry, data.iris.entry) {
-  pred = prediction(prob.result.entry, data.iris.entry)
-  perf = performance(pred, "sens", "spec")
-  return(perf)
+  for (i in 1:10) {
+    pred[i] = prediction(prob.result.entry, data.iris.entry)
+    perf = performance(pred[i], "sens", "spec")
+    return(perf)
+  }
 }
 
 aucfun = function(prob.result.entry, data.iris.entry) {
@@ -239,7 +293,7 @@ aucfun = function(prob.result.entry, data.iris.entry) {
 ## Courbe ROC (1)
 
 SETOSA  
-```{r, echo = FALSE}
+```{r}
 perf.seto = rocfun(prob.result[,1], data.iris$seto)
 plot(perf.seto, colorize = TRUE, main = "ROC apprentissage")
 
@@ -248,7 +302,7 @@ plot(perf.seto, colorize = TRUE, main = "ROC apprentissage")
 ## Courbe ROC (2)
 
 VERSICOLOR
-```{r, echo = FALSE}
+```{r}
 perf.versi = rocfun(prob.result[,2], data.iris$versi)
 plot(perf.versi, colorize = TRUE, main = "ROC apprentissage")
 ```
@@ -256,14 +310,14 @@ plot(perf.versi, colorize = TRUE, main = "ROC apprentissage")
 ## Courbe ROC (3)
 
 VIRGINICA
-```{r, echo = FALSE}
+```{r}
 perf.virgi = rocfun(prob.result[,3], data.iris$virgi)
 plot(perf.virgi, colorize = TRUE, main = "ROC apprentissage")
 ```
 
 ## Valeurs AUC
 
-```{r, echo = FALSE}
+```{r}
 Auc = c("AUC setosa", "AUC versicolor", "AUC virginica")
 Calcul_AUC = c(aucfun(prob.result[,1], data.iris$seto),
                aucfun(prob.result[,2], data.iris$versi),
