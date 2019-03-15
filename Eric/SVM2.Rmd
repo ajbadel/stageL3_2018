@@ -1,0 +1,64 @@
+---
+title: "SVM"
+author: "Eric"
+date: "8 février 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: fade
+  ioslides_presentation:
+    highlight: kate
+
+---
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message= 'hide'}
+library("revealjs")
+#library("caret")
+library("e1071")
+#library ("ggvis")
+library("GGally")
+library("RColorBrewer")
+library("ggplot2")
+```
+
+```{r}
+setwd(".")
+donnee = read.table("./../data/placenta90.138.txt", header = T, dec = ".", sep = "\t")
+```
+
+##Jeu de données
+
+Résumé des données
+```{r, eval}
+par(mfrow = c(1,2))
+head(donnee)
+```
+
+***
+Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
+```{r, fig.align = "center"}
+donnee.cmd = cmdscale(dist(donnee [,-1]))
+plot(donnee.cmd, col = donnee$Noms)
+```
+
+***
+Visualisation des données grâce à une analyse des principaux composants
+```{r, fig.align = "center"}
+par(mfrow = c(1,2))
+donnee.acp <- prcomp(as.matrix(donnee[,-1]))
+plot(donnee.acp)
+biplot(donnee.acp)
+```
+***
+Visualisation globale des données
+```{r, message = F}
+par(mfrow=c(1,1))
+GGally::ggpairs(donnee, mapping = aes(color = Species), cardinality_threshold = 15)
+```
+

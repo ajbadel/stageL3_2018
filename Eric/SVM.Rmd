@@ -90,7 +90,7 @@ biplot(iris.acp)
 ***
 - Le but de cet analyse est de réduire le nombre de variables à un nombre limité de combinaisons lineaires, ce sont les composantes
 - On remarque sur la première figure que la 1ère composante possède plus de 98% des données. 
-- Sur la 2ème figure, on remarque que "Petal Length" et Petal Width sont fortement correllés, cependant, "Sepal width" est n'es pas du tout corréllé avec le reste des variables
+- Sur la 2ème figure, on remarque que "Petal Length" et Petal Width sont fortement correllés, cependant, "Sepal width" n'est pas du tout corréllé avec le reste des variables
 - La longueur des fleches représente la taille des variables.
 
 ***
