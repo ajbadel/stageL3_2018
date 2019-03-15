@@ -25,11 +25,13 @@ install.packages("ggvis")
 set.seed(1)
 ```
 
-```{r}
+```{r, message = 'hide'}
 library("revealjs")
 #library("caret")
 library("e1071")
 #library ("ggvis")
+library("GGally")
+library("RColorBrewer")
 ```
 
 ```{r}
@@ -37,13 +39,15 @@ setwd(".")
 data(iris)
 ```
 
-```{r, eval = F}
-summary(iris)
-```
-
-
 ##Jeu de données
 
+Résumé des données
+```{r, eval}
+par(mfrow = c(1,2))
+summary(iris)
+head(iris)
+```
+***
 Les données que nous allons utiliser sont les mesures effectués sur les iris de Fisher.
 Il y a **3** **especes** d'iris :
 
@@ -55,28 +59,48 @@ La longueur et la largeur des pétales et sépales ont été mesurés sur 50 ind
 
 ##Visualisons graphiquement les données (data exploration)
 
-##Répartition des individus selon la taille des sépales
-
-```{r, comment="", fig.align = "center", fig.cap = "Plot"}
+***
+```{r, comment="", fig.align = "center", fig.cap = "Plot", eval = F}
 plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, xlab = "Longueur des sépales", ylab = "Largeur des sépales")
 ```
 
-##Répartition des individus selon la taille des pétales
-
-```{r, fig.align="center", fig.cap = "Plot"}
+```{r, fig.align="center", fig.cap = "Plot", eval = F}
 plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species)
 ```
 
+###Répartition des individus selon la taille des pétales et la taille des sépales 
+
 ***
-##Répartition des individus selon la taille des pétales et la taille des sépales (cmdscale)
-```{r}
-plot(cmdscale(dist(iris [,-5])), col= as.integer(iris[,5]))
+Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
+```{r, fig.align = "center"}
+iris.cmd = cmdscale(dist(iris [,-5]))
+plot(iris.cmd, col = iris$Species)
+```
+***
+Visualisation des données grâce à une analyse des principaux composants
+
+```{r, fig.align = "center"}
+iris.acp <- prcomp(as.matrix(iris[,1:4]))
+plot(iris.acp)
+biplot(iris.acp)
 ```
 
+***
+Visualisation globale des données
+```{r, message = F}
+par(mfrow=c(1,1))
+GGally::ggpairs(iris, mapping = aes(color = Species))
+```
 
 ***
-On remarque que les individus d'une espece sont très differents des deux autres espèces.
-Les setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
+- Representation de la densité de probabilité pour les 4 variables quantitatives en fonction des especes et d'un barplot pour la variables qualitative montrant le nombre d'individus dans chaque classe.
+- Representation des plots de variables en fonction des autres
+- Representation des histogrammes pour chaque espece en fonction de la variable
+- Representation des boxplot des variables pour chaque espece
+- Representation de la correlation entre les variables quantitatives
+
+***
+On remarque que certains individus de l'espece setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
 
 ***
 Notre but est de créer un modèle qui puisse déterminer à quelle espèce appartient l'individu testé grace aux donnée sur la taille des pétales et la taille des sépales.
@@ -132,6 +156,36 @@ pred2 = predict(modelref, iris)
 tab = table(predit = pred2, observe = iris$Species)
 tab
 ```
+
+***
+Spécificité et sensibilité
+```{r}
+tx.bon <- function(table) {
+  return(sum(diag(table)) / sum(table))
+}
+
+tx.erreur <- function(table) {
+  acc <- (sum(diag(table)) / sum(table))
+  return(1 - acc)
+}
+
+sensibilite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[1,1] / (table[1,1] + table[2,1]))
+  } else {
+    return(NA)
+  }
+}
+
+specificite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[2,2] / (table[2,2] + table[1,2]))
+  } else {
+    return(NA)
+  }
+}
+```
+
 
 ***
 On remarque que les deux modèles font des erreurs de classifications. Même avec les données  C'est peut être dû au noyau qui est lineaire.

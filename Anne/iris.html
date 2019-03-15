@@ -11,7 +11,7 @@
 
 <meta name="author" content="Anne Badel" />
 
-<meta name="date" content="2019-03-11" />
+<meta name="date" content="2019-03-15" />
 
 <title>Les Iris</title>
 
@@ -359,7 +359,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Les Iris</h1>
 <h4 class="author"><em>Anne Badel</em></h4>
-<h4 class="date"><em>2019-03-11</em></h4>
+<h4 class="date"><em>2019-03-15</em></h4>
 
 </div>
 
@@ -566,7 +566,7 @@ Parameters:
 
 Number of Support Vectors:  34
 
- ( 4 15 15 )
+ ( 3 15 16 )
 
 
 Number of Classes:  3 
@@ -579,13 +579,13 @@ Levels:
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">iris.svm<span class="op">$</span>tot.nSV</code></pre></div>
 <pre><code>[1] 34</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(iris.svm<span class="op">$</span>coefs)</code></pre></div>
-<pre><code>           [,1]       [,2]
-[1,] 0.74262214 0.07026074
-[2,] 0.79950254 0.90110947
-[3,] 0.08762759 0.23237116
-[4,] 0.07172150 0.75869922
-[5,] 0.00000000 1.00000000
-[6,] 0.00000000 1.00000000</code></pre>
+<pre><code>            [,1]      [,2]
+[1,]  1.00000000 0.9588012
+[2,]  0.72106774 0.0000000
+[3,]  0.44436228 0.9390177
+[4,]  0.00000000 1.0000000
+[5,] -1.00000000 0.0000000
+[6,] -0.05315862 1.0000000</code></pre>
 <p>Les vecteurs supports représentent 0.2266667 du nombre total d’individus.</p>
 </div>
 </div>
@@ -623,21 +623,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">34</td>
+<td align="right">37</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">38</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">28</td>
+<td align="right">1</td>
+<td align="right">30</td>
 </tr>
 </tbody>
 </table>
@@ -656,11 +656,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app)</code></p
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">1</td>
+<td align="right">0.99</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0</td>
+<td align="right">0.01</td>
 </tr>
 </tbody>
 </table>
@@ -715,21 +715,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.val.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">16</td>
+<td align="right">13</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">11</td>
-<td align="right">3</td>
+<td align="right">15</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">1</td>
-<td align="right">19</td>
+<td align="right">2</td>
+<td align="right">20</td>
 </tr>
 </tbody>
 </table>
@@ -748,11 +748,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.val)</code></p
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.92</td>
+<td align="right">0.96</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.08</td>
+<td align="right">0.04</td>
 </tr>
 </tbody>
 </table>
@@ -780,7 +780,7 @@ Parameters:
 
 Number of Support Vectors:  34
 
- ( 4 15 15 )
+ ( 3 15 16 )
 
 
 Number of Classes:  3 
@@ -807,9 +807,9 @@ Parameters:
        cost:  1 
       gamma:  0.25 
 
-Number of Support Vectors:  19
+Number of Support Vectors:  20
 
- ( 1 9 9 )
+ ( 2 9 9 )
 
 
 Number of Classes:  3 
@@ -838,9 +838,9 @@ Parameters:
       gamma:  0.25 
      coef.0:  0 
 
-Number of Support Vectors:  11
+Number of Support Vectors:  9
 
- ( 4 3 4 )
+ ( 2 3 4 )
 
 
 Number of Classes:  3 
@@ -868,9 +868,9 @@ Parameters:
       gamma:  0.25 
      coef.0:  0 
 
-Number of Support Vectors:  99
+Number of Support Vectors:  96
 
- ( 34 28 37 )
+ ( 33 33 30 )
 
 
 Number of Classes:  3 
@@ -893,21 +893,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf.radia
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">34</td>
+<td align="right">37</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">38</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">28</td>
+<td align="right">1</td>
+<td align="right">30</td>
 </tr>
 </tbody>
 </table>
@@ -932,11 +932,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.radial)</c
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">1</td>
+<td align="right">0.99</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0</td>
+<td align="right">0.01</td>
 </tr>
 </tbody>
 </table>
@@ -953,21 +953,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.radial)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">34</td>
+<td align="right">37</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">38</td>
+<td align="right">32</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
-<td align="right">0</td>
-<td align="right">28</td>
+<td align="right">1</td>
+<td align="right">30</td>
 </tr>
 </tbody>
 </table>
@@ -986,11 +986,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">1</td>
+<td align="right">0.99</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0</td>
+<td align="right">0.01</td>
 </tr>
 </tbody>
 </table>
@@ -1007,21 +1007,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.linear)</c
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">34</td>
+<td align="right">37</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">38</td>
+<td align="right">33</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">28</td>
+<td align="right">30</td>
 </tr>
 </tbody>
 </table>
@@ -1061,15 +1061,15 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.poly)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
+<td align="right">37</td>
+<td align="right">33</td>
+<td align="right">30</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
-<td align="right">34</td>
-<td align="right">38</td>
-<td align="right">28</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
@@ -1094,11 +1094,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.app.sig)</code
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.38</td>
+<td align="right">0.37</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.62</td>
+<td align="right">0.63</td>
 </tr>
 </tbody>
 </table>
@@ -1126,41 +1126,41 @@ Parameter tuning of &#39;svm&#39;:
 
 - Detailed performance results:
      gamma cost error dispersion
-1  0.03125 0.25  0.24 0.18378732
-2  0.06250 0.25  0.14 0.11737878
-3  0.12500 0.25  0.12 0.07888106
-4  0.25000 0.25  0.06 0.06992059
-5  0.50000 0.25  0.05 0.07071068
-6  1.00000 0.25  0.07 0.06749486
-7  2.00000 0.25  0.07 0.06749486
-8  0.03125 0.50  0.11 0.11005049
-9  0.06250 0.50  0.10 0.08164966
-10 0.12500 0.50  0.04 0.06992059
-11 0.25000 0.50  0.04 0.06992059
-12 0.50000 0.50  0.04 0.05163978
+1  0.03125 0.25  0.17 0.14181365
+2  0.06250 0.25  0.11 0.09944289
+3  0.12500 0.25  0.09 0.11005049
+4  0.25000 0.25  0.07 0.08232726
+5  0.50000 0.25  0.08 0.09189366
+6  1.00000 0.25  0.06 0.09660918
+7  2.00000 0.25  0.11 0.11005049
+8  0.03125 0.50  0.11 0.09944289
+9  0.06250 0.50  0.08 0.10327956
+10 0.12500 0.50  0.08 0.09189366
+11 0.25000 0.50  0.06 0.09660918
+12 0.50000 0.50  0.04 0.06992059
 13 1.00000 0.50  0.05 0.07071068
-14 2.00000 0.50  0.06 0.06992059
-15 0.03125 1.00  0.08 0.07888106
-16 0.06250 1.00  0.03 0.06749486
-17 0.12500 1.00  0.04 0.06992059
+14 2.00000 0.50  0.08 0.09189366
+15 0.03125 1.00  0.07 0.09486833
+16 0.06250 1.00  0.05 0.09718253
+17 0.12500 1.00  0.03 0.06749486
 18 0.25000 1.00  0.02 0.04216370
-19 0.50000 1.00  0.03 0.04830459
-20 1.00000 1.00  0.03 0.04830459
-21 2.00000 1.00  0.06 0.05163978
-22 0.03125 2.00  0.03 0.06749486
-23 0.06250 2.00  0.04 0.05163978
+19 0.50000 1.00  0.04 0.06992059
+20 1.00000 1.00  0.05 0.07071068
+21 2.00000 1.00  0.07 0.08232726
+22 0.03125 2.00  0.04 0.09660918
+23 0.06250 2.00  0.03 0.06749486
 24 0.12500 2.00  0.02 0.04216370
-25 0.25000 2.00  0.02 0.04216370
-26 0.50000 2.00  0.03 0.04830459
-27 1.00000 2.00  0.03 0.04830459
-28 2.00000 2.00  0.06 0.05163978
-29 0.03125 4.00  0.03 0.04830459
-30 0.06250 4.00  0.03 0.04830459
-31 0.12500 4.00  0.02 0.04216370
-32 0.25000 4.00  0.02 0.04216370
-33 0.50000 4.00  0.03 0.04830459
-34 1.00000 4.00  0.03 0.04830459
-35 2.00000 4.00  0.04 0.05163978</code></pre>
+25 0.25000 2.00  0.03 0.04830459
+26 0.50000 2.00  0.04 0.06992059
+27 1.00000 2.00  0.05 0.07071068
+28 2.00000 2.00  0.07 0.08232726
+29 0.03125 4.00  0.03 0.06749486
+30 0.06250 4.00  0.02 0.04216370
+31 0.12500 4.00  0.03 0.04830459
+32 0.25000 4.00  0.04 0.06992059
+33 0.50000 4.00  0.04 0.06992059
+34 1.00000 4.00  0.06 0.08432740
+35 2.00000 4.00  0.08 0.07888106</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(iris.app.tune)</code></pre></div>
 <p><img src="figures/iris_svm.tune-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
@@ -1183,18 +1183,18 @@ Parameter tuning of &#39;svm&#39;:
 iris.nn &lt;-<span class="st"> </span>nnet<span class="op">::</span><span class="kw">nnet</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris, <span class="dt">subset =</span> ind.app,
                       <span class="dt">size =</span> <span class="dv">1</span>)</code></pre></div>
 <pre><code># weights:  11
-initial  value 114.412861 
-iter  10 value 92.494199
-iter  20 value 48.608629
-iter  30 value 26.733573
-iter  40 value 5.451792
-iter  50 value 1.742605
-iter  60 value 1.311541
-iter  70 value 1.182000
-iter  80 value 1.144920
-iter  90 value 1.017045
-iter 100 value 0.637177
-final  value 0.637177 
+initial  value 112.632494 
+iter  10 value 45.699172
+iter  20 value 35.322326
+iter  30 value 14.910283
+iter  40 value 4.170712
+iter  50 value 2.089472
+iter  60 value 0.378128
+iter  70 value 0.002402
+iter  80 value 0.002310
+iter  90 value 0.001941
+iter 100 value 0.001775
+final  value 0.001775 
 stopped after 100 iterations</code></pre>
 </div>
 <div id="resume-du-modele-1" class="section level4">
@@ -1202,14 +1202,14 @@ stopped after 100 iterations</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(iris.nn)</code></pre></div>
 <pre><code>a 4-1-3 network with 11 weights
 options were - softmax modelling 
- b-&gt;h1 i1-&gt;h1 i2-&gt;h1 i3-&gt;h1 i4-&gt;h1 
- -5.19  -0.66  -0.68   2.17   1.22 
- b-&gt;o1 h1-&gt;o1 
- 32.73 -90.15 
- b-&gt;o2 h1-&gt;o2 
- 24.91  -5.81 
- b-&gt;o3 h1-&gt;o3 
--57.99  95.34 </code></pre>
+  b-&gt;h1  i1-&gt;h1  i2-&gt;h1  i3-&gt;h1  i4-&gt;h1 
+   3.92    0.28    1.50   -1.12   -3.53 
+  b-&gt;o1  h1-&gt;o1 
+-135.45  239.55 
+  b-&gt;o2  h1-&gt;o2 
+  32.98   58.75 
+  b-&gt;o3  h1-&gt;o3 
+ 101.14 -297.66 </code></pre>
 </div>
 <div id="tables-de-confusion-et-performances-du-modele-1" class="section level4">
 <h4><span class="header-section-number">2.3.1.3</span> Tables de confusion et performances du modèle</h4>
@@ -1230,21 +1230,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.app.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">34</td>
+<td align="right">37</td>
 <td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">38</td>
+<td align="right">33</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">28</td>
+<td align="right">30</td>
 </tr>
 </tbody>
 </table>
@@ -1289,21 +1289,21 @@ knitr<span class="op">::</span><span class="kw">kable</span>(iris.val.conf)</cod
 <tbody>
 <tr class="odd">
 <td>setosa</td>
-<td align="right">16</td>
-<td align="right">1</td>
+<td align="right">13</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td>versicolor</td>
 <td align="right">0</td>
-<td align="right">10</td>
-<td align="right">2</td>
+<td align="right">16</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td>virginica</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">20</td>
+<td align="right">19</td>
 </tr>
 </tbody>
 </table>
@@ -1322,11 +1322,11 @@ knitr<span class="op">::</span><span class="kw">kable</span>(perf.val)</code></p
 <tbody>
 <tr class="odd">
 <td>accuracy</td>
-<td align="right">0.92</td>
+<td align="right">0.96</td>
 </tr>
 <tr class="even">
 <td>erreur</td>
-<td align="right">0.08</td>
+<td align="right">0.04</td>
 </tr>
 </tbody>
 </table>
@@ -1381,14 +1381,14 @@ Parameter tuning of &#39;nnet&#39;:
  size
     4
 
-- best performance: 0.08 
+- best performance: 0.078 
 
 - Detailed performance results:
   size error dispersion
-1    1 0.258 0.14374360
-2    2 0.156 0.12642081
-3    3 0.098 0.08612652
-4    4 0.080 0.07180220</code></pre>
+1    1 0.200 0.08844333
+2    2 0.176 0.13125040
+3    3 0.124 0.13558105
+4    4 0.078 0.09681598</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">best.iris.nn &lt;-<span class="st"> </span><span class="kw">best.nnet</span>(Species <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> iris.app, <span class="dt">validation.x =</span> iris.val,
                      <span class="dt">size =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dt">sampling =</span> <span class="st">&quot;fix&quot;</span>)</code></pre></div>
 </div>

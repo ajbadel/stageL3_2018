@@ -19,7 +19,7 @@ output:
 library(GGally)
 library(RColorBrewer)
 library(e1071)
-library(knitr)
+#library(knitr)
 library(nnet)
 
 ## Location of the shared folder on the current install
