@@ -22,6 +22,8 @@ install.packages("revealjs")
 install.packages("caret")
 install.packages("e1071")
 install.packages("ggvis")
+install.packages("GGally")
+install.packages("ggplot2")
 set.seed(1)
 ```
 
@@ -32,6 +34,7 @@ library("e1071")
 #library ("ggvis")
 library("GGally")
 library("RColorBrewer")
+library("ggplot2")
 ```
 
 ```{r}
@@ -58,8 +61,6 @@ Il y a **3** **especes** d'iris :
 La longueur et la largeur des pétales et sépales ont été mesurés sur 50 individus de chaque espèce.
 
 ##Visualisons graphiquement les données (data exploration)
-
-***
 ```{r, comment="", fig.align = "center", fig.cap = "Plot", eval = F}
 plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, xlab = "Longueur des sépales", ylab = "Largeur des sépales")
 ```
@@ -76,14 +77,21 @@ Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
 iris.cmd = cmdscale(dist(iris [,-5]))
 plot(iris.cmd, col = iris$Species)
 ```
+
 ***
 Visualisation des données grâce à une analyse des principaux composants
-
 ```{r, fig.align = "center"}
+#par(mfrow = c(1,2))
 iris.acp <- prcomp(as.matrix(iris[,1:4]))
-plot(iris.acp)
+#plot(iris.acp)
 biplot(iris.acp)
 ```
+
+***
+- Le but de cet analyse est de réduire le nombre de variables à un nombre limité de combinaisons lineaires, ce sont les composantes
+- On remarque sur la première figure que la 1ère composante possède plus de 98% des données. 
+- Sur la 2ème figure, on remarque que "Petal Length" et Petal Width sont fortement correllés, cependant, "Sepal width" est n'es pas du tout corréllé avec le reste des variables
+- La longueur des fleches représente la taille des variables.
 
 ***
 Visualisation globale des données
@@ -100,7 +108,8 @@ GGally::ggpairs(iris, mapping = aes(color = Species))
 - Representation de la correlation entre les variables quantitatives
 
 ***
-On remarque que certains individus de l'espece setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
+- On remarque que la variable "Sepal width" n'est pas corrélée avec les autres variables.
+- On remarque également grâce aux histogrammes et boxplots que certains individus de l'espece setosas ont des tailles de pétales et de sépales très différentes par rapport aux autres espèces.
 
 ***
 Notre but est de créer un modèle qui puisse déterminer à quelle espèce appartient l'individu testé grace aux donnée sur la taille des pétales et la taille des sépales.
