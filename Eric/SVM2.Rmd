@@ -57,8 +57,11 @@ biplot(donnee.acp)
 ```
 ***
 Visualisation globale des données
-```{r, message = F}
+```{r, message = F, eval = F}
 par(mfrow=c(1,1))
 GGally::ggpairs(donnee, mapping = aes(color = Species), cardinality_threshold = 15)
 ```
+
+
+
 
