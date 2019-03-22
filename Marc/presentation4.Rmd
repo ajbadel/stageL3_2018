@@ -71,7 +71,7 @@ err = function (resultats) {
 # La fonction sensibilité
 sens = function (resultats) {
   if (nrow(resultats) >= 2) {
-    return(resultats[1,1] / (resultats[1,1] + resultats[2,1]))
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
   } else {
     return(NA)
   }
@@ -80,7 +80,7 @@ sens = function (resultats) {
 # La fonction spécifité
 spec = function (resultats) {
   if (nrow(resultats) >= 2) {
-    return(resultats[2,2] /(resultats[1,2] + resultats[2,2]))
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
   } else {
     return(NA)
   }
@@ -315,7 +315,7 @@ kable(data.frame(Paramètres, Valeurs))
 
 SETOSA  
 ```{r}
-reseau2 = neuralnet(Species == "setosa","versicolor","virginica" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
+reseau2 = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
 iris.app.prob.setosa <- prediction.2.seto[,2]
 iris.app.setosa <- iris.app$Species == "setosa"
 seuil <- seq(0, 1, length.out = 100)
@@ -325,6 +325,23 @@ for (i in 1:100) {
   iris.pred <- iris.app.prob.setosa >= seuil[i]
   vsens[i] <- sens(table(iris.pred, iris.app.setosa))
   vspe[i] <- spec(table(iris.pred, iris.app.setosa))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+```
+
+SETOSA  
+```{r}
+reseau2 = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
+iris.app.prob.versicolor <- prediction.2.seto[,2]
+iris.app.versicolor <- as.numeric(iris.app$Species == "versicolor")
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:90) {
+  iris.pred <- as.numeric(iris.app.prob.versicolor >= seuil[i])
+  vsens[i] <- sens(table(iris.pred, iris.app.versicolor))
+  vspe[i] <- spec(table(iris.pred, iris.app.versicolor))
 }
 plot(1-vspe, vsens, type = "l", col = "red",
      xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
