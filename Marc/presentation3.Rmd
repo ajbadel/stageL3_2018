@@ -9,7 +9,7 @@ output:
     theme: league
     transition: zoom
 ---
-# Neuron Network {data-background="pikachu.png"}
+# Neuron Network {data-background="neurone.png"}
 
 ```{r message = FALSE}
 library(neuralnet)
@@ -52,7 +52,7 @@ err = function (resultats) {
 # La fonction sensibilité
 sens = function (resultats) {
   if (nrow(resultats) >= 2) {
-    return(resultats[1,1] / (resultats[1,1] + resultats[2,1]))
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
   } else {
     return(NA)
   }
@@ -61,7 +61,7 @@ sens = function (resultats) {
 # La fonction spécifité
 spec = function (resultats) {
   if (nrow(resultats) >= 2) {
-    return(resultats[2,2] /(resultats[1,2] + resultats[2,2]))
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
   } else {
     return(NA)
   }
@@ -69,7 +69,7 @@ spec = function (resultats) {
 
 # La fonction F1_Score
 scor = function (resultats) {
-  return((2 * resultats[1,1]) / (2 * resultats[1,1] + resultats[1,2] + resultats[2,1]))
+  return((2 * resultats[2,2]) / (2 * resultats[2,2] + resultats[1,2] + resultats[2,1]))
 }
 
 # La fonction ccm
@@ -121,6 +121,14 @@ for (i in 1:4) {
 par(mfrow=c(1,1))
 ```
 
+## ACP
+
+```{r}
+iris.acp <- prcomp(as.matrix(iris[,1:4]))
+plot(iris.acp)
+biplot(iris.acp)
+```
+
 ```{r}
 seto = as.numeric(iris$Species == "setosa")
 versi = as.numeric(iris$Species == "versicolor")
@@ -142,17 +150,17 @@ resultat_matrice1 <- as.data.frame(reseau1$result.matrix)
 ```
 
 # Prediction
-```{r}
+```{r, results = 'hide'}
 set.seed(245)
 ind.app <- sample(1:nrow(iris), 100)
 iris.app <- iris[ind.app,]
 iris.test <- iris[-ind.app,]
+iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app, size = 1)
 ```
 
 ## Prédiction dans l'échantillon d'apprentissage
-```{r, results = 'hide'}
+```{r}
 set.seed(245)
-iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app, size = 1)
 prediction = predict(iris.nn, newdata = iris.app, type = "class")
 confiance <- table(prediction, iris.app$Species, dnn = c("predit", "observe"))
 knitr::kable(confiance)
@@ -163,27 +171,32 @@ names(perf.app) <- c("accuracy", "erreur")
 knitr::kable(perf.app)
 ```
 
-## Prédiction Prédiction dans l'échantillon test
-```{r, results = 'hide'}
+## Prédiction dans l'échantillon test
+```{r}
 set.seed(245)
-prediction = predict(iris.nn, newdata = iris.test, type = "class")
-confiance <- table(prediction, iris.test$Species, dnn = c("predit", "observe"))
-knitr::kable(confiance)
-acc.app <- acc(confiance)
-err.app <- err(confiance)
-perf.app <- c(acc.app, err.app)
-names(perf.app) <- c("accuracy", "erreur")
-knitr::kable(perf.app)
+prediction2 = predict(iris.nn, newdata = iris.test, type = "class")
+confiance2 <- table(prediction2, iris.test$Species, dnn = c("predit", "observe"))
+knitr::kable(confiance2)
+acc.test <- acc(confiance2)
+err.test <- err(confiance2)
+perf.test <- c(acc.test, err.test)
+names(perf.test) <- c("accuracy", "erreur")
+knitr::kable(perf.test)
 ```
 
-### Matrice de confusion
+## Tableau de confusion
 ```{r}
-matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
+matrice_confusion.ex = data.frame(Prediction_Negative = c("True Negative (TN)", "False Negative (FN)"), Prediction_Positive = c("False Positive (FP)", "True Positive (TP)"), row.names = c("Observe_Negative","Observe_Positive"))
 kable(matrice_confusion.ex)
 
-#predit = predict(iris.nn, newdata = iris.app)
-predit = predict(iris.nn, newdata = iris)
-observe = data.iris[,c(5:7)]
+predit = predict(iris.nn, newdata = iris.app)
+#predit = predict(iris.nn, newdata = iris)
+
+seto.app = as.numeric(iris.app$Species == "setosa")
+versi.app = as.numeric(iris.app$Species == "versicolor")
+virgi.app = as.numeric(iris.app$Species == "virginica")
+data.iris.app = data.frame(iris.app[,c(1:4)], seto.app, versi.app, virgi.app)
+observe = data.iris.app[,c(5:7)]
 
 # La fonction pour la matrice de confusion
 matrice_confusion = function (observation, prediction) {

@@ -1,15 +1,128 @@
-# Projet
-
 ---
-title: "NN"
-Nom : "Marc"
-Date : 20 Janvier 2019"
-output: html_document
+title: "NNET PRESENTATION"
+author: "Marc XU"
+date: "-- mars 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
 ---
+# Neuron Network 
 
-## R Markdown
+```{r message = FALSE}
+#{data-background="neurone.png"}
+library("neuralnet")
+library("nnet")
+library("mclust")
+library("caret")
+library("ROCR")
+library("knitr")
+library("GGally")
+library("MLmetrics") # calcul de F1.Score
+library("mltools") # calcul du coeff de correl. de Matthiew
 
-```{r setup, include=FALSE}}
-donnees = read.csv("C:/Users/Marc/Desktop/Github/stageL3_2018/data/donnees.csv")
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = FALSE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
+```
 
+```{r}
+setwd("../Marc")
+getwd()
+placenta = read.table(".././data/placenta90.138.txt", dec = ".", sep = "\t", header =TRUE)
+```
+
+```{r}
+# Les fonctions
+
+# La fonction accuracy
+acc = function (resultats) {
+  return(sum(diag(resultats)) / sum(resultats))
+}
+
+# La fonction erreur
+err = function (resultats) {
+  return(1 - (sum(diag(resultats)) / sum(resultats)))
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  return((2 * resultats[2,2]) / (2 * resultats[2,2] + resultats[1,2] + resultats[2,1]))
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
+}
+```
+
+```{r}
+table(placenta$CI)
+```
+
+# Données PLACENTA
+
+## Les données PLACENTA
+
+```{r}
+kable(head(placenta[,c(1:5)]))
+```
+
+## Résumés des données
+```{r}
+summary(placenta[,c(1:5)])
+```
+
+## Visualisation des données (plot)
+```{r}
+placenta.dist <- dist(placenta[,2:nrow(placenta)])
+placenta.mds <- cmdscale(placenta.dist)
+plot(placenta.mds, col = placenta$Noms)
+```
+
+## Visualisation des données (boxplot)
+
+## Visualisation des données (histogramme)
+
+
+## ACP
+```{r}
+placenta.acp <- prcomp(as.matrix(placenta[,2:nrow(placenta)]))
+plot(placenta.acp)
+biplot(placenta.acp)
+```
+
+```{r}
+placenta$CI_groupe = ifelse(placenta$CI <= 0.5, "petitCI",
+       ifelse(placenta$CI < 1, "moyenCI", "grandCI"))
+donnees_poissons[,6] = ifelse(donnees_poissons$Age <= 10, "jeune", "vieux")
+```
 
