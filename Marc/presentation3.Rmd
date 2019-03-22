@@ -1,5 +1,5 @@
 ---
-title: "Presentation 3"
+title: "NNET Presentation 3"
 author: "Marc XU"
 date: "1 mars 2019"
 output:
@@ -18,6 +18,7 @@ library(mclust)
 library(caret)
 library(ROCR)
 library(knitr)
+library(e1071)
 library(MLmetrics) # calcul de F1.Score
 library(mltools) # calcul du coeff de correl. de Matthiew
 
@@ -34,8 +35,50 @@ knitr::opts_chunk$set(
   comment = "")
 ```
 
-```{r echo = FALSE}
-set.seed(245)
+
+```{r}
+# Les fonctions
+
+# La fonction accuracy
+acc = function (resultats) {
+  return(sum(diag(resultats)) / sum(resultats))
+}
+
+# La fonction erreur
+err = function (resultats) {
+  return(1 - (sum(diag(resultats)) / sum(resultats)))
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[1,1] / (resultats[1,1] + resultats[2,1]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[2,2] /(resultats[1,2] + resultats[2,2]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  return((2 * resultats[1,1]) / (2 * resultats[1,1] + resultats[1,2] + resultats[2,1]))
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
+}
+```
+
+```{r}
 table(iris$Species)
 ```
 # Données IRIS
@@ -43,12 +86,12 @@ table(iris$Species)
 ## Les données IRIS
 
 ```{r}
-head(iris)
+data("iris")
+kable(head(iris))
 ```
 
 ## Résumés des données
 ```{r}
-data("iris")
 summary(iris)
 ```
 
@@ -79,8 +122,6 @@ par(mfrow=c(1,1))
 ```
 
 ```{r}
-set.seed(24)
-
 seto = as.numeric(iris$Species == "setosa")
 versi = as.numeric(iris$Species == "versicolor")
 virgi = as.numeric(iris$Species == "virginica")
@@ -94,40 +135,60 @@ data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
 ```
 
 ```{r}
-set.seed(24)
+set.seed(245)
 formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
-
 reseau1 = neuralnet(formule, data = data.iris, hidden = c(1,1))
 resultat_matrice1 <- as.data.frame(reseau1$result.matrix)
 ```
 
 # Prediction
-```{r, results = 'hide'}
-set.seed(24)
+```{r}
+set.seed(245)
 ind.app <- sample(1:nrow(iris), 100)
 iris.app <- iris[ind.app,]
 iris.test <- iris[-ind.app,]
-iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app,
-                      size = 1)
-temp_train <- subset(iris, select = c(1:4))
-prediction = predict(iris.nn, iris)
 ```
 
-## 
+## Prédiction dans l'échantillon d'apprentissage
+```{r, results = 'hide'}
+set.seed(245)
+iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app, size = 1)
+prediction = predict(iris.nn, newdata = iris.app, type = "class")
+confiance <- table(prediction, iris.app$Species, dnn = c("predit", "observe"))
+knitr::kable(confiance)
+acc.app <- acc(confiance)
+err.app <- err(confiance)
+perf.app <- c(acc.app, err.app)
+names(perf.app) <- c("accuracy", "erreur")
+knitr::kable(perf.app)
+```
+
+## Prédiction Prédiction dans l'échantillon test
+```{r, results = 'hide'}
+set.seed(245)
+prediction = predict(iris.nn, newdata = iris.test, type = "class")
+confiance <- table(prediction, iris.test$Species, dnn = c("predit", "observe"))
+knitr::kable(confiance)
+acc.app <- acc(confiance)
+err.app <- err(confiance)
+perf.app <- c(acc.app, err.app)
+names(perf.app) <- c("accuracy", "erreur")
+knitr::kable(perf.app)
+```
 
 ### Matrice de confusion
 ```{r}
 matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
 kable(matrice_confusion.ex)
 
-predit = prediction
+#predit = predict(iris.nn, newdata = iris.app)
+predit = predict(iris.nn, newdata = iris)
 observe = data.iris[,c(5:7)]
 
 # La fonction pour la matrice de confusion
 matrice_confusion = function (observation, prediction) {
-  resultats1 = sapply(X = data.frame(observe = observation,
-                                     predit = prediction),
-                      FUN = round, digits=1)
+  resultats1 = sapply(X = data.frame(observe = observation, predit = prediction),
+                      FUN = round, digits=0)
   resultats.df = data.frame(resultats1)
   attach(resultats.df)
   table.resultat = table(
@@ -153,39 +214,6 @@ Coefficient de corrélation de Matthews : MCC =
 
 $\frac{TP*TN-FP*FN} {((TP+FP)(TP+FN)(TN+FP)(TN+FN))^{-1}}$
 
-```{r}
-# La fonction accuracy
-acc = function (resultats) {
-  acc_cal = (resultats[1,1] + resultats[2,2]) /
-    (resultats[1,1] + resultats[1,2] + resultats[2,1] + resultats[2,2])
-  return(acc_cal)
-}
-
-# La fonction sensibilité
-sens = function (resultats) {
-  sens_cal = resultats[1,1] / (resultats[1,1] + resultats[2,1])
-  return(sens_cal)
-}
-
-# La fonction spécifité
-spec = function (resultats) {
-  spec_cal = resultats[2,2] /(resultats[1,2] + resultats[2,2])
-  return(spec_cal)
-}
-
-# La fonction F1_Score
-scor = function (resultats) {
-  scor_cal = (2 * resultats[1,1]) / (2 * resultats[1,1] + resultats[1,2] + resultats[2,1])
-  return(scor_cal)
-}
-
-# La fonction ccm
-ccm1 = function (resultats) {
-  ccm1_cal = (resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1])))
-  return(ccm1_cal)
-}
-```
-
 # Le modèle SETOSA
 
 ## Le modèle SETOSA (1)
@@ -208,8 +236,9 @@ mcc.seto = mcc(actuals = resultats.df.seto$observe, preds = resultats.df.seto$pr
 ```
 
 ```{r, message = FALSE}
-Paramètres = c("Accurancy", "Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
+Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
 Valeurs.seto = c(acc(matrice_confusion(observe[,1], predit[,1])),
+                 err(matrice_confusion(observe[,1], predit[,1])),
                  sens(matrice_confusion(observe[,1], predit[,1])),
                  spec(matrice_confusion(observe[,1], predit[,1])),
                  scor(matrice_confusion(observe[,1], predit[,1])),
@@ -230,10 +259,11 @@ kable(matrice_confusion(observe[,2], predit[,2]))
 
 ```{r}
 Valeurs.versi = c(acc(matrice_confusion(observe[,2], predit[,2])),
-                 sens(matrice_confusion(observe[,2], predit[,2])),
-                 spec(matrice_confusion(observe[,2], predit[,2])),
-                 scor(matrice_confusion(observe[,2], predit[,2])),
-                 ccm1(matrice_confusion(observe[,2], predit[,2])))
+                  err(matrice_confusion(observe[,2], predit[,2])),
+                  sens(matrice_confusion(observe[,2], predit[,2])),
+                  spec(matrice_confusion(observe[,2], predit[,2])),
+                  scor(matrice_confusion(observe[,2], predit[,2])),
+                  ccm1(matrice_confusion(observe[,2], predit[,2])))
 kable(data.frame(Paramètres, Valeurs.versi))
 ```
 
@@ -250,43 +280,23 @@ kable(matrice_confusion(observe[,3], predit[,3]))
 
 ```{r}
 Valeurs.virgi = c(acc(matrice_confusion(observe[,3], predit[,3])),
-                 sens(matrice_confusion(observe[,3], predit[,3])),
-                 spec(matrice_confusion(observe[,3], predit[,3])),
-                 scor(matrice_confusion(observe[,3], predit[,3])),
-                 ccm1(matrice_confusion(observe[,3], predit[,3])))
+                  err(matrice_confusion(observe[,3], predit[,3])),
+                  sens(matrice_confusion(observe[,3], predit[,3])),
+                  spec(matrice_confusion(observe[,3], predit[,3])),
+                  scor(matrice_confusion(observe[,3], predit[,3])),
+                  ccm1(matrice_confusion(observe[,3], predit[,3])))
 kable(data.frame(Paramètres, Valeurs.virgi)) 
 ```
 
 # Courbe ROC
 
-```{r, eval = FALSE}
-roc1 = function (resultats) {
-  roc1_cal = 1 - (resultats[1,1] / (resultats[1,1] + resultats[2,2]))
-  return(roc1_cal)
-}
-
-roc2 = function (resultats) {
-  roc2_cal = 1 - (resultats[2,1] / (resultats[2,1] + resultats[2,1]))
-  return(roc2_cal)
-}
-```
-
 ```{r}
 prob = compute(reseau1, data.iris[, -c(5:7)])
 prob.result = prob$net.result
 
-rocfun = function (prob.result.entry, data.iris.entry) {
-  for (i in 1:10) {
-    pred[i] = prediction(prob.result.entry, data.iris.entry)
-    perf = performance(pred[i], "sens", "spec")
-    return(perf)
-  }
-}
-
 aucfun = function(prob.result.entry, data.iris.entry) {
   pred = prediction(prob.result.entry, data.iris.entry)
-  auc = performance(pred, "auc")@y.values[[1]]
-  return(auc)
+  return(performance(pred, "auc")@y.values[[1]])
 }
 ```
 
@@ -294,25 +304,53 @@ aucfun = function(prob.result.entry, data.iris.entry) {
 
 SETOSA  
 ```{r}
-perf.seto = rocfun(prob.result[,1], data.iris$seto)
-plot(perf.seto, colorize = TRUE, main = "ROC apprentissage")
-
+iris.app.prob.setosa <- iris.nn$fitted.values[, "setosa"]
+iris.app.setosa <- iris.app$Species == "setosa"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.setosa >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.setosa))
+  vspe[i] <- spec(table(iris.pred, iris.app.setosa))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
 ```
 
 ## Courbe ROC (2)
 
 VERSICOLOR
 ```{r}
-perf.versi = rocfun(prob.result[,2], data.iris$versi)
-plot(perf.versi, colorize = TRUE, main = "ROC apprentissage")
+iris.app.prob.versicolor <- iris.nn$fitted.values[, "versicolor"]
+iris.app.versicolor <- iris.app$Species == "versicolor"
+seuil <- seq(0, 1, length.out = 100) # Seuil de taille 10 avec un pas (de 1 à taille)
+vsens <- rep(NA, 100) # Pour les deux paramètres, création de deux vecteurs NA...
+vspe <- rep(NA, 100) # ...(correspondant à la taille du seuil)
+for (i in 1:100) {
+  iris.pred.versicolor <- iris.app.prob.versicolor >= seuil[i]
+  vsens[i] <- sens(table(iris.pred.versicolor, iris.app.versicolor))
+  vspe[i] <- spec(table(iris.pred.versicolor, iris.app.versicolor))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+
 ```
 
 ## Courbe ROC (3)
 
 VIRGINICA
 ```{r}
-perf.virgi = rocfun(prob.result[,3], data.iris$virgi)
-plot(perf.virgi, colorize = TRUE, main = "ROC apprentissage")
+iris.app.prob.virginica <- iris.nn$fitted.values[, "virginica"]
+iris.app.virginica <- iris.app$Species == "virginica"
+seuil <- seq(0, 1, length.out = 100) # Seuil de taille 10 avec un pas (de 1 à taille)
+vsens <- rep(NA, 100) # Pour les deux paramètres, création de deux vecteurs NA...
+vspe <- rep(NA, 100) # ...(correspondant à la taille du seuil)
+for (i in 1:100) {
+  iris.pred <- iris.app.prob.virginica >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.virginica))
+  vspe[i] <- spec(table(iris.pred, iris.app.virginica))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
 ```
 
 ## Valeurs AUC
@@ -325,7 +363,17 @@ Calcul_AUC = c(aucfun(prob.result[,1], data.iris$seto),
 kable(data.frame(Auc, Calcul_AUC))
 ```
 
+## Recherche des paramètres optimaux
+
+En laissant faire par la fonction `tune`
+```{r nn.tune}
+iris.nn.tune <- tune.nnet(Species ~ ., data = iris.app, validation.x = iris.val,
+                     size = 1:4, sampling = "fix")
+summary(iris.nn.tune)
+best.iris.nn <- best.nnet(Species ~ ., data = iris.app, validation.x = iris.val, size = 1:4, sampling = "fix")
+```
 # Bibliographie
 
 ## Sites consultés
 https://www.calvin.edu/~rpruim/courses/s341/S17/from-class/MathinRmd.html (formules mathématiques)
+
