@@ -14,7 +14,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 ```{r, eval=F}
@@ -22,8 +22,8 @@ install.packages("revealjs")
 install.packages("caret")
 install.packages("e1071")
 install.packages("ggvis")
-install.packages("GGally")
 install.packages("ggplot2")
+install.packages("GGally")
 set.seed(1)
 ```
 
@@ -35,6 +35,33 @@ library("e1071")
 library("GGally")
 library("RColorBrewer")
 library("ggplot2")
+```
+
+```{r fonctions}
+tx.bon <- function(table) {
+  return(sum(diag(table)) / sum(table))
+}
+
+tx.erreur <- function(table) {
+  acc <- (sum(diag(table)) / sum(table))
+  return(1 - acc)
+}
+
+sensibilite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[1,1] / (table[1,1] + table[2,1]))
+  } else {
+    return(NA)
+  }
+}
+
+specificite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[2,2] / (table[2,2] + table[1,2]))
+  } else {
+    return(NA)
+  }
+}
 ```
 
 ```{r}
@@ -67,9 +94,7 @@ plot(iris$Sepal.Length, iris$Sepal.Width, col = iris$Species, xlab = "Longueur d
 
 ```{r, fig.align="center", fig.cap = "Plot", eval = F}
 plot(iris$Petal.Length, iris$Petal.Width, col = iris$Species)
-```
-
-###Répartition des individus selon la taille des pétales et la taille des sépales 
+``` 
 
 ***
 Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
@@ -81,9 +106,9 @@ plot(iris.cmd, col = iris$Species)
 ***
 Visualisation des données grâce à une analyse des principaux composants
 ```{r, fig.align = "center"}
-#par(mfrow = c(1,2))
+par(mfrow = c(1,2))
 iris.acp <- prcomp(as.matrix(iris[,1:4]))
-#plot(iris.acp)
+plot(iris.acp)
 biplot(iris.acp)
 ```
 
@@ -117,7 +142,8 @@ Nous allons donc creer un **modèle test** qui sera optimisé grace à un **mod�
 
 ***
 Voici un modèle test 
-```{r, eval = F, fig.align="center"}
+```{r, fig.align="center"}
+set.seed (1000)
 ech = sample(150,100)
 column = c("Petal.Length", "Petal.Width", "Sepal.Length", "Sepal.Width", "Species")
 iris1 = iris[ech,column]
@@ -129,7 +155,7 @@ plot(modeltest, data = iris1,Petal.Width~Petal.Length, slice = list(Sepal.Width 
 
 ***
 Résumé du modele test:
-```{r, eval = F}
+```{r}
 summary(modeltest)
 ```
 
@@ -149,55 +175,33 @@ summary(modelref)
 
 ##Determination de la precision de prediction du modèle par observation d'une matrice de confusion (accuracy check)
 ***
-Comparaisons des résultats de prediction du modèle avec les données actuelles
-(Determination de la precision du modèle (accuracy check))
-
-```{r, eval = F, fig.align= "center"}
+Comparaisons des résultats de prediction du modèle test avec les données observées
+```{r, fig.align= "center"}
 pred = predict(modeltest, iris)
 tab = table(predit = pred, observe = iris$Species)
 tab
+acc.app.poly <- tx.bon(tab)
+err.app.poly <- tx.erreur(tab)
+perf.app.poly <- c(acc.app.poly, err.app.poly)
+names(perf.app.poly) <- c("accuracy", "erreur")
+knitr::kable(perf.app.poly)
 ```
 
 ***
-Comparaisons des résultats du modèle de référence avec les données observées
+Comparaisons des résultats de prédiction du modèle d'apprentissage avec les données observées
 ```{r}
 pred2 = predict(modelref, iris)
-tab = table(predit = pred2, observe = iris$Species)
-tab
+tab2 = table(predit = pred2, observe = iris$Species)
+tab2
+acc.app.poly <- tx.bon(tab2)
+err.app.poly <- tx.erreur(tab2)
+perf.app.poly <- c(acc.app.poly, err.app.poly)
+names(perf.app.poly) <- c("accuracy", "erreur")
+knitr::kable(perf.app.poly)
 ```
 
 ***
-Spécificité et sensibilité
-```{r}
-tx.bon <- function(table) {
-  return(sum(diag(table)) / sum(table))
-}
-
-tx.erreur <- function(table) {
-  acc <- (sum(diag(table)) / sum(table))
-  return(1 - acc)
-}
-
-sensibilite <- function(table) {
-  if (nrow(table) >= 2) {
-    return(table[1,1] / (table[1,1] + table[2,1]))
-  } else {
-    return(NA)
-  }
-}
-
-specificite <- function(table) {
-  if (nrow(table) >= 2) {
-    return(table[2,2] / (table[2,2] + table[1,2]))
-  } else {
-    return(NA)
-  }
-}
-```
-
-
-***
-On remarque que les deux modèles font des erreurs de classifications. Même avec les données  C'est peut être dû au noyau qui est lineaire.
+On remarque que nos 2 modèles font très peu d'erreurs de classifications. 
 
 ##Tuning et optimisation du modèle
 
