@@ -36,6 +36,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
+set.seed(245)
 matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
 
 #predit = predict(iris.nn, newdata = iris.test)
@@ -98,7 +99,6 @@ ccm1 = function (resultats) {
 ```
 
 ```{r}
-set.seed(245)
 table(iris$Species)
 ```
 # Données IRIS
@@ -183,44 +183,59 @@ perfection2 = function(matrice) {
 }
 ```
 
+```{r}
+formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
+reseau1 = neuralnet(formule, data = data.iris, hidden = c(1,1))
+
+predire = predict(reseau1, newdata = iris.app, type = "class")
+confiance.seto <- table(predire[,1], iris.app$Species, dnn = c("predit", "observe"))
+confiance.versi <- table(predire[,2], iris.app$Species, dnn = c("predit", "observe"))
+confiance.virgi <- table(predire[,3], iris.app$Species, dnn = c("predit", "observe"))
+
+knitr::kable(confiance.seto)
+knitr::kable(confiance.versi)
+knitr::kable(confiance.virgi)
+
+```
+
 ## Prédiction dans l'échantillon d'apprentissage
 ```{r}
 reseau2.seto.app = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.seto = prediction2(reseau2.seto.app)
-matrice = matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])
-kable(matrice)
-kable(perfection2(matrice))
+prediction.2.seto.app = prediction2(reseau2.seto.app)
+matrice.seto.app = matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])
+knitr::kable(matrice.seto.app)
+knitr::kable(perfection2(matrice.seto.app))
 ```
 
 ## Les taux (échantillon d'apprentissage)
 ```{r}
 Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
-Valeurs = c(acc(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            err(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            sens(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            spec(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            scor(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            ccm1(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])))
+Valeurs = c(acc(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])),
+            err(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])),
+            sens(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])),
+            spec(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])),
+            scor(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])),
+            ccm1(matrice_confusion(prediction.2.seto.app[,1], prediction.2.seto.app[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
 
 ## Prédiction dans l'échantillon test
 ```{r}
 reseau2.seto.test = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.seto.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+prediction.2.seto.test = prediction2(reseau2.seto.test)
+matrice.seto.test = matrice_confusion(prediction.2.seto.test[,1], prediction.2.seto.test[,2])
+knitr::kable(matrice.seto.test)
+knitr::kable(perfection2(matrice.seto.test))
 ```
 
 ## Les taux (échantillon test)
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
+Valeurs = c(acc(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])),
+            err(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])),
+            sens(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])),
+            spec(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])),
+            scor(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])),
+            ccm1(matrice_confusion(prediction.2.test[,1], prediction.2.test[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
 
@@ -229,40 +244,43 @@ kable(data.frame(Paramètres, Valeurs))
 ## Prédiction dans l'échantillon d'apprentissage
 ```{r}
 reseau2.versi.app = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.versi = prediction2(reseau2.versi.app)
-matrice = matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+reseau2.versi.app$net.result
+prediction.2.versi.app = prediction2(reseau2.versi.app)
+prediction.2.versi.app[,2] = ifelse(prediction.2.seto.app[,2] >= 0.5, 0, 1) 
+matrice.versi.app = matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])
+knitr::kable(matrice.versi.app)
+knitr::kable(perfection2(matrice.versi.app))
 ```
 
 ## Les taux (échantillon d'apprentissage)
 
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            err(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            sens(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            spec(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            scor(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            ccm1(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])))
+Valeurs = c(acc(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])),
+            err(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])),
+            sens(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])),
+            spec(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])),
+            scor(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])),
+            ccm1(matrice_confusion(prediction.2.versi.app[,1], prediction.2.versi.app[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
 
-## Prédiction Prédiction dans l'échantillon test
+##  Prédiction dans l'échantillon test
 ```{r}
 reseau2.versi.test = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.versi.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+prediction.2.versi.test = prediction2(reseau2.versi.test)
+prediction.2.versi.test[,2] = ifelse(prediction.2.seto.test[,2] >= 0.5, 0, 1) 
+matrice.versi.test = matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])
+knitr::kable(matrice.versi.test)
+knitr::kable(perfection2(matrice.versi.test))
 ```
 
 ## Les taux (échantillon test)
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
+Valeurs = c(acc(matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])),
+            err(matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])),
+            sens(matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])),
+            spec(matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])),
+            scor(matrice_confusion(prediction.2.versi.test[,1], prediction.2.versi.test[,2])),
             ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
@@ -272,40 +290,40 @@ kable(data.frame(Paramètres, Valeurs))
 ## Prédiction dans l'échantillon d'apprentissage
 ```{r}
 reseau2.virgi.app = neuralnet(Species == "virginica" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.virgi = prediction2(reseau2.virgi.app)
-matrice = matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+prediction.2.virgi.app = prediction2(reseau2.virgi.app)
+matrice.virgi.app = matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])
+knitr::kable(matrice.virgi.app)
+knitr::kable(perfection2(matrice.virgi.app))
 ```
 
 ## Les taux (échantillon d'apprentissage)
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            err(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            sens(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            spec(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            scor(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            ccm1(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])))
+Valeurs = c(acc(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])),
+            err(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])),
+            sens(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])),
+            spec(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])),
+            scor(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])),
+            ccm1(matrice_confusion(prediction.2.virgi.app[,1], prediction.2.virgi.app[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
 
-## Prédiction Prédiction dans l'échantillon test
+## Prédiction dans l'échantillon test
 ```{r}
 reseau2.virgi.test = neuralnet(Species == "virginica" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.virgi.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
+prediction.2.virgi.test = prediction2(reseau2.virgi.test)
+matrice = matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])
 knitr::kable(matrice)
 knitr::kable(perfection2(matrice))
 ```
 
 ## Les taux (échantillon test)
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
+Valeurs = c(acc(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])),
+            err(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])),
+            sens(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])),
+            spec(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])),
+            scor(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])),
+            ccm1(matrice_confusion(prediction.2.virgi.test[,1], prediction.2.virgi.test[,2])))
 kable(data.frame(Paramètres, Valeurs))
 ```
 
@@ -315,8 +333,7 @@ kable(data.frame(Paramètres, Valeurs))
 
 SETOSA  
 ```{r}
-reseau2 = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-iris.app.prob.setosa <- prediction.2.seto[,2]
+iris.app.prob.setosa <- prediction.2.seto.app[,2]
 iris.app.setosa <- iris.app$Species == "setosa"
 seuil <- seq(0, 1, length.out = 100)
 vsens <- rep(NA, 100)
@@ -330,18 +347,35 @@ plot(1-vspe, vsens, type = "l", col = "red",
      xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
 ```
 
-SETOSA  
+VERSICOLOR  
 ```{r}
-reseau2 = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-iris.app.prob.versicolor <- prediction.2.seto[,2]
-iris.app.versicolor <- as.numeric(iris.app$Species == "versicolor")
+
+iris.app.prob.versicolor <- prediction.2.versi.app[,2]
+iris.app.versicolor <- iris.app$Species == "versicolor"
 seuil <- seq(0, 1, length.out = 100)
 vsens <- rep(NA, 100)
 vspe <- rep(NA, 100)
 for (i in 1:90) {
-  iris.pred <- as.numeric(iris.app.prob.versicolor >= seuil[i])
+  iris.pred <- iris.app.prob.versicolor >= seuil[i]
   vsens[i] <- sens(table(iris.pred, iris.app.versicolor))
   vspe[i] <- spec(table(iris.pred, iris.app.versicolor))
+}
+plot(1-vspe, vsens, type = "l", col = "red",
+     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+```
+
+VIRGINICA  
+```{r}
+
+iris.app.prob.virginica <- prediction.2.virgi.app[,2]
+iris.app.virginica <- iris.app$Species == "virginica"
+seuil <- seq(0, 1, length.out = 100)
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:90) {
+  iris.pred <- iris.app.prob.virginica >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.virginica))
+  vspe[i] <- spec(table(iris.pred, iris.app.virginica))
 }
 plot(1-vspe, vsens, type = "l", col = "red",
      xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
