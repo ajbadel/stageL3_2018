@@ -141,63 +141,114 @@ Notre but est de créer un modèle qui puisse déterminer à quelle espèce appa
 Nous allons donc creer un **modèle test** qui sera optimisé grace à un **modèle d'apprentissage**
 
 ***
-Voici un modèle test 
+Verification du nombre d'individus dans notre échantillon d'apprentissage
 ```{r, fig.align="center"}
+#faire 
 set.seed (1000)
-ech = sample(150,100)
-column = c("Petal.Length", "Petal.Width", "Sepal.Length", "Sepal.Width", "Species")
-iris1 = iris[ech,column]
 
-modeltest = svm(Species ~., data = iris1, kernel = "linear", cost = 10, scale = F)
-
-plot(modeltest, data = iris1,Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+vIndApp = sample(1:dim(iris)[1],2*dim(iris)[1]/3)
+matApp = iris[vIndApp,]
+matApp_row = nrow(matApp)
+names(matApp_row) = "individus dans échantillon d'apprentissage"
+matApp_row
 ```
-
 ***
-Résumé du modele test:
-```{r}
-summary(modeltest)
-```
-
-***
-Voici un modèle d'apprentisage
+Verification du nombre d'individus dans notre échantillon test
 ```{r, fig.align = "center", comment = ""}
-modelref = svm(Species~., data = iris, type = "C-classification", kernel = "polynomial", cost = 1, scale = F)
+vIndTest = setdiff(1:nrow(iris),vIndApp)
+matTest = iris[vIndTest,]
+matTest_row = nrow(matTest)
+names(matTest_row) = "individus dans notre échantillon test"
+matTest_row
+```
 
-plot (modelref, data=iris, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+***
+Verification de la répartition de d'individus dans nos échantillons (test d'homogénéité)
+```{r, fig.align= "center"}
+par(mfrow=c(1,2))
+boxplot (matApp[,-5], las = 2)
+boxplot (matTest[,-5], las = 2)
+```
+
+***
+Voici les résultats obtenus le modele apprentissage
+```{r, fig.align= "center"}
+par(mfrow=c(2,1))
+modelapp = svm(Species ~., data = matApp, type = "C-classification", kernel = "polynomial", cost = 1, scale = F)
+
+plot(modelapp, data = matApp, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
+```
+
+***
+Voici les résultats obtenus le modele test
+```{r, fig.align= "center"}
+modeltest = svm(Species~., data = matTest, type = "C-classification", kernel = "polynomial", cost = 1, scale = F)
+
+plot (modeltest, data=matTest, Petal.Width~Petal.Length, slice = list(Sepal.Width = 3, Sepal.Length = 4))
 ```
 
 ***
 Résumé du modèle de d'apprentissage:
 ```{r}
-summary(modelref)
+summary(modelapp)
+```
+
+***
+Résumé du modèle test:
+```{r}
+summary(modeltest)
 ```
 
 ##Determination de la precision de prediction du modèle par observation d'une matrice de confusion (accuracy check)
+
 ***
-Comparaisons des résultats de prediction du modèle test avec les données observées
+Calcul des performances de prédiction de notre modèle d'apprentissage
+```{r}
+predapp = predict(modelapp, iris)
+tabapp = table(predit = predapp, observe = iris$Species)
+tabapp
+```
+
+```{r}
+acc.app.poly <- tx.bon(tabapp)
+err.app.poly <- tx.erreur(tabapp)
+sens.app.poly = sensibilite(tabapp)
+spec.app.poly = specificite(tabapp)
+names(sens.app.poly) = "sensibilite du modele d'apprentissage"
+sens.app.poly
+names(spec.app.poly) = "specificite du modele d'apprentissage"
+spec.app.poly
+```
+
 ```{r, fig.align= "center"}
-pred = predict(modeltest, iris)
-tab = table(predit = pred, observe = iris$Species)
-tab
-acc.app.poly <- tx.bon(tab)
-err.app.poly <- tx.erreur(tab)
 perf.app.poly <- c(acc.app.poly, err.app.poly)
-names(perf.app.poly) <- c("accuracy", "erreur")
+names(perf.app.poly) <- c("accuracy", "error")
 knitr::kable(perf.app.poly)
 ```
 
 ***
-Comparaisons des résultats de prédiction du modèle d'apprentissage avec les données observées
+Calcul des performances de prédiction de notre modèle de test
 ```{r}
-pred2 = predict(modelref, iris)
-tab2 = table(predit = pred2, observe = iris$Species)
-tab2
-acc.app.poly <- tx.bon(tab2)
-err.app.poly <- tx.erreur(tab2)
-perf.app.poly <- c(acc.app.poly, err.app.poly)
-names(perf.app.poly) <- c("accuracy", "erreur")
-knitr::kable(perf.app.poly)
+predtest = predict(modeltest, iris)
+tabtest = table(predit = predtest, observe = iris$Species)
+tabtest
+```
+
+```{r}
+acc.test.poly <- tx.bon(tabtest)
+err.test.poly <- tx.erreur(tabtest)
+sens.test.poly = sensibilite(tabtest)
+spec.test.poly = specificite(tabtest)
+names(sens.test.poly) = "sensibilite du modele test"
+sens.test.poly
+names(spec.test.poly) = "specificite du modele test"
+spec.test.poly
+```
+
+```{r}
+perf.test.poly <- c(acc.test.poly, err.test.poly)
+names(perf.test.poly) <- c("accuracy", "error")
+knitr::kable(perf.test.poly)
 ```
 
 ***

@@ -14,15 +14,16 @@ output:
 ---
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, comment = NA)
 ```
 
 ```{r, message= 'hide'}
+library("ggplot2")
+library("lattice")
 library("revealjs")
-#library("caret")
+library("caret")
 library("e1071")
 #library ("ggvis")
-library("ggplot2")
 library("GGally")
 library("RColorBrewer")
 library("e1071")
@@ -31,53 +32,160 @@ library("e1071")
 ```{r}
 setwd(".")
 donnee = read.table("./../data/placenta90.138.txt", header = T, dec = ".", sep = "\t")
+set.seed(1000)
+```
+
+```{r fonctions}
+tx.bon <- function(table) {
+  return(sum(diag(table)) / sum(table))
+}
+
+tx.erreur <- function(table) {
+  acc <- (sum(diag(table)) / sum(table))
+  return(1 - acc)
+}
+
+sensibilite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[1,1] / (table[1,1] + table[2,1]))
+  } else {
+    return(NA)
+  }
+}
+
+specificite <- function(table) {
+  if (nrow(table) >= 2) {
+    return(table[2,2] / (table[2,2] + table[1,2]))
+  } else {
+    return(NA)
+  }
+}
 ```
 ***
+
 But de l'étude:
 
 On souhaite établir un modèle de prédiction de la clairance à partir de descripteurs géométrique et physico-chimiques de petits composés. Nous allons utiliser la méthode SVM pour répondre à la question.
 
-##Jeu de données
+##Preparation du jeu de données
 
-Résumé des données
-```{r, eval}
-par(mfrow = c(1,2))
-head(donnee)
+***
+Présentation des données
+```{r resume.donnee}
+#summary(donnee)
+head(donnee[,c(1:4)])
+col_donnee = ncol(donnee)
+names(col_donnee) = "Nombre de descripteurs (médicaments)"
+row_donnee = nrow(donnee)
+names(row_donnee) = "Nombre de molecules"
+col_donnee
+row_donnee
+```
+
+```{r}
+
+```
+
+
+***
+Verification des descripteurs à variances nulles ou proche de 0
+```{r variances.nulles}
+
+#variances = donnee[nearZeroVar(donnee)]
+#variances
+variance = apply(donnee[,-1], 2, var)
+#variance
+donnee_var_null = variance[which(variance<=0.05)]
+#donnee_var_null
+names(donnee_var_null)
+#On a les noms des variables qui ont des variables à variances proche de 0
+```
+
+```{r apres sup des var nulles}
+colsuppr = c()
+for(i in 1:length(donnee_var_null))
+  colsuppr = c(colsuppr,which(colnames(donnee)==names(donnee_var_null)[i]))
+
+donnee_ss_var2 = donnee[,-colsuppr]
+ncol_donnee_ss_var2 = ncol(donnee_ss_var2)
+#ncol_donnee_ss_var2
+names(ncol_donnee_ss_var2)= "Nombre de descripteurs restants"
+ncol_donnee_ss_var2
+```
+
+***
+Verification des descripteurs corrélées a plus de 0.8
+```{r}
+mat.cor = cor(donnee_ss_var2[,-1])
+donnee_ss_cor = findCorrelation(mat.cor, cutoff=0.8)
+donnee_ss_cor
+
+donnee_ss_cor2 = donnee_ss_var2[,-c(donnee_ss_cor)]
+ncol_donnee_ss_cor2 = ncol(donnee_ss_cor2)
+names(ncol_donnee_ss_cor2) = "Nombres de descripteurs restant"
+ncol_donnee_ss_cor2
+```
+
+***
+Verification des descripteurs avec des données abérantes
+```{r}
+boxplot(donnee_ss_cor2[,c(20:40)], las = 2)
+```
+
+```{r}
+donnee_ss_ab = donnee_ss_cor2[,-21]
+```
+
+***
+Après suppression du descripteur "Wap"
+```{r}
+boxplot(donnee_ss_ab[,c(20:40)], las = 2)
+ncol_donnee_ss_ab = ncol(donnee_ss_ab)
+names(ncol_donnee_ss_ab) = "Nombres de descripteurs restant"
+ncol_donnee_ss_ab
+```
+
+***
+Normalisation des descripteurs
+```{r normal}
+donnee_scale = scale(donnee_ss_ab[,-1], center = T, scale = T)
+
+boxplot (donnee_scale[,c(20:40)], las = 2)
+#boxplot (donnee_scale, las = 2)
+#Exemple: les 20 premiers descripteurs
+```
+
+```{r CI_class}
+donnee_ss_ab$CI_class = ifelse(donnee_ss_ab$CI <= 0.5, "petit","grand")
+donnee.fin = donnee_ss_ab[,-c(1:2)]
+donnee.fin$CI_class = as.factor(donnee.fin$CI_class)
 ```
 
 ***
 Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
-```{r, fig.align = "center"}
-donnee.cmd = cmdscale(dist(donnee [,-1]))
-plot(donnee.cmd, col = donnee$Noms)
+```{r MDS, fig.align = "center"}
+donnee.cmd = cmdscale(dist(donnee_scale))
+plot(donnee.cmd, col = donnee.fin$CI_class)
 ```
 
 ***
 Visualisation des données grâce à une analyse des principaux composants
-```{r, fig.align = "center", messages = 'hide'}
-par(mfrow = c(1,2))
-donnee.acp <- prcomp(as.matrix(donnee[,-1]))
+```{r acp, fig.align = "center", messages = 'hide'}
+#par(mfrow = c(1,2))
+donnee.acp <- prcomp(as.matrix(donnee.fin[,-74]))
 plot(donnee.acp)
-biplot(donnee.acp)
-```
-
-***
-Toutes les variables sont corrélées entre elles
-
-
-***
-Visualisation globale des données
-```{r, message = F, eval = F}
-#par(mfrow=c(1,1))
-#GGally::ggpairs(donnee, mapping = aes(color = Noms), cardinality_threshold = 90)
+#biplot(donnee.acp)
 ```
 
 ***
 Création d'un modèle d'apprentissage
 ```{r}
-set.seed(1000)
-ech.App = sample(1:dim(donnee)[1],2*dim(donnee)[1]/3)
-mat.App = donnee[ech.App,]
+ech.App = sample(1:dim(donnee.fin)[1],2*dim(donnee.fin)[1]/3)
+mat.App = donnee.fin[ech.App,]
+head(mat.App[,c(1:4)])
+matApp_row = nrow(mat.App)
+names(matApp_row) = "individus dans échantillon d'apprentissage"
+matApp_row
 
 #plot (model.app, data = donnee.cmd, donnee.cmd[1]~donnee.cmd[2])
 ```
@@ -85,8 +193,78 @@ mat.App = donnee[ech.App,]
 ***
 Création d'un modèle de test
 ```{r}
-ech.Test = setdiff(1:nrow(donnee),ech.App)
-mat.Test = donnee[ech.Test,]
+ech.Test = setdiff(1:nrow(donnee.fin),ech.App)
+mat.Test = donnee.fin[ech.Test,]
+head(mat.Test[,c(1:4)])
+matTest_row = nrow(mat.Test)
+names(matTest_row) = "individus dans échantillon test"
+matTest_row
+```
+
+***
+Verification de la répartition de d'individus dans nos échantillons (test d'homogénéité)
+```{r homogeneite, fig.align= "center"}
+par(mfrow=c(1,2))
+boxplot (mat.App[,c(10:20)], las = 2)
+boxplot (mat.Test[,c(10:20)], las = 2)
+```
+
+##Verification des résultats de prédictions avec différents paramètres
+***
+Résultats obtenus pour le modele d'apprentissage avec kernel lineaire
+```{r kernel_lin}
+modelapp_lin = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "linear")
+#attributes (modelapp)
+summary(modelapp_lin)
+```
+
+***
+```{r pred_lin}
+predapp_lin = predict(modelapp_lin, mat.App)
+tabapp_lin = table(predit = predapp_lin, observe = mat.App$CI_class)
+tabapp_lin
+```
+
+***
+Résultats obtenus pour le modele d'apprentissage avec kernel polynomial
+```{r kernel_pol}
+modelapp_pol = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "polynomial")
+summary(modelapp_pol)
+```
+
+***
+```{r pred_pol}
+predapp_pol = predict(modelapp_pol, mat.App)
+tabapp_pol = table(predit = predapp_pol, observe = mat.App$CI_class)
+tabapp_pol
+```
+
+***
+Résultats obtenus pour le modele d'apprentissage avec kernel radial
+```{r kernel_rad}
+modelapp_rad = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "radial")
+summary(modelapp_rad)
+```
+
+***
+```{r pred_rad}
+predapp_rad = predict(modelapp_rad, mat.App)
+tabapp_rad = table(predit = predapp_rad, observe = mat.App$CI_class)
+tabapp_rad
+```
+
+***
+Résultats obtenus pour le modele d'apprentissage avec kernel sigmoide
+```{r kernel_sig}
+modelapp_sig = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "sigmoid")
+summary(modelapp_sig)
+```
+
+***
+```{r pred_sig}
+predapp_sig = predict(modelapp_sig, mat.App)
+tabapp_sig = table(predit = predapp_sig, observe = mat.App$CI_class)
+tabapp_sig
 ```
 
 ***
