@@ -13,7 +13,6 @@ output:
 
 ```{r message = FALSE}
 library(neuralnet)
-library(nnet)
 library(mclust)
 library(caret)
 library(ROCR)
@@ -36,6 +35,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
+set.seed(245)
 matrice_confusion.ex = data.frame(CONDITION_POSITIVE = c("True Positive (TP)", "False Negative (FN)"), CONDITION_NEGATIVE = c("False Positive (FP)", "False Negative (TN)"), row.names = c("PREDICT_POSITIVE (P)","PREDICT_NEGATIVE (N)"))
 
 #predit = predict(iris.nn, newdata = iris.test)
@@ -98,7 +98,6 @@ ccm1 = function (resultats) {
 ```
 
 ```{r}
-set.seed(245)
 table(iris$Species)
 ```
 # Données IRIS
@@ -148,21 +147,10 @@ virgi = as.numeric(iris$Species == "virginica")
 ```
 
 ```{r}
-#data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
-#data.seto = data.frame(iris[,c(1:4)], seto)
-#data.versi = data.frame(iris[,c(1:4)], versi)
-#data.virgi = data.frame(iris[,c(1:4)], virgi)
-```
-
-```{r}
-formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
-```
-
-# Prediction des SETOSA
-```{r}
-ind.app <- sample(1:nrow(iris), 100)
-iris.app <- iris[ind.app,]
-iris.test <- iris[-ind.app,]
+data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
+ind.app <- sample(1:nrow(data.iris), 100)
+iris.app <- data.iris[ind.app,]
+iris.test <- data.iris[-ind.app,]
 ```
 
 ```{r}
@@ -183,166 +171,289 @@ perfection2 = function(matrice) {
 }
 ```
 
-## Prédiction dans l'échantillon d'apprentissage
+# Prédiction
+
+Prediction avec deux couches de 1 neurone chacune
 ```{r}
-reseau2.seto.app = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.seto = prediction2(reseau2.seto.app)
-matrice = matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])
-kable(matrice)
-kable(perfection2(matrice))
+formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
+reseau1.app = neuralnet(formule, data = iris.app, hidden = c(1,1))
+reseau1.test = neuralnet(formule, data = iris.test, hidden = c(1,1))
+
+predire1.app = compute(reseau1.app, iris.app[,1:4], rep = 1)
+predire1.test = compute(reseau1.test, iris.test[,1:4], rep = 1)
+
+prediction.seto1.app = ifelse(predire1.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.seto1.test = ifelse(predire1.test$net.result[,1] >= 0.5, 1 ,0)
+prediction.versi1.app = ifelse(predire1.app$net.result[,2] >= 0.4, 1 ,0)
+prediction.versi1.test = ifelse(predire1.test$net.result[,2] >= 0.4, 1 ,0)
+prediction.virgi1.app = ifelse(predire1.app$net.result[,3] >= 0.4, 1 ,0)
+prediction.virgi1.test = ifelse(predire1.test$net.result[,3] >= 0.4, 1 ,0)
+
+confiance.seto1.app <- table(prediction.seto1.app, iris.app$seto, dnn = c("predit", "observe"))
+confiance.seto1.test <- table(prediction.seto1.test, iris.test$seto, dnn = c("predit", "observe"))
+confiance.versi1.app <- table(prediction.versi1.app, iris.app$versi, dnn = c("predit", "observe"))
+confiance.versi1.test <- table(prediction.versi1.test, iris.test$versi, dnn = c("predit", "observe"))
+confiance.virgi1.app <- table(prediction.virgi1.app, iris.app$virgi, dnn = c("predit", "observe"))
+confiance.virgi1.test <- table(prediction.virgi1.test, iris.test$virgi, dnn = c("predit", "observe"))
 ```
 
-## Les taux (échantillon d'apprentissage)
+Prédiction avec deux couches de 10 neurones chacune
+```{r}
+# L'augmentation des neurones permet d'obtenir des résultats plus fins
+reseau2.app = neuralnet(formule, data = iris.app, hidden = c(10,10))
+reseau2.test = neuralnet(formule, data = iris.test, hidden = c(10,10))
+
+predire2.app = compute(reseau2.app, iris.app[,1:4], rep = 1)
+predire2.test = compute(reseau2.test, iris.test[,1:4], rep = 1)
+
+prediction.seto2.app = ifelse(predire2.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.seto2.test = ifelse(predire2.test$net.result[,1] >= 0.5, 1 ,0)
+prediction.versi2.app = ifelse(predire2.app$net.result[,2] >= 0.5, 1 ,0)
+prediction.versi2.test = ifelse(predire2.test$net.result[,2] >= 0.5, 1 ,0)
+prediction.virgi2.app = ifelse(predire2.app$net.result[,3] >= 0.5, 1 ,0)
+prediction.virgi2.test = ifelse(predire2.test$net.result[,3] >= 0.5, 1 ,0)
+
+confiance.seto2.app <- table(prediction.seto2.app, iris.app$seto, dnn = c("predit", "observe"))
+confiance.seto2.test <- table(prediction.seto2.test, iris.test$seto, dnn = c("predit", "observe"))
+confiance.versi2.app <- table(prediction.versi2.app, iris.app$versi, dnn = c("predit", "observe"))
+confiance.versi2.test <- table(prediction.versi2.test, iris.test$versi, dnn = c("predit", "observe"))
+confiance.virgi2.app <- table(prediction.virgi2.app, iris.app$virgi, dnn = c("predit", "observe"))
+confiance.virgi2.test <- table(prediction.virgi2.test, iris.test$virgi, dnn = c("predit", "observe"))
+```
+
+# Prediction des SETOSA
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec deux couches de 1 neurones chacune
+```{r}
+knitr::kable(confiance.seto1.app)
+knitr::kable(perfection2(confiance.seto1.app))
+```
+
+Prédiction avec deux couches de 10 neurones chacune
+```{r}
+knitr::kable(confiance.seto2.app)
+knitr::kable(perfection2(confiance.seto2.app))
+```
+
+## Les critères (échantillon d'apprentissage)
 ```{r}
 Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score", "Coeff. de cor. de Matthew")
-Valeurs = c(acc(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            err(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            sens(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            spec(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            scor(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])),
-            ccm1(matrice_confusion(prediction.2.seto[,1], prediction.2.seto[,2])))
-kable(data.frame(Paramètres, Valeurs))
+Valeurs.1.1 = c(acc(confiance.seto1.app), err(confiance.seto1.app), sens(confiance.seto1.app),
+            spec(confiance.seto1.app), scor(confiance.seto1.app), ccm1(confiance.seto1.app))
+Valeurs.10.10 = c(acc(confiance.seto2.app), err(confiance.seto2.app), sens(confiance.seto2.app),
+            spec(confiance.seto2.app), scor(confiance.seto2.app), ccm1(confiance.seto2.app))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
 ## Prédiction dans l'échantillon test
+
+Prédiction avec deux couches de 1 neurones chacune
 ```{r}
-reseau2.seto.test = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.seto.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+knitr::kable(confiance.seto1.test)
+knitr::kable(perfection2(confiance.seto1.test))
 ```
 
-## Les taux (échantillon test)
+Prédiction avec deux couches de 10 neurones chacune
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
-kable(data.frame(Paramètres, Valeurs))
+knitr::kable(confiance.seto2.test)
+knitr::kable(perfection2(confiance.seto2.test))
+```
+
+## Les critères (échantillon test)
+```{r}
+Valeurs.1.1 = c(acc(confiance.seto1.test), err(confiance.seto1.test), sens(confiance.seto1.test),
+            spec(confiance.seto1.test), scor(confiance.seto1.test), ccm1(confiance.seto1.test))
+Valeurs.10.10 = c(acc(confiance.seto2.test), err(confiance.seto2.test), sens(confiance.seto2.test),
+            spec(confiance.seto2.test), scor(confiance.seto2.test), ccm1(confiance.seto2.test))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
 # Prédiction des VERSICOLOR
 
 ## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec deux couches de 1 neurones chacune
 ```{r}
-reseau2.versi.app = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.versi = prediction2(reseau2.versi.app)
-matrice = matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+knitr::kable(confiance.versi1.app)
+knitr::kable(perfection2(confiance.versi1.app))
 ```
 
-## Les taux (échantillon d'apprentissage)
-
+Prédiction avec deux couches de 10 neurones chacune
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            err(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            sens(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            spec(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            scor(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])),
-            ccm1(matrice_confusion(prediction.2.versi[,1], prediction.2.versi[,2])))
-kable(data.frame(Paramètres, Valeurs))
+knitr::kable(confiance.versi2.app)
+knitr::kable(perfection2(confiance.versi2.app))
 ```
 
-## Prédiction Prédiction dans l'échantillon test
+## Les critères (échantillon d'apprentissage)
 ```{r}
-reseau2.versi.test = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.versi.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+Valeurs.1.1 = c(acc(confiance.versi1.app), err(confiance.versi1.app), sens(confiance.versi1.app),
+            spec(confiance.versi1.app), scor(confiance.versi1.app), ccm1(confiance.versi1.app))
+Valeurs.10.10 = c(acc(confiance.versi2.app), err(confiance.versi2.app), sens(confiance.versi2.app),
+            spec(confiance.versi2.app), scor(confiance.versi2.app), ccm1(confiance.versi2.app))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
-## Les taux (échantillon test)
+## Prédiction dans l'échantillon test
+
+Prédiction avec deux couches de 1 neurones chacune
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
-kable(data.frame(Paramètres, Valeurs))
+knitr::kable(confiance.versi1.test)
+knitr::kable(perfection2(confiance.versi1.test))
+```
+
+Prédiction avec deux couches de 10 neurones chacune
+```{r}
+knitr::kable(confiance.versi2.test)
+knitr::kable(perfection2(confiance.versi2.test))
+```
+
+## Les critères (échantillon test)
+```{r}
+Valeurs.1.1 = c(acc(confiance.versi1.test), err(confiance.versi1.test), sens(confiance.versi1.test),
+            spec(confiance.versi1.test), scor(confiance.versi1.test), ccm1(confiance.versi1.test))
+Valeurs.10.10 = c(acc(confiance.versi2.test), err(confiance.versi2.test), sens(confiance.versi2.test),
+            spec(confiance.versi2.test), scor(confiance.versi2.test), ccm1(confiance.versi2.test))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
 # Prédiction des VIRGINICA
 
 ## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec deux couches de 1 neurones chacune
 ```{r}
-reseau2.virgi.app = neuralnet(Species == "virginica" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-prediction.2.virgi = prediction2(reseau2.virgi.app)
-matrice = matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+knitr::kable(confiance.virgi1.app)
+knitr::kable(perfection2(confiance.virgi1.app))
 ```
 
-## Les taux (échantillon d'apprentissage)
+Prédiction avec deux couches de 10 neurones chacune
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            err(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            sens(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            spec(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            scor(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])),
-            ccm1(matrice_confusion(prediction.2.virgi[,1], prediction.2.virgi[,2])))
-kable(data.frame(Paramètres, Valeurs))
+knitr::kable(confiance.virgi2.app)
+knitr::kable(perfection2(confiance.virgi2.app))
 ```
 
-## Prédiction Prédiction dans l'échantillon test
+## Les critères (échantillon d'apprentissage)
 ```{r}
-reseau2.virgi.test = neuralnet(Species == "virginica" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.test, linear.output = FALSE)
-prediction.2 = prediction2(reseau2.virgi.test)
-matrice = matrice_confusion(prediction.2[,1], prediction.2[,2])
-knitr::kable(matrice)
-knitr::kable(perfection2(matrice))
+Valeurs.1.1 = c(acc(confiance.virgi1.app), err(confiance.virgi1.app), sens(confiance.virgi1.app),
+            spec(confiance.virgi1.app), scor(confiance.virgi1.app), ccm1(confiance.virgi1.app))
+Valeurs.10.10 = c(acc(confiance.virgi2.app), err(confiance.virgi2.app), sens(confiance.virgi2.app),
+            spec(confiance.virgi2.app), scor(confiance.virgi2.app), ccm1(confiance.virgi2.app))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
-## Les taux (échantillon test)
+## Prédiction dans l'échantillon test
+
+Prédiction avec deux couches de 1 neurones chacune
 ```{r}
-Valeurs = c(acc(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            err(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            sens(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            spec(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            scor(matrice_confusion(prediction.2[,1], prediction.2[,2])),
-            ccm1(matrice_confusion(prediction.2[,1], prediction.2[,2])))
-kable(data.frame(Paramètres, Valeurs))
+knitr::kable(confiance.virgi1.test)
+knitr::kable(perfection2(confiance.virgi1.test))
+```
+
+Prédiction avec deux couches de 10 neurones chacune
+```{r}
+knitr::kable(confiance.virgi2.test)
+knitr::kable(perfection2(confiance.virgi2.test))
+```
+
+## Les critères (échantillon test)
+```{r}
+Valeurs.1.1 = c(acc(confiance.virgi1.test), err(confiance.virgi1.test), sens(confiance.virgi1.test),
+            spec(confiance.virgi1.test), scor(confiance.virgi1.test), ccm1(confiance.virgi1.test))
+Valeurs.10.10 = c(acc(confiance.virgi2.test), err(confiance.virgi2.test), sens(confiance.virgi2.test),
+            spec(confiance.virgi2.test), scor(confiance.virgi2.test), ccm1(confiance.virgi2.test))
+kable(data.frame(Paramètres, Valeurs.1.1, Valeurs.10.10))
 ```
 
 # Courbe ROC
 
-## Courbe ROC (1)
-
-SETOSA  
+## Courbe ROC SETOSA (2 couches, 1 neurone)
 ```{r}
-reseau2 = neuralnet(Species == "setosa" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-iris.app.prob.setosa <- prediction.2.seto[,2]
-iris.app.setosa <- iris.app$Species == "setosa"
 seuil <- seq(0, 1, length.out = 100)
+iris.app.setosa <- iris.app$seto
 vsens <- rep(NA, 100)
 vspe <- rep(NA, 100)
 for (i in 1:100) {
-  iris.pred <- iris.app.prob.setosa >= seuil[i]
+  iris.pred <- predire1.app$net.result[,1] >= seuil[i]
   vsens[i] <- sens(table(iris.pred, iris.app.setosa))
   vspe[i] <- spec(table(iris.pred, iris.app.setosa))
 }
-plot(1-vspe, vsens, type = "l", col = "red",
-     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de SETOSA pour 2 couches d'1 neurone")
 ```
 
-SETOSA  
+## Courbe ROC SETOSA (2 couches, 10 neurones)
 ```{r}
-reseau2 = neuralnet(Species == "versicolor" ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.app, linear.output = FALSE)
-iris.app.prob.versicolor <- prediction.2.seto[,2]
-iris.app.versicolor <- as.numeric(iris.app$Species == "versicolor")
-seuil <- seq(0, 1, length.out = 100)
 vsens <- rep(NA, 100)
 vspe <- rep(NA, 100)
-for (i in 1:90) {
-  iris.pred <- as.numeric(iris.app.prob.versicolor >= seuil[i])
-  vsens[i] <- sens(table(iris.pred, iris.app.versicolor))
-  vspe[i] <- spec(table(iris.pred, iris.app.versicolor))
+for (i in 1:100) {
+  iris.pred <- predire2.app$net.result[,1] >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.setosa))
+  vspe[i] <- spec(table(iris.pred, iris.app.setosa))
 }
-plot(1-vspe, vsens, type = "l", col = "red",
-     xlab = "FPR = 1-Spe", ylab = "TPR = Sens")
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de SETOSA pour 2 couches de 10 neurones")
+```
+
+## Courbe ROC VERSICOLOR (2 couches, 1 neurone)
+```{r}
+seuil <- seq(0, 1, length.out = 100)
+
+iris.app.versi <- iris.app$versi
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- predire1.app$net.result[,2] >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.versi))
+  vspe[i] <- spec(table(iris.pred, iris.app.versi))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de VERSICOLOR pour 2 couches d'1 neurone")
+```
+
+## Courbe ROC VERSICOLOR (2 couches, 10 neurones)
+```{r}
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- predire2.app$net.result[,2] >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.versi))
+  vspe[i] <- spec(table(iris.pred, iris.app.versi))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de VERSICOLOR pour 2 couches de 10 neurones")
+```
+
+## Courbe ROC VIRGINICA (2 couches, 1 neurone)
+```{r}
+seuil <- seq(0, 1, length.out = 100)
+
+iris.app.virgi <- iris.app$virgi
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- predire1.app$net.result[,3] >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.virgi))
+  vspe[i] <- spec(table(iris.pred, iris.app.virgi))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de VIRGINICA pour 2 couches d'1 neurone")
+```
+
+## Courbe ROC VIRGINICA (2 couches, 10 neurones)
+```{r}
+vsens <- rep(NA, 100)
+vspe <- rep(NA, 100)
+for (i in 1:100) {
+  iris.pred <- predire2.app$net.result[,3] >= seuil[i]
+  vsens[i] <- sens(table(iris.pred, iris.app.virgi))
+  vspe[i] <- spec(table(iris.pred, iris.app.virgi))
+}
+plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de VIRGINICA pour 2 couches de 10 neurones")
+```
+
+## Recherche des paramètres optimaux
+
+En laissant faire par la fonction `tune`
+```{r nn.tune}
+iris.nn.tune <- tune.nnet(seto ~ ., data = iris.app, validation.x = iris.val, size = 1:4, sampling = "fix")
+summary(iris.nn.tune)
+best.iris.nn <- best.nnet(seto ~ ., data = iris.app, validation.x = iris.val, size = 1:4, sampling = "fix")
+summary(best.iris.nn)
 ```

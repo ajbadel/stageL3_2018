@@ -12,7 +12,6 @@ output:
 # Neuron Network {data-background="neurone.png"}
 
 ```{r message = FALSE}
-library(neuralnet)
 library(nnet)
 library(mclust)
 library(caret)
@@ -90,9 +89,15 @@ data("iris")
 kable(head(iris))
 ```
 
+##
+
+```{r}
+dim(iris)
+```
+
 ## Résumés des données
 ```{r}
-summary(iris)
+kable(summary(iris))
 ```
 
 ## Visualisation des données (plot)
@@ -126,32 +131,15 @@ par(mfrow=c(1,1))
 ```{r}
 iris.acp <- prcomp(as.matrix(iris[,1:4]))
 plot(iris.acp)
+```
+
+```{r}
 biplot(iris.acp)
 ```
 
-```{r}
-seto = as.numeric(iris$Species == "setosa")
-versi = as.numeric(iris$Species == "versicolor")
-virgi = as.numeric(iris$Species == "virginica")
-```
-
-```{r}
-data.iris = data.frame(iris[,c(1:4)], seto, versi, virgi)
-#data.seto = data.frame(iris[,c(1:4)], seto)
-#data.versi = data.frame(iris[,c(1:4)], versi)
-#data.virgi = data.frame(iris[,c(1:4)], virgi)
-```
-
-```{r}
-set.seed(245)
-formule = as.formula(seto + versi + virgi ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width)
-reseau1 = neuralnet(formule, data = data.iris, hidden = c(1,1))
-resultat_matrice1 <- as.data.frame(reseau1$result.matrix)
-```
-
 # Prediction
+
 ```{r, results = 'hide'}
-set.seed(245)
 ind.app <- sample(1:nrow(iris), 100)
 iris.app <- iris[ind.app,]
 iris.test <- iris[-ind.app,]
@@ -160,7 +148,6 @@ iris.nn <- nnet::nnet(Species ~ ., data = iris, subset = ind.app, size = 1)
 
 ## Prédiction dans l'échantillon d'apprentissage
 ```{r}
-set.seed(245)
 prediction = predict(iris.nn, newdata = iris.app, type = "class")
 confiance <- table(prediction, iris.app$Species, dnn = c("predit", "observe"))
 knitr::kable(confiance)
@@ -173,7 +160,6 @@ knitr::kable(perf.app)
 
 ## Prédiction dans l'échantillon test
 ```{r}
-set.seed(245)
 prediction2 = predict(iris.nn, newdata = iris.test, type = "class")
 confiance2 <- table(prediction2, iris.test$Species, dnn = c("predit", "observe"))
 knitr::kable(confiance2)
@@ -200,8 +186,7 @@ observe = data.iris.app[,c(5:7)]
 
 # La fonction pour la matrice de confusion
 matrice_confusion = function (observation, prediction) {
-  resultats1 = sapply(X = data.frame(observe = observation, predit = prediction),
-                      FUN = round, digits=0)
+  resultats1 = sapply(X = data.frame(observe = observation, predit = prediction), FUN = round, digits=0)
   resultats.df = data.frame(resultats1)
   attach(resultats.df)
   table.resultat = table(
@@ -225,7 +210,7 @@ F1 score : F1 = $\frac{2*TP} {2*TP+FP+FN}$
 
 Coefficient de corrélation de Matthews : MCC =  
 
-$\frac{TP*TN-FP*FN} {((TP+FP)(TP+FN)(TN+FP)(TN+FN))^{-1}}$
+$\frac{TP*TN-FP*FN} {((TP+FP)(TP+FN)(TN+FP)(TN+FN))^{0.5}}$
 
 # Le modèle SETOSA
 
@@ -290,7 +275,6 @@ kable(matrice_confusion(observe[,3], predit[,3]))
 ```
 
 ## Le modèle VIRGINICA (2)
-
 ```{r}
 Valeurs.virgi = c(acc(matrice_confusion(observe[,3], predit[,3])),
                   err(matrice_confusion(observe[,3], predit[,3])),
@@ -302,16 +286,6 @@ kable(data.frame(Paramètres, Valeurs.virgi))
 ```
 
 # Courbe ROC
-
-```{r}
-prob = compute(reseau1, data.iris[, -c(5:7)])
-prob.result = prob$net.result
-
-aucfun = function(prob.result.entry, data.iris.entry) {
-  pred = prediction(prob.result.entry, data.iris.entry)
-  return(performance(pred, "auc")@y.values[[1]])
-}
-```
 
 ## Courbe ROC (1)
 
@@ -369,10 +343,19 @@ plot(1-vspe, vsens, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR =
 ## Valeurs AUC
 
 ```{r}
+aucfun = function(prob.result.entry, espece.entry) {
+  pred = prediction(prob.result.entry, espece.entry)
+  return(performance(pred, "auc")@y.values[[1]])
+}
+
+seto = as.numeric(iris.app$Species == "setosa")
+versi = as.numeric(iris.app$Species == "versicolor")
+virgi = as.numeric(iris.app$Species == "virginica")
+
 Auc = c("AUC setosa", "AUC versicolor", "AUC virginica")
-Calcul_AUC = c(aucfun(prob.result[,1], data.iris$seto),
-               aucfun(prob.result[,2], data.iris$versi),
-               aucfun(prob.result[,3], data.iris$virgi))
+Calcul_AUC = c(aucfun(iris.nn$fitted.values[,1], seto),
+               aucfun(iris.nn$fitted.values[,2], versi),
+               aucfun(iris.nn$fitted.values[,3], virgi))
 kable(data.frame(Auc, Calcul_AUC))
 ```
 
@@ -380,10 +363,10 @@ kable(data.frame(Auc, Calcul_AUC))
 
 En laissant faire par la fonction `tune`
 ```{r nn.tune}
-iris.nn.tune <- tune.nnet(Species ~ ., data = iris.app, validation.x = iris.val,
-                     size = 1:4, sampling = "fix")
+iris.nn.tune <- tune.nnet(Species ~ ., data = iris.app, validation.x = iris.val, size = 1:4, sampling = "fix")
 summary(iris.nn.tune)
 best.iris.nn <- best.nnet(Species ~ ., data = iris.app, validation.x = iris.val, size = 1:4, sampling = "fix")
+summary(best.nn.tune)
 ```
 # Bibliographie
 
