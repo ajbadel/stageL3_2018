@@ -106,3 +106,28 @@ Nous allons employer une boucle `for` qui fera trois choses :
 
 On utilise la fonction `tune.nnet`  
 La valeur de `best performance` donne le meilleur rendement atteint.
+knitr::kable(confiance.grand
+# Comparaison  
+
+## Neuralnet  
+
+Avantages :  
+
+  - on peut travailler sur plusieurs couches de neurones -> résultats plus affinés  
+
+Inconvénients :  
+
+  - pour la fonction "neuralnet", il faut entrer tous les descripteurs  
+  - pas trouver comment faire une matrice de confusion  
+  - compute ne donne que les probabilités pour chaque individu s'il est ou pas l'espèce recherchée  
+  
+## Nnet  
+
+Avantages :  
+
+  - pour la fonction nnet -> il suffit de mettre un point pour indiquer tous les descripteurs  
+  - "predict" détermine l'individu à quelle espèce il correspond -> ainsi pouvoir faire une matrice de confusion  
+
+Inconvénients :  
+
+  - on ne peut pas affiner les résultats en modifiant le nombre de couches cachées  
