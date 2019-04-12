@@ -1,0 +1,228 @@
+---
+title: "Réduction des descripteurs (vecteur 0/1)"
+author: "Marc XU"
+date: "Avril 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
+---
+
+# Neuron Network 
+```{r message = FALSE}
+set.seed(23)
+#{data-background="neurone.png"}
+library("neuralnet")
+library("mclust")
+library("caret")
+library("ROCR")
+library("knitr")
+library("GGally")
+library("MLmetrics") # calcul de F1.Score
+library("mltools") # calcul du coeff de correl. de Matthiew
+
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = FALSE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
+```
+
+```{r}
+setwd("../Marc")
+getwd()
+placenta_mod3 = na.omit(read.table(".././data/placenta90.138.txt", dec = ".", sep = "\t", header =TRUE))
+```
+
+```{r}
+# Les fonctions
+
+# La fonction accuracy
+acc = function (resultats) {
+  return(sum(diag(resultats)) / sum(resultats))
+}
+
+# La fonction erreur
+err = function (resultats) {
+  return(1 - (sum(diag(resultats)) / sum(resultats)))
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  return((2 * resultats[2,2]) / (2 * resultats[2,2] + resultats[1,2] + resultats[2,1]))
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
+}
+
+# Les fonctions
+prediction2 = function (reseau) {
+  realite2 = as.numeric(reseau$response)
+  prediction2 = reseau$net.result
+  results <- data.frame(actual = realite2, prediction = prediction2)
+  names(results) <- c("Realité", "Prédiction")
+  return(results)
+}
+perfection2 = function(matrice) {
+  acc.app <- acc(matrice)
+  err.app <- err(matrice)
+  perf.app <- c(acc.app, err.app)
+  names(perf.app) <- c("accuracy", "erreur")
+  return(perf.app)
+}
+```
+
+## T.test
+```{r}
+var.table <- apply(placenta_mod3[,3:ncol(placenta_mod3)], MARGIN = 2, FUN = var)
+placenta_mod3_2 = placenta_mod3[,-c(which(var.table <= 0.01))]
+##########
+mat.Cor = cor(placenta_mod3_2[,-(which(colnames(placenta_mod3_2)== "Noms"))])
+placenta_mod3_2 = placenta_mod3_2[,-(findCorrelation(mat.Cor, cutoff = 0.8))]
+##########
+placenta_mod3_3 = as.data.frame(scale(placenta_mod3_2[-1], center = TRUE, scale = TRUE))
+```
+
+Prendre les descripteurs avec les meilleurs p.value (les plus faibles)
+```{r}
+# Test de normalité
+val.p.value.shapi = rep(NA, 99)
+for (i in 2:100) {
+  test.shapi = shapiro.test(placenta_mod3_3[,i])
+  val.p.value.shapi[i] = test.shapi$p.value
+}
+# p.value des descripteurs 51 et 52 suivent une loi normale
+# Donc les descripteurs ne suivent pas une loi normale (sauf pour deux descripteurs)
+# On doit donc faire un test de wilcoxon (test non paramétrique)
+
+# Test de wilcoxon
+val.p.value.wil = rep(NA, 99)
+for (i in 2:100) {
+  test.wilcox = wilcox.test(placenta_mod3_3[,i], placenta_mod3_3[,1])
+  val.p.value.wil[i-1] = test.wilcox$p.value
+}
+# On enregistre nos valeurs de p.value
+p.value.petite = rep(NA, 20)
+p.value.col = rep(NA, 20)
+for (i in 1:20) {
+  p.value.petite[i] = unique(sort(val.p.value.wil))[i]
+  p.value.col[i] = which(val.p.value.wil == unique(sort(val.p.value.wil))[i])
+}
+
+# Création d'une matrice avec que les descripteurs ayant une bonne p.value
+placenta_mod3_4 = placenta_mod3_3[,c(53,74,91,27,28,18,57,85,52,24,55,22,3,23,42,40,31,47,25,34)]
+```
+
+```{r}
+CI_groupe = as.factor(ifelse(placenta_mod3$CI <= 0.5, "petitCI", "grandCI"))
+petit = as.numeric(CI_groupe == "petitCI")
+```
+
+# Travaux
+
+## Prédiction avec une couche de 5 neurones
+```{r}
+placenta_mod3_4$CI_groupe = petit
+ind.app <- sample(1:nrow(placenta_mod3_4), 60)
+placenta.app <- placenta_mod3_4[ind.app,]
+placenta.test <- placenta_mod3_4[-ind.app,]
+
+formule = as.formula(CI_groupe ~ G.O..F. + C.004 + N.076 + Lop + T.N..P. + Mv + nRCOOR + H.052 + FDI + HNar + G.F..F. + nR10 + BCUT_PEOE_1 + nR11 + MATS7p + MATS2p + X5Av + GATS7m + PW4 + MATS7m )
+
+reseau3.app = neuralnet(formule, data = placenta.app, hidden = c(2))
+reseau3.test = neuralnet(formule, data = placenta.test, hidden = c(2))
+  
+predire3.app = compute(reseau3.app, placenta.app[,1:20], rep = 1)
+predire3.test = compute(reseau3.test, placenta.test[,1:20], rep = 1)
+  
+prediction.3.app = ifelse(predire3.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.3.test = ifelse(predire3.test$net.result[,1] >= 0.5, 1 ,0)
+  
+confiance.3.app <- table(prediction.3.app, placenta.app$CI_groupe, dnn = c("predit", "observe"))
+confiance.3.test <- table(prediction.3.test, placenta.test$CI_groupe, dnn = c("predit", "observe"))
+  
+Valeurs.app.3 = c(acc(confiance.3.app), err(confiance.3.app), sens(confiance.3.app), spec(confiance.3.app), scor(confiance.3.app))
+
+Valeurs.test.3 = c(acc(confiance.3.test), err(confiance.3.test), sens(confiance.3.test), spec(confiance.3.test), scor(confiance.3.test))
+
+Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score")
+kable(data.frame(Paramètres, Valeurs.app.3, Valeurs.test.3))
+```
+
+## Tableaux de confusion
+
+Prédiction avec une couche de 2 neurones dans l'échantillon d'apprentissage
+```{r}
+knitr::kable(confiance.3.app)
+```
+
+Prédiction avec une couche de 2 neurones dans l'échantillon test
+```{r}
+knitr::kable(confiance.3.test)
+```
+
+##
+```{r}
+
+formule = as.formula(CI_groupe ~ G.O..F. + C.004 + N.076 + Lop + T.N..P. + Mv + nRCOOR + H.052 + FDI + HNar + G.F..F. + nR10 + BCUT_PEOE_1 + nR11 + MATS7p + MATS2p + X5Av + GATS7m + PW4 + MATS7m )
+
+reseau3.app = neuralnet(formule, data = placenta.app, hidden = c(5))
+reseau3.test = neuralnet(formule, data = placenta.test, hidden = c(5))
+  
+predire3.app = compute(reseau3.app, placenta.app[,1:20], rep = 1)
+predire3.test = compute(reseau3.test, placenta.test[,1:20], rep = 1)
+  
+prediction.3.app = ifelse(predire3.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.3.test = ifelse(predire3.test$net.result[,1] >= 0.5, 1 ,0)
+  
+confiance.3.app <- table(prediction.3.app, placenta.app$CI_groupe, dnn = c("predit", "observe"))
+confiance.3.test <- table(prediction.3.test, placenta.test$CI_groupe, dnn = c("predit", "observe"))
+  
+Valeurs.app.3 = c(acc(confiance.3.app), err(confiance.3.app), sens(confiance.3.app), spec(confiance.3.app), scor(confiance.3.app))
+
+Valeurs.test.3 = c(acc(confiance.3.test), err(confiance.3.test), sens(confiance.3.test), spec(confiance.3.test), scor(confiance.3.test))
+
+Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score")
+
+kable(data.frame(Paramètres, Valeurs.app.3, Valeurs.test.3))
+```
+
+## Tableaux de confusion
+
+Prédiction avec une couche de 5 neurones dans l'échantillon d'apprentissage
+```{r}
+knitr::kable(confiance.3.app)
+```
+
+Prédiction avec une couche de 5 neurones dans l'échantillon test
+```{r}
+knitr::kable(confiance.3.test)
+```

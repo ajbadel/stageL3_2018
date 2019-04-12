@@ -1,0 +1,207 @@
+---
+title: "Y-SCRAMBLING (vecteur 0/1)"
+author: "Marc XU"
+date: "Avril 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
+---
+
+# Neuron Network 
+```{r message = FALSE}
+set.seed(23)
+#{data-background="neurone.png"}
+library("neuralnet")
+library("mclust")
+library("caret")
+library("ROCR")
+library("knitr")
+library("GGally")
+library("MLmetrics") # calcul de F1.Score
+library("mltools") # calcul du coeff de correl. de Matthiew
+
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = FALSE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
+```
+
+```{r}
+setwd("../Marc")
+getwd()
+placenta_mod2 = na.omit(read.table(".././data/placenta90.138.txt", dec = ".", sep = "\t", header =TRUE))
+```
+
+```{r}
+# Les fonctions
+
+# La fonction accuracy
+acc = function (resultats) {
+  return(sum(diag(resultats)) / sum(resultats))
+}
+
+# La fonction erreur
+err = function (resultats) {
+  return(1 - (sum(diag(resultats)) / sum(resultats)))
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  return((2 * resultats[2,2]) / (2 * resultats[2,2] + resultats[1,2] + resultats[2,1]))
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
+}
+
+# Les fonctions
+prediction2 = function (reseau) {
+  realite2 = as.numeric(reseau$response)
+  prediction2 = reseau$net.result
+  results <- data.frame(actual = realite2, prediction = prediction2)
+  names(results) <- c("Realité", "Prédiction")
+  return(results)
+}
+perfection2 = function(matrice) {
+  acc.app <- acc(matrice)
+  err.app <- err(matrice)
+  perf.app <- c(acc.app, err.app)
+  names(perf.app) <- c("accuracy", "erreur")
+  return(perf.app)
+}
+```
+
+## Travaux
+```{r}
+var.table <- apply(placenta_mod2[,3:ncol(placenta_mod2)], MARGIN = 2, FUN = var)
+placenta_mod2_2 = placenta_mod2[,-c(which(var.table <= 0.01))]
+##########
+mat.Cor = cor(placenta_mod2_2[,-(which(colnames(placenta_mod2_2)== "Noms"))])
+placenta_mod2_2 = placenta_mod2_2[,-(findCorrelation(mat.Cor, cutoff = 0.8))]
+##########
+placenta_mod2_3 = as.data.frame(scale(placenta_mod2_2[-1], center = TRUE, scale = TRUE))
+##########
+CI_groupe = as.factor(ifelse(placenta_mod2$CI <= 0.5, "petitCI", "grandCI"))
+petit = as.numeric(CI_groupe == "petitCI")
+```
+
+
+```{r}
+CI_groupe_melange = as.data.frame(col = 100, rep(NA, 90))
+for (i in 1:100) {
+  CI_groupe_melange[i] = sample(petit, 90)
+}
+
+placenta_mod2_3 = placenta_mod2_3[,-1]
+```
+
+## Prédiction avec une couche de 5 neurones
+```{r}
+ind.app <- sample(1:nrow(placenta_mod2_3), 60)
+#placenta.app <- placenta_mod2_3[ind.app,]
+#placenta.test <- placenta_mod2_3[-ind.app,]
+
+accuracy.cal.app = 0
+t.erreur.cal.app = 0
+sensibil.cal.app = 0
+specific.cal.app = 0
+F1.score.cal.app = 0
+
+accuracy.cal.test = 0
+t.erreur.cal.test = 0
+sensibil.cal.test = 0
+specific.cal.test = 0
+F1.score.cal.test = 0
+
+for (i in 1:100) {
+  placenta_mod2_3$CI_groupe_mel = CI_groupe_melange[i]
+  names(placenta_mod2_3[,"CI_groupe_mel"]) = c("CI_groupe_mel")
+  placenta.app <- placenta_mod2_3[ind.app,]
+  placenta.test <- placenta_mod2_3[-ind.app,]
+  
+  formule = as.formula(CI_groupe_mel ~ a_base + BCUT_PEOE_1 + BCUT_SMR_2 + b_max1len + GCUT_SMR_0 + GCUT_SMR_2 + logS + mutagenic + PEOE_VSA.0 + PEOE_VSA.5 + PEOE_VSA.6 + PEOE_VSA.0.1 + PEOE_VSA_FPOS + SlogP_VSA5 + SlogP_VSA8 + AMW + Mv + nTB + nR06 + nR09 + nR10 + nR11 + HNar + PW4 + PJI2 + Lop + T.N..P. + T.O..Cl. + X3Av + X5Av + MATS1m + MATS2m + MATS7m + MATS8m + MATS5v + MATS6v + MATS4e + MATS7e + MATS2p + MATS6p + MATS7p + MATS8p + GATS4m + GATS5m + GATS6m + GATS7m + GATS4v + GATS2e + GATS2p +SPAM + FDI + G.O..F. + G.S..F. + G.F..F. + nR.Cp + nRCOOR + nArCONHR + nRCO + nCONN + nN.C.N. + nRNHR + nArNR2 + nN. + nNq + nN.CO.2 + nArOR + nPyrrolidines + ntH.Thiophenes + nThiophenes + nPyridines + nPyridazines + nPyrazines + C.004 + C.012 + C.015 + C.020 + C.026 + C.027 + C.029 + C.034 + H.046 + H.047 + H.051 + H.052 + H.054 + O.060 + N.071 + N.073 + N.075 + N.076 + N.078 + N.079 + F.081 + Cl.090 + S.109 + P.117 + Ui + MLOGP2 + ALOGP2)
+  
+  reseau2.app = neuralnet(formule, data = placenta.app, hidden = c(5))
+  reseau2.test = neuralnet(formule, data = placenta.test, hidden = c(5))
+  
+  predire2.app = compute(reseau2.app, placenta.app[,1:99], rep = 1)
+  predire2.test = compute(reseau2.test, placenta.test[,1:99], rep = 1)
+  
+  prediction.2.app = ifelse(predire2.app$net.result[,1] >= 0.5, 1 ,0)
+  prediction.2.test = ifelse(predire2.test$net.result[,1] >= 0.5, 1 ,0)
+  
+  confiance.2.app <- table(prediction.2.app, placenta.app$CI_groupe_mel, dnn = c("predit", "observe"))
+  confiance.2.test <- table(prediction.2.test, placenta.test$CI_groupe_mel, dnn = c("predit", "observe"))
+  
+  accuracy.cal.app = acc(confiance.2.app) + accuracy.cal.app
+  t.erreur.cal.app = err(confiance.2.app) + t.erreur.cal.app
+  sensibil.cal.app = sens(confiance.2.app) + sensibil.cal.app
+  specific.cal.app = spec(confiance.2.app) + specific.cal.app
+  F1.score.cal.app = scor(confiance.2.app) + F1.score.cal.app
+  
+  accuracy.cal.test = acc(confiance.2.test) + accuracy.cal.test
+  t.erreur.cal.test = err(confiance.2.test) + t.erreur.cal.test
+  sensibil.cal.test = sens(confiance.2.test) + sensibil.cal.test
+  specific.cal.test = spec(confiance.2.test) + specific.cal.test
+  F1.score.cal.test = scor(confiance.2.test) + F1.score.cal.test
+}
+
+accuracy.cal.app = accuracy.cal.app/100
+t.erreur.cal.app = t.erreur.cal.app/100
+sensibil.cal.app = sensibil.cal.app/100
+specific.cal.app = specific.cal.app/100
+F1.score.cal.app = F1.score.cal.app/100
+
+accuracy.cal.test = accuracy.cal.test/100
+t.erreur.cal.test = t.erreur.cal.test/100
+sensibil.cal.test = sensibil.cal.test/100
+specific.cal.test = specific.cal.test/100
+F1.score.cal.test = F1.score.cal.test/100
+
+Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score")
+Valeurs.app.2 = c(accuracy.cal.app, t.erreur.cal.app, sensibil.cal.app, specific.cal.app, F1.score.cal.app)
+Valeurs.test.2 = c(accuracy.cal.test, t.erreur.cal.test, sensibil.cal.test, specific.cal.test, F1.score.cal.test)
+kable(data.frame(Paramètres, Valeurs.app.2, Valeurs.test.2))
+```
+
+## Tableaux de confusion
+
+Prédiction avec une couche de 5 neurones dans l'échantillon d'apprentissage
+```{r}
+knitr::kable(confiance.2.app)
+```
+
+Prédiction avec une couche de 5 neurones dans l'échantillon test
+```{r}
+knitr::kable(confiance.2.test)
+```
+
