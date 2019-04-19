@@ -1,38 +1,78 @@
 ---
-title: "Présentation PDF"
+title: "Neuron Network"
 author: "Marc XU"
-date: "29 mars 2019"
+date: "19 avril 2019"
 output:
   pdf_document: default
   html_document: default
 ---
 
+#Projet
+
+Le projet de ce stage est de prédire si la molécule sera-t-elle apte à passer la barrière placentaire ou pas.
+
+# Introduction
+
+"Un réseau de neurones artificiels (réseau neuronal artificiel) est un système dont la conception est inspirée du fonctionnement des neurones biologiques, et qui par la suite s'est rapproché des méthodes statistiques." (Wikipédia).  
+
+Les réseaux de neurones se basent initialement sur les neurones biologiques en se servant des outils mathématiques dont les probabilités.  
+
+
+## Un neurone 
+
+Un neurone biologique est composé de trois parties principales :
+un corps cellulaire, un axone (lien servant à la transmission des signaux) et une synapse (enclenchement d'un potentiel d'action dans le neurone pour activer la communication au neurone suivant).  
+
+Dans un réseau de neurones, la communication entre les neurones se fait par des signaux électriques nommées "influx nerveux". L'influx nerveux traverse le neurone reçu dans les dendrites puis le long de l'axone et termine son chemin dans la terminaison synaptique. Ce signal se traduit par des neurotransmetteurs (la quantité dépend de la fréquence du signal).  
+
+![Schéma de la structure d'un neurone et d'une synapse biologique.](neurone1.jpg)  
+
+## Un réseau de neurone artificiel (neuron network)
+
+Cette méthode est un terme qui ressort de plus en plus souvent lorsqu'on parle de "deep learning". Mais c'est encore un terme assez vague.  
+
+Le "deep learning" est la prédiction d'une sortie Y (caractéristique) via un ensemble de données Xi en entrée (descripteurs), avec un algorithme permettant de prédire une caractéristique des observations.
+
+![Schématisation algorithmique d’un neurone artificiel.](neurone2.png)  
+
+La figure 2 représente un perceptron, on a une couche de neurones (qui sont également appelés des variables d'entrées). Cette méthode peut s'appliquer à la classification binaire linéaire. Lorsqu'on fait de la prédiction, il y a toujours un risque d'erreur. De ce fait pour réduire cette erreur, on doit ajuster le perceptron (poids de connexion), c'est-à-dire affiner les résultats en augmentant le nombre de neurones.  
+
+Un réseau de neurone plus dévelopé est composé de milliers voire de millions de neurones organisés en couches interconnectées (couches cachés) grâce à des liens pondérés (Wi). Chaque noeud est caractérisé par l’ensemble [Fi (fonction d’activation) + Ci (condition d’activation)]. Ainsi pour obtenir les meilleurs résultats de prédiction et d'estimation, on doit trouver la combinaison optimale des trois paramètres (Wi + Fi + Ci).  
+
+Donc l'utilisation des réseaux de neurones est donc intéressant pour analyser nos données et trouver si une molécule serait-elle capable ou pas de passer la barrière placentaire.  
+
 # Réseaux de neurones
 
-Avec le logiciel Rmarkdown (ou RStudio), on peut utiliser deux librairies qui permettent toutes les deux de faire des calculs d'apprentissage sur les réseaux neurones.  
-Les deux librairies sont `nnet` et `neuralnet`.  
+Nous allons travailler les réseaux de neurones avec le logiciel Rmarkdown (ou RStudio). Ce logiciel est un excellent outil mathématiques notamment dans les outils de probabilités et statistiques.  
+
+Il existe deux librairies qui permettent toutes les deux de faire des calculs d'apprentissage sur les réseaux neurones.  
+Les deux librairies sont `nnet` et `neural net`. Ces deux librairies seront alors étudiées et on déterminera laquelles des deux utilisées.  
 
 ## Libraries `nnet`
 
-La librarie `nnet` est la plus ancienne des deux librairies. Cette librairie est utiliser pour les réseaux neuronaux en aval avec une seule couche cachée (et pour les modèles log-linéaires multinomiaux).  
+La librarie `nnet` est la plus ancienne des deux librairies. Cette librairie est utiliser pour les réseaux neuronaux en aval avec une seule couche cachée (et pour les modèles log-linéaires multinomiaux). La condition d'une unique couche neuronal ressemble fortement au perceptron.  
 
-Il existe une fonction `nnet` qui permet d'installer un réseau neuronal à couche unique caché. Pour le calcul de probabilités, nous pouvons utiliser la fonction `predict`.  
+La librairie contient une fonction `nnet` qui permet d'installer un réseau neuronal à couche unique caché. Pour le calcul de probabilités, nous pouvons utiliser la fonction `predict`.  
 
 ## Librairie `neuralnet`  
 
 La librarie `neuralnet` permet des réglages flexibles par le biais d'un choix personnalisé d'erreurs et d'une fonction d'activation.  
 
-Avec la fonction `neuralnet`, nous pouvons installer un réseau neuronal à un ou plusieurs couches cachés, nous sommes donc plus limités dans le nombre de couches cachés. Cependant, pour calculer les probabilités, nous devrons alors utiliser la fonction `compute`.  
+La librairie possède une fonction `neuralnet` pouvant installer un réseau neuronal à un ou plusieurs couches cachés, nous sommes donc moins limités dans le nombre de couches cachés. Cependant, pour calculer les probabilités, nous devrons alors utiliser la fonction `compute`.  
 
 # Utilisation des deux méthodes sur les données d'IRIS
 
+Le modèle IRIS est un jeu de données qui restent assez facilement compréhensible et également facilement interprétable. Il y a peu de descripteurs (4 descripteurs : longueur et largeur des sépales et pétales), c'est un modèle de faible complexité.
+
+Pour travailler sur la prédiction avec le modèle d'IRIS, notre descripteur à prédire est de quelle espèce est l'individu contenu dans le vecteur "Species". Il existe trois différentes espèces : SETOSA, VERSICOLOR et VIRGINICA.  
+
 ## Création de la matrice des données
 
-Pour les deux méthodes, nous avons crée trois nouveaux vecteurs qui servent à montrer si l'individu est-il de l'espèce d'IRIS ou pas. Par exemple pour l'espèce SETOSA, on crée un vecteur qui contient deux valeurs. Soit "1" soit "0", qui représente le fait d'être SETOSA et le fait de ne pas être SETOSA respectivement.  
+Pour les deux méthodes, nous avons crée trois nouveaux vecteurs qui servent à montrer si l'individu est-il de l'espèce choisit ou pas. Par exemple pour l'espèce SETOSA, on crée un vecteur qui contient deux valeurs. Soit "1" soit "0", qui représente le fait d'être SETOSA et le fait de ne pas être SETOSA (donc VERSICOLOR/VIRGINICA) respectivement.  
 
 ### Réseaux de neurones avec `nnet`  
 
-Les trois vecteurs crées serviront pour calculer AUC (aire sous la courbe)  
+Les trois vecteurs crées serviront pour calculer AUC (aire sous la courbe).   
 
 ### Réseaux de neurones avec `neuralnet`  
 
@@ -106,7 +146,7 @@ Nous allons employer une boucle `for` qui fera trois choses :
 
 On utilise la fonction `tune.nnet`  
 La valeur de `best performance` donne le meilleur rendement atteint.
-knitr::kable(confiance.grand
+
 # Comparaison  
 
 ## Neuralnet  
@@ -131,3 +171,40 @@ Avantages :
 Inconvénients :  
 
   - on ne peut pas affiner les résultats en modifiant le nombre de couches cachées  
+
+# Étude des données Edragon avec `neuralnet`
+
+## Présentation des données
+
+Le jeu de données contient 90 individus (90 lignes) et 138 variables (138 colonnes). 
+
+ACP : permet de réduire le nombre de variables en seulement deux, trois voire quatre composantes principales en rassemblant le maximun d'informations dans chaque variable. Lorsqu'on fait un plot de l'ACP, la grande majorité des informations se trouvent dans PC1 (composante princpale 1). Ccependant les PC2 et PC3 contiennent des informations non négligeables, il est dont nécessaire des les prendre en compte.   
+
+Après visualisation par un `biplot`, on peut difficilement distinguer les individus, il y a beaucoup de variable.
+
+## Nettoyage des données
+
+Le jeu de données contenaient encore des variables qui devaient être supprimées.  
+
+On a vérifié s'il y contenait toujours des variables à variance nulle. On a utilisé les fonctions `apply(... FUN = var))` qui a permis de calculer la variance de chaque colonne et `which` qui permet de choisir que les variances nulles ou du moins des variances faibles (proche de 0) et de les enlever du jeu de données.  
+
+Ensuite, nous avons cherché s'il y avait encore des variables corrélées. On aurait d'abord utilisé la fonction `cor`  
+`mat.Cor = cor(placenta2[,-(which(colnames(placenta2)== "Noms"))])`  
+`varSup = findCorrelation(mat.Cor, cutoff = 0.8)`  
+`placenta2 = placenta2[,-varSup]`  
+
+Normaliser les données  
+`placenta = as.data.frame(scale(placenta[-1], center = TRUE, scale = TRUE))`  
+
+## Analyse du jeu de données
+
+Le facteur auquel on va travailler est la clairance. On a choisit de créer un vecteur qui serait un descripteur qualitative. Séparation des individus ayant une clairance supérieure à 0.5 et inférieure à 0.5.
+
+
+
+# Crédits
+
+Article sur les réseaux de neurones : https://meritis.fr/ia/deep-learning/  
+
+Performant : le modèle présente de bonnes performances (prédit bien)
+Reproductible : le modèle est applicable à d'autres jeux de données
