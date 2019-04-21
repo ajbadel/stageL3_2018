@@ -91,7 +91,7 @@ scor = function (resultats) {
   return((2 * resultats[1,1]) / (2 * resultats[1,1] + resultats[1,2] + resultats[2,1]))
 }
 
-# La fonction ccm
+# La fonction mcc
 ccm1 = function (resultats) {
   return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
 }
@@ -100,6 +100,7 @@ ccm1 = function (resultats) {
 ```{r}
 table(iris$Species)
 ```
+
 # Données IRIS
 
 ## Les données IRIS
@@ -162,7 +163,7 @@ prediction2 = function (reseau) {
   names(results) <- c("Realité", "Prédiction")
   return(results)
 }
-perfection2 = function(matrice) {
+perfection2 = function(ma1trice) {
   acc.app <- acc(matrice)
   err.app <- err(matrice)
   perf.app <- c(acc.app, err.app)
