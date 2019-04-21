@@ -26,7 +26,6 @@ library("e1071")
 #library ("ggvis")
 library("GGally")
 library("RColorBrewer")
-library("e1071")
 ```
 
 ```{r}
@@ -138,7 +137,7 @@ donnee_ss_ab = donnee_ss_cor2[,-21]
 
 ***
 Après suppression du descripteur "Wap"
-```{r}
+```{r, fig.align= "center"}
 boxplot(donnee_ss_ab[,c(20:40)], las = 2)
 ncol_donnee_ss_ab = ncol(donnee_ss_ab)
 names(ncol_donnee_ss_ab) = "Nombres de descripteurs restant"
@@ -177,6 +176,8 @@ plot(donnee.acp)
 #biplot(donnee.acp)
 ```
 
+##Création des modèles d'apprentissage et de test
+
 ***
 Création d'un modèle d'apprentissage
 ```{r}
@@ -202,7 +203,7 @@ matTest_row
 ```
 
 ***
-Verification de la répartition de d'individus dans nos échantillons (test d'homogénéité)
+Verification de la répartition des individus dans nos échantillons (test d'homogénéité)
 ```{r homogeneite, fig.align= "center"}
 par(mfrow=c(1,2))
 boxplot (mat.App[,c(10:20)], las = 2)
@@ -268,8 +269,53 @@ tabapp_sig
 ```
 
 ***
-```{r}
-#model.app = svm(CI~., data = mat.App, kernel = "polynomial", cost = 1, scale =F)
+Conclusion, le modele linéaire semble plus approprié
+
+***
+```{r kernel_lin2}
+modelapp_lin2 = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "linear", cost = 2)
+#attributes (modelapp)
+summary(modelapp_lin2)
 ```
 
+***
+```{r pred_lin2}
+predapp_lin2 = predict(modelapp_lin2, mat.App)
+tabapp_lin2 = table(predit = predapp_lin2, observe = mat.App$CI_class)
+tabapp_lin2
+```
+
+***
+Conclusion, le cout à 2 semble plus approprié
+
+***
+Et pour le modele test:
+```{r modeltest_lin}
+modeltest_lin = svm(CI_class ~., data = mat.Test, type = "C-classification", kernel = "linear")
+#attributes (modelapp)
+summary(modeltest_lin)
+```
+
+***
+```{r pred_lintest}
+predtest_lin = predict(modeltest_lin, mat.Test)
+tabtest_lin = table(predit = predtest_lin, observe = mat.Test$CI_class)
+tabtest_lin
+```
+
+##Calcul des performances des modèles:
+
+***
+Pour le modèle d'apprentissage;
+```{r}
+tabTBPapp = tx.bon(tabapp_lin2)
+taberreurapp = tx.erreur(tabapp_lin2)
+tabsensapp= sensibilite(tabapp_lin2)
+tabspecapp = specificite(tabapp_lin2)
+
+names(tabsensapp) = "sensibilite du modele d'apprentissage"
+tabsensapp
+names(tabspecapp) = "specificite du modele d'apprentissage"
+tabspecapp
+```
 
