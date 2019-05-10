@@ -12,7 +12,7 @@ output:
     highlight: tango # ou  default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, and textmate
     code_folding: hide
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -97,9 +97,11 @@ new_table = na.omit(new_table)
 
 On remplace la valeur aberrante par "NA", et on l'enlève de la ligne
 
+* !! attention : tu as voulu dire on enlève toute la ligne correspondant à ce composé ? *
+
 ### Données manquantes
 
-Dans certaines données, il y a des valeurs manquantes qu'on ne peut pas traiter et sont remplacés par -999. SI une colonne contenant au moins une valeur manquante, alors il faudra supprimer la colonne. 
+Dans certaines lignes, il y a des valeurs manquantes qu'on ne peut pas traiter et sont remplacés par -999. SI une colonne contenant au moins une valeur manquante, alors il faudra supprimer la colonne. 
 
 ```{r}
 new_table[new_table == -999] <- NA
@@ -121,7 +123,7 @@ Nous remplaçons les valeurs manquantes, affichées par "-999", par les NA. Ensu
 
 which(, arr.ind) : Nous n'avons pas réussi à utiliser la fonction "which", cependant nous avons trouvé un intermédiaire pour remplacer les valeurs manquantes par NA.
 
-``` {r, eval = F}
+```{r, eval = F}
 # Bouble "for" qui cherche les colonnes où les valeurs manquantes sont supérieurs à un certain seuil.
 
 for (i in nrow(val_manq):1) {
