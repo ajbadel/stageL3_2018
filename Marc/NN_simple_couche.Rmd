@@ -1,0 +1,1147 @@
+---
+title: "NEURALNET PRESENTATION"
+author: "Marc XU"
+date: "-- mars 2019"
+output:
+  revealjs::revealjs_presentation:
+    center: yes
+    highlight: kate
+    theme: league
+    transition: zoom
+---
+
+# Neuron Network 
+```{r message = FALSE}
+set.seed(23)
+#{data-background="neurone.png"}
+library("neuralnet")
+library("mclust")
+library("caret")
+library("ROCR")
+library("knitr")
+library("GGally")
+library("MLmetrics") # calcul de F1.Score
+library("mltools") # calcul du coeff de correl. de Matthiew
+
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, 
+  fig.path = 'figures/iris_',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = FALSE, 
+  eval = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  results = TRUE, 
+  comment = "")
+
+setwd("../Marc")
+getwd()
+placenta1 = na.omit(read.table(".././data/placenta90.208.Rdata.txt", dec = ".", sep = "\t", header =TRUE))
+```
+
+```{r}
+# Les fonctions
+
+# La fonction accuracy
+acc = function (resultats) {
+  return(sum(diag(resultats)) / sum(resultats))
+}
+
+# La fonction erreur
+err = function (resultats) {
+  return(1 - (sum(diag(resultats)) / sum(resultats)))
+}
+
+# La fonction sensibilité
+sens = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[2,2] / (resultats[2,2] + resultats[1,2]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction spécifité
+spec = function (resultats) {
+  if (nrow(resultats) >= 2) {
+    return(resultats[1,1] /(resultats[2,1] + resultats[1,1]))
+  } else {
+    return(NA)
+  }
+}
+
+# La fonction F1_Score
+scor = function (resultats) {
+  return((2 * resultats[2,2]) / (2 * resultats[2,2] + resultats[1,2] + resultats[2,1]))
+}
+
+# La fonction ccm
+ccm1 = function (resultats) {
+  return((resultats[1,1] * resultats[2,2] - resultats[1,2] * resultats[2,1]) / (sqrt((resultats[1,1]+resultats[1,2]) * (resultats[1,1]+resultats[2,1]) * (resultats[2,2]+resultats[1,2]) *  (resultats[2,2]+resultats[2,1]))))
+}
+
+# Les fonctions
+prediction2 = function (reseau) {
+  realite2 = as.numeric(reseau$response)
+  prediction2 = reseau$net.result
+  results <- data.frame(actual = realite2, prediction = prediction2)
+  names(results) <- c("Realité", "Prédiction")
+  return(results)
+}
+perfection2 = function(matrice) {
+  acc.app <- acc(matrice)
+  err.app <- err(matrice)
+  perf.app <- c(acc.app, err.app)
+  names(perf.app) <- c("accuracy", "erreur")
+  return(perf.app)
+}
+```
+
+# Données PLACENTA
+
+## Les données PLACENTA
+```{r}
+dim(placenta1)
+kable(head(placenta1[,c(1:5)]))
+```
+
+## Résumés des données
+```{r}
+summary(placenta1[,c(1:5)])
+```
+
+## ACP (sans normalisé)
+```{r}
+placenta1 = scale(placenta1, center = TRUE, scale = FALSE)
+placenta1.acp <- prcomp(as.matrix(placenta1[,2:nrow(placenta1)]))
+plot(placenta1.acp)
+```
+
+## ACP (sans normalisé)
+```{r}
+biplot(placenta1.acp)
+```
+
+## ACP (normalisé)
+```{r}
+placenta1 = scale(placenta1, center = TRUE, scale = TRUE)
+placenta1.acp <- prcomp(as.matrix(placenta1[,2:nrow(placenta1)]))
+vp_pourcent <- cumsum(placenta1.acp$sdev) / sum(placenta1.acp$sdev)
+barplot(vp_pourcent[1:10])
+plot(placenta1.acp)
+```
+
+## ACP (normalisé)
+```{r}
+biplot(placenta1.acp)
+```
+
+# Nettoyage des données
+```{r}
+var.table <- apply(placenta1[,2:ncol(placenta1)], MARGIN = 2, FUN = var)
+which(var.table <= 0.1)
+#placenta1[,-c(which(var.table <= 0.1))]
+
+##########
+mat.Cor = cor(placenta1)
+findCorrelation(mat.Cor, cutoff = 0.9)
+#placenta1.2 = placenta1[,-(findCorrelation(mat.Cor, cutoff = 0.9))]
+
+##########
+placenta1.2 = as.data.frame(placenta1)
+#placenta1.2 = as.data.frame(scale(placenta1[-1], center = TRUE, scale = TRUE))
+placenta1.2$CI_groupe = as.factor(ifelse(placenta1.2$CI <= 0.5, "petitCI", "grandCI"))
+```
+
+## Visualisation des données (boxplot)
+```{r}
+boxplot(placenta1.2[,c(2:ncol(placenta1.2))])
+```
+
+## Visualisation des données (histogramme)
+```{r}
+hist(placenta1[,"CI"])
+```
+
+## Visualisation des données (plot)
+```{r}
+placenta.dist <- dist(placenta1.2[,3:ncol(placenta1.2)-1])
+placenta.mds <- cmdscale(placenta.dist)
+plot(placenta.mds, col = placenta1.2$CI_groupe)
+```
+
+Rouge = Petite CI || Noir = Grande CI
+
+# Prédiction
+```{r}
+placenta1.2$CI_groupe = as.factor(ifelse(placenta1.2$CI <= 0.5, "petitCI", "grandCI"))
+petit = as.numeric(placenta1.2$CI_groupe == "petitCI")
+
+data.placenta = data.frame(placenta1.2[,c(2:ncol(placenta1))], petit)
+ind.app <- sample(1:nrow(data.placenta), 60)
+placenta.app <- data.placenta[ind.app,]
+placenta.validation <- data.placenta[-ind.app,]
+```
+
+## La normalité des deux échantillons
+```{r}
+par(mfrow = c(1,2))
+boxplot(placenta.app[,c(1:10)])
+boxplot(placenta.validation[,c(1:10)])
+```
+
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 1 neurone
+
+```{r}
+formule = as.formula(petit ~ ast_fraglike + ast_fraglike_ext + ast_violation + a_don + a_ICM + BCUT_SLOGP_1 + BCUT_SLOGP_3 + BCUT_SMR_0 + b_1rotN + b_double + chiral_u + density + FCharge + GCUT_PEOE_1 + GCUT_PEOE_2 + GCUT_SLOGP_1 + GCUT_SLOGP_2 + GCUT_SMR_1 + lip_violation + logP.o.w. + opr_leadlike + PEOE_PC. + PEOE_PC..1 + PEOE_RPC. + PEOE_RPC..1 + PEOE_VSA.1 + PEOE_VSA.2 + PEOE_VSA.3 + PEOE_VSA.4 + PEOE_VSA.1.1 + PEOE_VSA.2.1 + PEOE_VSA.3.1 + PEOE_VSA.4.1 + PEOE_VSA.5.1 + PEOE_VSA.6.1 + PEOE_VSA_FHYD + PEOE_VSA_FPNEG + PEOE_VSA_FPPOS + PEOE_VSA_NEG + PEOE_VSA_PNEG + PEOE_VSA_POL + PEOE_VSA_PPOS + reactive + SlogP_VSA0 + SlogP_VSA1 + SlogP_VSA2 + SlogP_VSA3 + SlogP_VSA4 + SlogP_VSA6 + SMR_VSA1 + SMR_VSA2 + SMR_VSA3 + SMR_VSA4 + vsa_acc + vsa_base + vsa_don + vsa_other + vsa_pol + Ms + ARR + nCIR + nAB + nH + nN + nO + nR05 + nR07 + nR08 + TI2 + J + Jhetp + MAXDN + MAXDP + S3K + PW2 + D.Dr05 + D.Dr06 + D.Dr08 + D.Dr09 + D.Dr10 + T.Cl..Cl. + SRW05 + MPC10 + PCR + X0Av + X1Av + ATS7m + MATS3m + MATS4m + MATS5m + MATS1v + MATS2v + MATS3v + MATS8v + MATS3p + MATS4p + GATS1m + GATS2m + GATS3m + GATS8m + GATS3v + GATS8v + GATS3e + GATS5e + GATS7e + GATS8e + GATS1p + GATS3p + JGI1 + JGI3 + JGI5 + JGI7 + JGI8 + JGI9 + JGI10 + JGT + DP20 + J3D + PJI3 + L.Bw + AROM + DISPm + DISPv + DISPe + G.N..N. + G.N..O. + G.N..S. + G.N..Cl. + G.O..O. + G.S..S. + nCs + nCrs + nCrt + nCbH + nCb. + nCconj + nArCOOR + nRCONH2 + nRCONHR + nRCONR2 + nROCON + nArCO + nC..N.N2 + nArNH2 + nArNHR + nRNR2 + nArOH + nOHp + nOHs + nOHt + nRSR + nArX + nBeta.Lactams + nOxolanes + nThiazoles + nHBonds + C.003 + C.007 + C.008 + C.009 + C.011 + C.016 + C.017 + C.018 + C.019 + C.025 + C.028 + C.031 + C.032 + C.033 + C.037 + C.040 + C.041 + C.043 + C.044 + H.048 + H.049 + H.053 + O.056 + O.059 + N.066 + N.067 + N.068 + N.072 + N.074 + Cl.089 + S.107 + S.108 + S.110 + Hy + MLOGP + ALOGP + LAI + GVWAI.50 + Inflammat.80 + Inflammat.50 + Depressant.80 + Psychotic.80 + Hypertens.80 + Hypertens.50 + Hypnotic.80 + Hypnotic.50 + Neoplastic.80 + Neoplastic.50 + Infective.50 + ALOGPS_logP + ALOGPS_logS)
+
+reseau1.app = neuralnet(formule, data = placenta.app, hidden = c(1))
+reseau1.validation = neuralnet(formule, data = placenta.validation, hidden = c(1))
+
+predire1.app = compute(reseau1.app, placenta.app[,1:207], rep = 1)
+predire1.validation = compute(reseau1.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.1.app = ifelse(predire1.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.1.validation = ifelse(predire1.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.1.app <- table(prediction.1.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.1.validation <- table(prediction.1.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 1 neurone PETITES CI
+```{r}
+knitr::kable(confiance.1.app)
+```
+
+## Les critères (échantillon de d'apprentissage)
+```{r}
+Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score")
+Valeurs.2.app = c(acc(confiance.1.app), err(confiance.1.app), sens(confiance.1.app), spec(confiance.1.app), scor(confiance.1.app))
+kable(data.frame(Paramètres, Valeurs.2.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 1 neurone PETITES CI
+```{r}
+knitr::kable(confiance.1.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.1.validation = c(acc(confiance.1.validation), err(confiance.1.validation), sens(confiance.1.validation), spec(confiance.1.validation), scor(confiance.1.validation))
+kable(data.frame(Paramètres, Valeurs.1.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 2 neurones
+```{r}
+reseau2.app = neuralnet(formule, data = placenta.app, hidden = c(2))
+reseau2.validation = neuralnet(formule, data = placenta.validation, hidden = c(2))
+
+predire2.app = compute(reseau2.app, placenta.app[,1:207], rep = 1)
+predire2.validation = compute(reseau2.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.2.app = ifelse(predire2.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.2.validation = ifelse(predire2.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.2.app <- table(prediction.2.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.2.validation <- table(prediction.2.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 2 neurones PETITES CI
+```{r}
+knitr::kable(confiance.2.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.2.app = c(acc(confiance.2.app), err(confiance.2.app), sens(confiance.2.app),
+                  spec(confiance.2.app), scor(confiance.2.app))
+kable(data.frame(Paramètres, Valeurs.2.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 2 neurones PETITES CI
+```{r}
+knitr::kable(confiance.2.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.2.validation = c(acc(confiance.2.validation), err(confiance.2.validation), sens(confiance.2.validation), spec(confiance.2.validation), scor(confiance.2.validation))
+kable(data.frame(Paramètres, Valeurs.2.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 3 neurones
+```{r}
+reseau3.app = neuralnet(formule, data = placenta.app, hidden = c(3))
+reseau3.validation = neuralnet(formule, data = placenta.validation, hidden = c(3))
+
+predire3.app = compute(reseau3.app, placenta.app[,1:207], rep = 1)
+predire3.validation = compute(reseau3.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.3.app = ifelse(predire3.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.3.validation = ifelse(predire3.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.3.app <- table(prediction.3.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.3.validation <- table(prediction.3.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 3 neurones PETITES CI
+```{r}
+knitr::kable(confiance.3.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.3.app = c(acc(confiance.3.app), err(confiance.3.app), sens(confiance.3.app),
+                  spec(confiance.3.app), scor(confiance.3.app))
+kable(data.frame(Paramètres, Valeurs.3.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 3 neurones PETITES CI
+```{r}
+knitr::kable(confiance.3.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.3.validation = c(acc(confiance.3.validation), err(confiance.3.validation), sens(confiance.3.validation), spec(confiance.3.validation), scor(confiance.3.validation))
+kable(data.frame(Paramètres, Valeurs.3.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 4 neurones
+```{r}
+reseau4.app = neuralnet(formule, data = placenta.app, hidden = c(4))
+reseau4.validation = neuralnet(formule, data = placenta.validation, hidden = c(4))
+
+predire4.app = compute(reseau4.app, placenta.app[,1:207], rep = 1)
+predire4.validation = compute(reseau4.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.4.app = ifelse(predire4.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.4.validation = ifelse(predire4.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.4.app <- table(prediction.4.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.4.validation <- table(prediction.4.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 4 neurones PETITES CI
+```{r}
+knitr::kable(confiance.4.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.4.app = c(acc(confiance.4.app), err(confiance.4.app), sens(confiance.4.app),
+                  spec(confiance.4.app), scor(confiance.4.app))
+kable(data.frame(Paramètres, Valeurs.4.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 4 neurones PETITES CI
+```{r}
+knitr::kable(confiance.4.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.4.validation = c(acc(confiance.4.validation), err(confiance.4.validation), sens(confiance.4.validation), spec(confiance.4.validation), scor(confiance.4.validation))
+kable(data.frame(Paramètres, Valeurs.4.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 5 neurones
+```{r}
+reseau5.app = neuralnet(formule, data = placenta.app, hidden = c(5))
+reseau5.validation = neuralnet(formule, data = placenta.validation, hidden = c(5))
+
+predire5.app = compute(reseau5.app, placenta.app[,1:207], rep = 1)
+predire5.validation = compute(reseau5.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.5.app = ifelse(predire5.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.5.validation = ifelse(predire5.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.5.app <- table(prediction.5.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.5.validation <- table(prediction.5.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 5 neurones PETITES CI
+```{r}
+knitr::kable(confiance.5.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.5.app = c(acc(confiance.5.app), err(confiance.5.app), sens(confiance.5.app),
+            spec(confiance.5.app), scor(confiance.5.app))
+kable(data.frame(Paramètres, Valeurs.5.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 5 neurones PETITES CI
+```{r}
+knitr::kable(confiance.5.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.5.validation = c(acc(confiance.5.validation), err(confiance.5.validation), sens(confiance.5.validation), spec(confiance.5.validation), scor(confiance.5.validation))
+kable(data.frame(Paramètres, Valeurs.5.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 6 neurones
+```{r}
+reseau6.app = neuralnet(formule, data = placenta.app, hidden = c(6))
+reseau6.validation = neuralnet(formule, data = placenta.validation, hidden = c(6))
+
+predire6.app = compute(reseau6.app, placenta.app[,1:207], rep = 1)
+predire6.validation = compute(reseau6.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.6.app = ifelse(predire6.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.6.validation = ifelse(predire6.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.6.app <- table(prediction.6.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.6.validation <- table(prediction.6.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 6 neurones PETITES CI
+```{r}
+knitr::kable(confiance.6.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.6.app = c(acc(confiance.6.app), err(confiance.6.app), sens(confiance.6.app),
+                  spec(confiance.6.app), scor(confiance.6.app))
+kable(data.frame(Paramètres, Valeurs.6.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 6 neurones PETITES CI
+```{r}
+knitr::kable(confiance.6.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.6.validation = c(acc(confiance.6.validation), err(confiance.6.validation), sens(confiance.6.validation), spec(confiance.6.validation), scor(confiance.6.validation))
+kable(data.frame(Paramètres, Valeurs.6.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 7 neurones
+```{r}
+reseau7.app = neuralnet(formule, data = placenta.app, hidden = c(7))
+reseau7.validation = neuralnet(formule, data = placenta.validation, hidden = c(7))
+
+predire7.app = compute(reseau7.app, placenta.app[,1:207], rep = 1)
+predire7.validation = compute(reseau7.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.7.app = ifelse(predire7.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.7.validation = ifelse(predire7.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.7.app <- table(prediction.7.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.7.validation <- table(prediction.7.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 7 neurones PETITES CI
+```{r}
+knitr::kable(confiance.7.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.7.app = c(acc(confiance.7.app), err(confiance.7.app), sens(confiance.7.app),
+                  spec(confiance.7.app), scor(confiance.7.app))
+kable(data.frame(Paramètres, Valeurs.7.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 7 neurones PETITES CI
+```{r}
+knitr::kable(confiance.7.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.7.validation = c(acc(confiance.7.validation), err(confiance.7.validation), sens(confiance.7.validation), spec(confiance.7.validation), scor(confiance.7.validation))
+kable(data.frame(Paramètres, Valeurs.7.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 8 neurones
+```{r}
+reseau8.app = neuralnet(formule, data = placenta.app, hidden = c(8))
+reseau8.validation = neuralnet(formule, data = placenta.validation, hidden = c(8))
+
+predire8.app = compute(reseau8.app, placenta.app[,1:207], rep = 1)
+predire8.validation = compute(reseau8.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.8.app = ifelse(predire8.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.8.validation = ifelse(predire8.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.8.app <- table(prediction.8.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.8.validation <- table(prediction.8.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 8 neurones PETITES CI
+```{r}
+knitr::kable(confiance.8.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.8.app = c(acc(confiance.8.app), err(confiance.8.app), sens(confiance.8.app),
+                  spec(confiance.8.app), scor(confiance.8.app))
+kable(data.frame(Paramètres, Valeurs.8.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 8 neurones PETITES CI
+```{r}
+knitr::kable(confiance.8.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.8.validation = c(acc(confiance.8.validation), err(confiance.8.validation), sens(confiance.8.validation), spec(confiance.8.validation), scor(confiance.8.validation))
+kable(data.frame(Paramètres, Valeurs.8.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 9 neurones
+```{r}
+reseau9.app = neuralnet(formule, data = placenta.app, hidden = c(9))
+reseau9.validation = neuralnet(formule, data = placenta.validation, hidden = c(9))
+
+predire9.app = compute(reseau9.app, placenta.app[,1:207], rep = 1)
+predire9.validation = compute(reseau9.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.9.app = ifelse(predire9.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.9.validation = ifelse(predire9.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.9.app <- table(prediction.9.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.9.validation <- table(prediction.9.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 9 neurones PETITES CI
+```{r}
+knitr::kable(confiance.9.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.9.app = c(acc(confiance.9.app), err(confiance.9.app), sens(confiance.9.app),
+                  spec(confiance.9.app), scor(confiance.9.app))
+kable(data.frame(Paramètres, Valeurs.9.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 9 neurones PETITES CI
+```{r}
+knitr::kable(confiance.9.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.9.validation = c(acc(confiance.9.validation), err(confiance.9.validation), sens(confiance.9.validation), spec(confiance.9.validation), scor(confiance.9.validation))
+kable(data.frame(Paramètres, Valeurs.9.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 10 neurones
+```{r}
+reseau10.app = neuralnet(formule, data = placenta.app, hidden = c(10))
+reseau10.validation = neuralnet(formule, data = placenta.validation, hidden = c(10))
+
+predire10.app = compute(reseau10.app, placenta.app[,1:207], rep = 1)
+predire10.validation = compute(reseau10.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.10.app = ifelse(predire10.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.10.validation = ifelse(predire10.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.10.app <- table(prediction.10.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.10.validation <- table(prediction.10.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 10 neurones PETITES CI
+```{r}
+knitr::kable(confiance.10.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.10.app = c(acc(confiance.10.app), err(confiance.10.app), sens(confiance.10.app),
+                  spec(confiance.10.app), scor(confiance.10.app))
+kable(data.frame(Paramètres, Valeurs.10.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 10 neurones PETITES CI
+```{r}
+knitr::kable(confiance.10.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.10.validation = c(acc(confiance.10.validation), err(confiance.10.validation), sens(confiance.10.validation), spec(confiance.10.validation), scor(confiance.10.validation))
+kable(data.frame(Paramètres, Valeurs.10.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 20 neurones
+```{r}
+reseau20.app = neuralnet(formule, data = placenta.app, hidden = c(20))
+reseau20.validation = neuralnet(formule, data = placenta.validation, hidden = c(20))
+
+predire20.app = compute(reseau20.app, placenta.app[,1:207], rep = 1)
+predire20.validation = compute(reseau20.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.20.app = ifelse(predire20.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.20.validation = ifelse(predire20.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.20.app <- table(prediction.20.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.20.validation <- table(prediction.20.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 20 neurones PETITES CI
+```{r}
+knitr::kable(confiance.20.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.20.app = c(acc(confiance.20.app), err(confiance.20.app), sens(confiance.20.app),
+                  spec(confiance.20.app), scor(confiance.20.app))
+kable(data.frame(Paramètres, Valeurs.20.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 20 neurones PETITES CI
+```{r}
+knitr::kable(confiance.20.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.20.validation = c(acc(confiance.20.validation), err(confiance.20.validation), sens(confiance.20.validation), spec(confiance.20.validation), scor(confiance.20.validation))
+kable(data.frame(Paramètres, Valeurs.20.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 30 neurones
+```{r}
+reseau30.app = neuralnet(formule, data = placenta.app, hidden = c(30))
+reseau30.validation = neuralnet(formule, data = placenta.validation, hidden = c(30))
+
+predire30.app = compute(reseau30.app, placenta.app[,1:207], rep = 1)
+predire30.validation = compute(reseau30.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.30.app = ifelse(predire30.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.30.validation = ifelse(predire30.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.30.app <- table(prediction.30.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.30.validation <- table(prediction.30.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 30 neurones PETITES CI
+```{r}
+knitr::kable(confiance.30.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.30.app = c(acc(confiance.30.app), err(confiance.30.app), sens(confiance.30.app),
+                  spec(confiance.30.app), scor(confiance.30.app))
+kable(data.frame(Paramètres, Valeurs.30.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 30 neurones PETITES CI
+```{r}
+knitr::kable(confiance.30.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.30.validation = c(acc(confiance.30.validation), err(confiance.30.validation), sens(confiance.30.validation), spec(confiance.30.validation), scor(confiance.30.validation))
+kable(data.frame(Paramètres, Valeurs.30.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 40 neurones
+```{r}
+reseau40.app = neuralnet(formule, data = placenta.app, hidden = c(40))
+reseau40.validation = neuralnet(formule, data = placenta.validation, hidden = c(40))
+
+predire40.app = compute(reseau40.app, placenta.app[,1:207], rep = 1)
+predire40.validation = compute(reseau40.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.40.app = ifelse(predire40.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.40.validation = ifelse(predire40.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.40.app <- table(prediction.40.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.40.validation <- table(prediction.40.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 40 neurones PETITES CI
+```{r}
+knitr::kable(confiance.40.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.40.app = c(acc(confiance.40.app), err(confiance.40.app), sens(confiance.40.app),
+                  spec(confiance.40.app), scor(confiance.40.app))
+kable(data.frame(Paramètres, Valeurs.40.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 40 neurones PETITES CI
+```{r}
+knitr::kable(confiance.40.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.40.validation = c(acc(confiance.40.validation), err(confiance.40.validation), sens(confiance.40.validation), spec(confiance.40.validation), scor(confiance.40.validation))
+kable(data.frame(Paramètres, Valeurs.40.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 50 neurones
+```{r}
+reseau50.app = neuralnet(formule, data = placenta.app, hidden = c(50))
+reseau50.validation = neuralnet(formule, data = placenta.validation, hidden = c(50))
+
+predire50.app = compute(reseau50.app, placenta.app[,1:207], rep = 1)
+predire50.validation = compute(reseau50.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.50.app = ifelse(predire50.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.50.validation = ifelse(predire50.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.50.app <- table(prediction.50.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.50.validation <- table(prediction.50.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 50 neurones PETITES CI
+```{r}
+knitr::kable(confiance.50.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.50.app = c(acc(confiance.50.app), err(confiance.50.app), sens(confiance.50.app),
+                  spec(confiance.50.app), scor(confiance.50.app))
+kable(data.frame(Paramètres, Valeurs.50.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 50 neurones PETITES CI
+```{r}
+knitr::kable(confiance.50.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.50.validation = c(acc(confiance.50.validation), err(confiance.50.validation), sens(confiance.50.validation), spec(confiance.50.validation), scor(confiance.50.validation))
+kable(data.frame(Paramètres, Valeurs.50.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 100 neurones
+```{r}
+reseau100.app = neuralnet(formule, data = placenta.app, hidden = c(100))
+reseau100.validation = neuralnet(formule, data = placenta.validation, hidden = c(100))
+
+predire100.app = compute(reseau100.app, placenta.app[,1:207], rep = 1)
+predire100.validation = compute(reseau100.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.100.app = ifelse(predire100.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.100.validation = ifelse(predire100.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.100.app <- table(prediction.100.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.100.validation <- table(prediction.100.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 100 neurones PETITES CI
+```{r}
+knitr::kable(confiance.100.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.100.app = c(acc(confiance.100.app), err(confiance.100.app), sens(confiance.100.app),
+                  spec(confiance.100.app), scor(confiance.100.app))
+kable(data.frame(Paramètres, Valeurs.100.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 100 neurones PETITES CI
+```{r}
+knitr::kable(confiance.100.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.100.validation = c(acc(confiance.100.validation), err(confiance.100.validation), sens(confiance.100.validation), spec(confiance.100.validation), scor(confiance.100.validation))
+kable(data.frame(Paramètres, Valeurs.100.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 150 neurones
+```{r}
+reseau150.app = neuralnet(formule, data = placenta.app, hidden = c(150))
+reseau150.validation = neuralnet(formule, data = placenta.validation, hidden = c(150))
+
+predire150.app = compute(reseau150.app, placenta.app[,1:207], rep = 1)
+predire150.validation = compute(reseau150.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.150.app = ifelse(predire150.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.150.validation = ifelse(predire150.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.150.app <- table(prediction.150.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.150.validation <- table(prediction.150.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 150 neurones PETITES CI
+```{r}
+knitr::kable(confiance.150.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.150.app = c(acc(confiance.150.app), err(confiance.150.app), sens(confiance.150.app),
+                  spec(confiance.150.app), scor(confiance.150.app))
+kable(data.frame(Paramètres, Valeurs.150.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 150 neurones PETITES CI
+```{r}
+knitr::kable(confiance.150.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.150.validation = c(acc(confiance.150.validation), err(confiance.150.validation), sens(confiance.150.validation), spec(confiance.150.validation), scor(confiance.150.validation))
+kable(data.frame(Paramètres, Valeurs.150.validation))
+```
+
+################################################
+
+# Prédiction dans l'échantillon d'apprentissage pour 1 couche = 207 neurones
+
+```{r}
+reseau207.app = neuralnet(formule, data = placenta.app, hidden = c(207))
+reseau207.validation = neuralnet(formule, data = placenta.validation, hidden = c(207))
+
+predire207.app = compute(reseau207.app, placenta.app[,1:207], rep = 1)
+predire207.validation = compute(reseau207.validation, placenta.validation[,1:207], rep = 1)
+
+prediction.207.app = ifelse(predire207.app$net.result[,1] >= 0.5, 1 ,0)
+prediction.207.validation = ifelse(predire207.validation$net.result[,1] >= 0.5, 1 ,0)
+
+confiance.207.app <- table(prediction.207.app, placenta.app$petit, dnn = c("predit", "observe"))
+confiance.207.validation <- table(prediction.207.validation, placenta.validation$petit, dnn = c("predit", "observe"))
+```
+
+## Prédiction dans l'échantillon d'apprentissage
+
+Prédiction avec une couche de 207 neurones PETITES CI
+```{r}
+knitr::kable(confiance.207.app)
+```
+
+## Les critères (échantillon d'apprentissage)
+```{r}
+Valeurs.207.app = c(acc(confiance.207.app), err(confiance.207.app), sens(confiance.207.app), spec(confiance.207.app), scor(confiance.207.app))
+kable(data.frame(Paramètres, Valeurs.207.app))
+```
+
+## Prédiction dans l'échantillon de validation
+
+Prédiction avec une couche de 207 neurones PETITES CI
+```{r}
+knitr::kable(confiance.207.validation)
+```
+
+## Les critères (échantillon de validation)
+```{r}
+Valeurs.207.validation = c(acc(confiance.207.validation), err(confiance.207.validation), sens(confiance.207.validation), spec(confiance.207.validation), scor(confiance.207.validation))
+kable(data.frame(Paramètres, Valeurs.207.validation))
+```
+
+
+# Courbe ROC
+
+Courbe ROC avec toutes les droites
+
+## Courbe de clairance d'1 couche d'1 neurone
+```{r}
+seuil <- seq(0, 1, length.out = 100)
+clairance.app <- placenta.app$petit
+vsens1 <- rep(NA, 100)
+vspe1 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire1.app$net.result[,1] >= seuil[i]
+  vsens1[i] <- sens(table(clairance.pred, clairance.app))
+  vspe1[i] <- spec(table(clairance.pred, clairance.app))
+}
+#plot(1-vspe1, vsens1, type = "l", col = "red", xlab = "FPR = 1-Spe", ylab = "TPR = Sens", main = "Courbe ROC de clairance pour 1 couche d'1 neurone")
+```
+
+## Courbe de clairance d'1 couche de 2 neurones
+```{r}
+vsens2 <- rep(NA, 100)
+vspe2 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire2.app$net.result[,1] >= seuil[i]
+  vsens2[i] <- sens(table(clairance.pred, clairance.app))
+  vspe2[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 3 neurones
+```{r}
+vsens3 <- rep(NA, 100)
+vspe3 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire3.app$net.result[,1] >= seuil[i]
+  vsens3[i] <- sens(table(clairance.pred, clairance.app))
+  vspe3[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 4 neurones
+```{r}
+vsens4 <- rep(NA, 100)
+vspe4 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire4.app$net.result[,1] >= seuil[i]
+  vsens4[i] <- sens(table(clairance.pred, clairance.app))
+  vspe4[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 5 neurones
+```{r}
+vsens5 <- rep(NA, 100)
+vspe5 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire5.app$net.result[,1] >= seuil[i]
+  vsens5[i] <- sens(table(clairance.pred, clairance.app))
+  vspe5[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 6 neurones
+```{r}
+vsens6 <- rep(NA, 100)
+vspe6 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire6.app$net.result[,1] >= seuil[i]
+  vsens6[i] <- sens(table(clairance.pred, clairance.app))
+  vspe6[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 7 neurones
+```{r}
+vsens7 <- rep(NA, 100)
+vspe7 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire7.app$net.result[,1] >= seuil[i]
+  vsens7[i] <- sens(table(clairance.pred, clairance.app))
+  vspe7[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 8 neurones
+```{r}
+vsens8 <- rep(NA, 100)
+vspe8 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire8.app$net.result[,1] >= seuil[i]
+  vsens8[i] <- sens(table(clairance.pred, clairance.app))
+  vspe8[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 9 neurones
+```{r}
+vsens9 <- rep(NA, 100)
+vspe9 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire9.app$net.result[,1] >= seuil[i]
+  vsens9[i] <- sens(table(clairance.pred, clairance.app))
+  vspe9[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 10 neurones
+```{r}
+vsens10 <- rep(NA, 100)
+vspe10 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire10.app$net.result[,1] >= seuil[i]
+  vsens10[i] <- sens(table(clairance.pred, clairance.app))
+  vspe10[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 20 neurones
+```{r}
+vsens20 <- rep(NA, 100)
+vspe20 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire20.app$net.result[,1] >= seuil[i]
+  vsens20[i] <- sens(table(clairance.pred, clairance.app))
+  vspe20[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 30 neurones
+```{r}
+vsens30 <- rep(NA, 100)
+vspe30 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire30.app$net.result[,1] >= seuil[i]
+  vsens30[i] <- sens(table(clairance.pred, clairance.app))
+  vspe30[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 40 neurones
+```{r}
+vsens40 <- rep(NA, 100)
+vspe40 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire40.app$net.result[,1] >= seuil[i]
+  vsens40[i] <- sens(table(clairance.pred, clairance.app))
+  vspe40[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 50 neurones
+```{r}
+vsens50 <- rep(NA, 100)
+vspe50 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire50.app$net.result[,1] >= seuil[i]
+  vsens50[i] <- sens(table(clairance.pred, clairance.app))
+  vspe50[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 100 neurones
+```{r}
+vsens100 <- rep(NA, 100)
+vspe100 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire100.app$net.result[,1] >= seuil[i]
+  vsens100[i] <- sens(table(clairance.pred, clairance.app))
+  vspe100[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche de 150 neurones
+```{r}
+vsens150 <- rep(NA, 100)
+vspe150 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire150.app$net.result[,1] >= seuil[i]
+  vsens150[i] <- sens(table(clairance.pred, clairance.app))
+  vspe150[i] <- spec(table(clairance.pred, clairance.app))
+}
+```
+
+## Courbe de clairance d'1 couche d'207 neurones
+```{r}
+vsens207 <- rep(NA, 100)
+vspe207 <- rep(NA, 100)
+for (i in 1:100) {
+  clairance.pred <- predire207.app$net.result[,1] >= seuil[i]
+  vsens207[i] <- sens(table(clairance.pred, clairance.app))
+  vspe207[i] <- spec(table(clairance.pred, clairance.app))
+}
+
+
+x <- seq(-100, -1, 1)
+y <- data.frame(vsens2, vsens3, vsens4, vsens5, vsens6, vsens7, vsens8, vsens9, vsens10, vsens20, vsens30, vsens40, vsens50, vsens100, vsens100, vsens207)
+matplot(1-x,y,col=rainbow(4),type="l",lty=1)
+
+```
+
+
+# FIN
