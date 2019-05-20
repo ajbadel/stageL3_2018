@@ -237,7 +237,7 @@ kable(data.frame(Paramètres, Valeurs.2.val))
 ```
 
 
-# Taux de bien prédit pour différents nombres de neurones pour 1 neurone
+# Prédiction pour différents nombres de neurones pour 1 neurone
 ```{r}
 # Prédiction pour 1 couche = 1 neurone
 reseau1.app = neuralnet(formule, data = placenta.app, hidden = c(1))
@@ -462,7 +462,6 @@ confiance.207.app <- table(prediction.207.app, placenta.app$petit, dnn = c("pred
 confiance.207.val <- table(prediction.207.val, placenta.val$petit, dnn = c("predit", "observe"))
 ```
 
-
 ## Tableau d'accuracy
 ```{r}
 couches.neurones = c("1 couche 1 neurone", "1 couche 2 neurones", "1 couche 3 neurones", "1 couche 4 neurones", "1 couche 5 neurones", "1 couche 6 neurones", "1 couche 7 neurones", "1 couche 8 neurones", "1 couche 9 neurones", "1 couche 10 neurones", "1 couche 20 neurones", "1 couche 30 neurones")
@@ -471,7 +470,37 @@ validation = c(acc(confiance.1.val), acc(confiance.2.val), acc(confiance.3.val),
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
-# Taux de bien prédit pour différents 2n/n nombres de neurones pour 2 couches
+## Courbe ROC
+```{r}
+seuil <- seq(0, 1, length.out = 100)
+clairance.app <- placenta.app$petit
+clairance.val <- placenta.val$petit
+
+vsens.app <- data.frame(vsens2 = rep(NA, 100), vsens3 = c(NA), vsens4 = c(NA), vsens5 = c(NA), vsens6 = c(NA), vsens7 = c(NA), vsens8 = c(NA), vsens9 = c(NA), vsens10 = c(NA), vsens20 = c(NA), vsens30 = c(NA), vsens40 = c(NA), vsens50 = c(NA), vsens100 = c(NA), vsens150 = c(NA), vsens207 = c(NA))
+
+vsens.val <- data.frame(vsens2 = rep(NA, 100), vsens3 = c(NA), vsens4 = c(NA), vsens5 = c(NA), vsens6 = c(NA), vsens7 = c(NA), vsens8 = c(NA), vsens9 = c(NA), vsens10 = c(NA), vsens20 = c(NA), vsens30 = c(NA), vsens40 = c(NA), vsens50 = c(NA), vsens100 = c(NA), vsens150 = c(NA), vsens207 = c(NA))
+
+vspe.app <- data.frame(vspe2 = rep(NA, 100), vspe3 = c(NA), vspe4 = c(NA), vspe5 = c(NA), vspe6 = c(NA), vspe7 = c(NA), vspe8 = c(NA), vspe9 = c(NA), vspe10 = c(NA), vspe20 = c(NA), vspe30 = c(NA), vspe40 = c(NA), vspe50 = c(NA), vspe100 = c(NA), vspe150 = c(NA), vspe207 = c(NA))
+
+vspe.val <- data.frame(vspe2 = rep(NA, 100), vspe3 = c(NA), vspe4 = c(NA), vspe5 = c(NA), vspe6 = c(NA), vspe7 = c(NA), vspe8 = c(NA), vspe9 = c(NA), vspe10 = c(NA), vspe20 = c(NA), vspe30 = c(NA), vspe40 = c(NA), vspe50 = c(NA), vspe100 = c(NA), vspe150 = c(NA), vspe207 = c(NA))
+
+for (i in 1:100) {
+  clairance.app.pred2 <- predire2.app$net.result[,1] >= seuil[i]
+  clairance.val.pred2 <- predire2.val$net.result[,1] >= seuil[i]
+  vsens.app$vsens2[i] <- sens(table(clairance.app.pred2, clairance.app))
+  vsens.val$vsens2[i] <- sens(table(clairance.val.pred2, clairance.val))
+  vspe.app$vspe2[i] <- spec(table(clairance.app.pred2, clairance.app))
+  vspe.val$vspe2[i] <- spec(table(clairance.val.pred2, clairance.val))
+}
+
+specificite <- seq(-100, -1, 1)
+sensibilite <- data.frame(vsens.app$vsens2, vsens.val$vsens2)
+matplot(1-specificite,sensibilite,col=rainbow(2),type="l",lty=1)
+# rouge = app et bleu = val
+```
+
+
+# Prédiction pour différents 2n/n de neurones pour 2 couches
 ```{r}
 # Prédiction pour 2 couches = 2.1 neurones
 
@@ -594,8 +623,13 @@ validation = c(acc(confiance.2.1.val), acc(confiance.4.2.val), acc(confiance.6.3
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
+## Courbe ROC
+```{r}
 
-# Taux de bien prédit pour différents n/2n nombres de neurones pour 2 couches
+```
+
+
+# Prédiction pour différents n/2n de neurones pour 2 couches
 ```{r}
 # Prédiction pour 2 couches = 1.2 neurones
 
@@ -716,5 +750,10 @@ couches.neurones = c("2 couches 1 neurone et 2 neurones", "2 couches 2 neurones 
 apprentissage = c(acc(confiance.1.2.app), acc(confiance.2.4.app), acc(confiance.3.6.app), acc(confiance.4.8.app), acc(confiance.5.10.app), acc(confiance.10.20.app), acc(confiance.50.100.app), acc(confiance.100.200.app))
 validation = c(acc(confiance.1.2.val), acc(confiance.2.4.val), acc(confiance.3.6.val), acc(confiance.4.8.val), acc(confiance.5.10.val), acc(confiance.10.20.val), acc(confiance.50.100.val), acc(confiance.100.200.val))
 kable(data.frame(couches.neurones, apprentissage, validation))
+```
+
+## Courbe ROC
+```{r}
+
 ```
 
