@@ -4,10 +4,11 @@ author: "Marc XU"
 date: "20 mai 2019"
 output: 
   revealjs::revealjs_presentation:
-    center: yes
+    center: no # yes
     highlight: kate
     theme: league
     transition: zoom
+    toc: TRUE
 ---
 
 # Neural network
@@ -93,6 +94,54 @@ perfection2 = function(matrice) {
 }
 ```
 
+## Déroulé du stage
+
+1. Apprentissage de R avancé <!-- être agile avec R, R studio, Rmarkdown, compilation d'un notebook en .pdf, .html -->
+
+2. Apprentissage de la méthode de prédiction choisie et de sa librairie R sur le jeu de données `Iris de Fisher`
+=> éventuellement mettre une image couche/neurone
+3. Apprentissage des critères de validation d'un modèle d'apprentissage en classification <!-- Y qualitatif à deux classes -->
+<!-- Accuracy, Sensibilité, spécificité, F1-score et courbes ROC-->
+<!-- échantillon d'apprentissage versus échantillon de validation -->
+
+4. Application aux données "membranes placentaires"
+
+
+## Objectifs du stage
+
+1. problématique : établir un modèle permettant de prédire si une molécule donnée traverse la membrane placentaire <!-- importance de la membrane placentaire et du fait de savoir si un composé passe ou non -->
+2. méthode : utilisation d'un réseau de neurones
+
+# Les données
+
+jeu de données comportant
+
+- 91 molécules décrites par
+- 207 descripteurs calculés avec le logiciel e-dragon
+- une mesure de clairance, CI
+
+<!-- Ces données concernent 90 molécules / médicaments dont on souhaitent savoir si elles passent la membrane placentaire. Pour cela, elles ont été testées et leur clairance a été calculée. Wikipédia = "La « clairance d'une substance » est le volume apparent (virtuel) de plasma artériel totalement débarrassé de cette substance donnée par unité de temps". Une clairance a des valeurs entre 0 et 1, 0 veut dire que la molécule ne passe pas la barrière placentaire du tout et une clairance de 1 veut dire que la molécule passe en totalité la barrière placentaire. Il arrive que la clairance soit supérieur à 1. -->
+
+---
+
+** METTRE un premier tableau extrait des données ou on voit 6 molécules, avec leur nom, leur CI et 3-4 descripteurs **
+
+## Nettoyage des données
+** METTRE une représentation graphique de la clairance avec et sans Mefloquine (valeur aberrante) boxplot ** => exemple de nettoyage des données
+
+<!-- Au départ, plus de mille descripteurs, donc les données ont été néttoyées, par exemple, les données manquantes, les données aberrantes, les descripteurs non variants ou trop corrélés entre eux ont été éliminés de l'étude -->
+
+## Transformation de la variable "clairance = CI"
+
+** METTRE clairance en deux classe ** = SUPER IMPORTANT = ** histogramme**
+
+## Les réseaux de neurones
+
+**PRESENTATION rapide des NN**
+- la théorie des NN
+- le package utilisé neuralnet
+
+
 ## Les données PLACENTA
 ```{r}
 setwd("../Marc")
@@ -104,6 +153,8 @@ Il y a `r nrow(placenta1)` individus et `r ncol(placenta1)` descripteurs.
 ```{r}
 kable(head(placenta1[,c(1,6:9)]))
 ```
+
+
 
 ## Résumés des données
 ```{r}
