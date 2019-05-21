@@ -160,7 +160,8 @@ boxplot(placenta1.2[,c(2:ncol(placenta1.2))])
 
 ## Visualisation des données (histogramme)
 ```{r}
-hist(placenta1[,"CI"])
+hist(placenta1[,"CI"], col = "red")
+abline(hist(placenta1[,"CI"]),col="red",lwd=0)
 ```
 
 ## Visualisation des données (plot)
@@ -191,7 +192,7 @@ boxplot(placenta.val[,c(1:10)])
 
 formule = as.formula(petit ~ ast_fraglike + ast_fraglike_ext + ast_violation + a_don + a_ICM + BCUT_SLOGP_1 + BCUT_SLOGP_3 + BCUT_SMR_0 + b_1rotN + b_double + chiral_u + density + FCharge + GCUT_PEOE_1 + GCUT_PEOE_2 + GCUT_SLOGP_1 + GCUT_SLOGP_2 + GCUT_SMR_1 + lip_violation + logP.o.w. + opr_leadlike + PEOE_PC. + PEOE_PC..1 + PEOE_RPC. + PEOE_RPC..1 + PEOE_VSA.1 + PEOE_VSA.2 + PEOE_VSA.3 + PEOE_VSA.4 + PEOE_VSA.1.1 + PEOE_VSA.2.1 + PEOE_VSA.3.1 + PEOE_VSA.4.1 + PEOE_VSA.5.1 + PEOE_VSA.6.1 + PEOE_VSA_FHYD + PEOE_VSA_FPNEG + PEOE_VSA_FPPOS + PEOE_VSA_NEG + PEOE_VSA_PNEG + PEOE_VSA_POL + PEOE_VSA_PPOS + reactive + SlogP_VSA0 + SlogP_VSA1 + SlogP_VSA2 + SlogP_VSA3 + SlogP_VSA4 + SlogP_VSA6 + SMR_VSA1 + SMR_VSA2 + SMR_VSA3 + SMR_VSA4 + vsa_acc + vsa_base + vsa_don + vsa_other + vsa_pol + Ms + ARR + nCIR + nAB + nH + nN + nO + nR05 + nR07 + nR08 + TI2 + J + Jhetp + MAXDN + MAXDP + S3K + PW2 + D.Dr05 + D.Dr06 + D.Dr08 + D.Dr09 + D.Dr10 + T.Cl..Cl. + SRW05 + MPC10 + PCR + X0Av + X1Av + ATS7m + MATS3m + MATS4m + MATS5m + MATS1v + MATS2v + MATS3v + MATS8v + MATS3p + MATS4p + GATS1m + GATS2m + GATS3m + GATS8m + GATS3v + GATS8v + GATS3e + GATS5e + GATS7e + GATS8e + GATS1p + GATS3p + JGI1 + JGI3 + JGI5 + JGI7 + JGI8 + JGI9 + JGI10 + JGT + DP20 + J3D + PJI3 + L.Bw + AROM + DISPm + DISPv + DISPe + G.N..N. + G.N..O. + G.N..S. + G.N..Cl. + G.O..O. + G.S..S. + nCs + nCrs + nCrt + nCbH + nCb. + nCconj + nArCOOR + nRCONH2 + nRCONHR + nRCONR2 + nROCON + nArCO + nC..N.N2 + nArNH2 + nArNHR + nRNR2 + nArOH + nOHp + nOHs + nOHt + nRSR + nArX + nBeta.Lactams + nOxolanes + nThiazoles + nHBonds + C.003 + C.007 + C.008 + C.009 + C.011 + C.016 + C.017 + C.018 + C.019 + C.025 + C.028 + C.031 + C.032 + C.033 + C.037 + C.040 + C.041 + C.043 + C.044 + H.048 + H.049 + H.053 + O.056 + O.059 + N.066 + N.067 + N.068 + N.072 + N.074 + Cl.089 + S.107 + S.108 + S.110 + Hy + MLOGP + ALOGP + LAI + GVWAI.50 + Inflammat.80 + Inflammat.50 + Depressant.80 + Psychotic.80 + Hypertens.80 + Hypertens.50 + Hypnotic.80 + Hypnotic.50 + Neoplastic.80 + Neoplastic.50 + Infective.50 + ALOGPS_logP + ALOGPS_logS)
 
-Paramètres = c("Taux bon", "Taux d'erreur","Sensibilité", "Specifité", "F1_Score")
+Paramètres = c("Taux bon","Sensibilité", "Specifité", "F1_Score")
 ```
 
 
@@ -219,7 +220,7 @@ knitr::kable(confiance.2.app)
 
 ## Les critères (échantillon d'apprentissage)
 ```{r}
-Valeurs.2.app = c(acc(confiance.2.app), err(confiance.2.app), sens(confiance.2.app), spec(confiance.2.app), scor(confiance.2.app))
+Valeurs.2.app = c(acc(confiance.2.app), sens(confiance.2.app), spec(confiance.2.app), scor(confiance.2.app))
 kable(data.frame(Paramètres, Valeurs.2.app))
 ```
 
@@ -232,12 +233,12 @@ knitr::kable(confiance.2.val)
 
 ## Les critères (échantillon de validation)
 ```{r}
-Valeurs.2.val = c(acc(confiance.2.val), err(confiance.2.val), sens(confiance.2.val), spec(confiance.2.val), scor(confiance.2.val))
+Valeurs.2.val = c(acc(confiance.2.val), sens(confiance.2.val), spec(confiance.2.val), scor(confiance.2.val))
 kable(data.frame(Paramètres, Valeurs.2.val))
 ```
 
 
-# Prédiction pour différents nombres de neurones pour 1 neurone
+# Prédiction pour différents nombres de neurones pour 1 couche
 ```{r}
 # Prédiction pour 1 couche = 1 neurone
 reseau1.app = neuralnet(formule, data = placenta.app, hidden = c(1))
@@ -470,7 +471,7 @@ validation = c(acc(confiance.1.val), acc(confiance.2.val), acc(confiance.3.val),
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
-## Courbe ROC
+## Courbe ROC (1)
 ```{r}
 seuil <- seq(0, 1, length.out = 100)
 clairance.app <- placenta.app$petit
@@ -484,19 +485,108 @@ vspe.app <- data.frame(vspe2 = rep(NA, 100), vspe3 = c(NA), vspe4 = c(NA), vspe5
 
 vspe.val <- data.frame(vspe2 = rep(NA, 100), vspe3 = c(NA), vspe4 = c(NA), vspe5 = c(NA), vspe6 = c(NA), vspe7 = c(NA), vspe8 = c(NA), vspe9 = c(NA), vspe10 = c(NA), vspe20 = c(NA), vspe30 = c(NA), vspe40 = c(NA), vspe50 = c(NA), vspe100 = c(NA), vspe150 = c(NA), vspe207 = c(NA))
 
-for (i in 1:100) {
-  clairance.app.pred2 <- predire2.app$net.result[,1] >= seuil[i]
-  clairance.val.pred2 <- predire2.val$net.result[,1] >= seuil[i]
-  vsens.app$vsens2[i] <- sens(table(clairance.app.pred2, clairance.app))
-  vsens.val$vsens2[i] <- sens(table(clairance.val.pred2, clairance.val))
-  vspe.app$vspe2[i] <- spec(table(clairance.app.pred2, clairance.app))
-  vspe.val$vspe2[i] <- spec(table(clairance.val.pred2, clairance.val))
+roc_courbe.sens = function (predire.ech, vsens.ech, clairance.ech) {
+  for (i in 1:100) {
+    clairance.pred <- predire.ech >= seuil[i]
+    vsens.ech[i] <- sens(table(clairance.pred, clairance.ech))
+  }
+  return(vsens.ech)
+}
+roc_courbe.spe = function (predire.ech, vspe.ech, clairance.ech) {
+  for (i in 1:100) {
+    clairance.pred <- predire.ech >= seuil[i]
+    vspe.ech[i] <- spec(table(clairance.pred, clairance.ech))
+  }
+  return(vspe.ech)
 }
 
-specificite <- seq(-100, -1, 1)
-sensibilite <- data.frame(vsens.app$vsens2, vsens.val$vsens2)
-matplot(1-specificite,sensibilite,col=rainbow(2),type="l",lty=1)
+```
+
+```{r fig.width = 10, fig.height = 7}
+specificite <- seq(0.01, 1, 0.01)
+par(mfrow = c(2,3))
+vsens.app2 = roc_courbe.sens(predire.ech = predire2.app$net.result, vsens.ech = vsens.app$vsens2, clairance.ech = clairance.app)
+vspe.app2 = roc_courbe.spe(predire.ech = predire2.app$net.result, vspe.ech = vspe.app$vspe2, clairance.ech = clairance.app)
+vsens.val2 = roc_courbe.sens(predire.ech = predire2.val$net.result, vsens.ech = vsens.val$vsens2, clairance.ech = clairance.val)
+vspe.val2 = roc_courbe.spe(predire.ech = predire2.val$net.result, vspe.ech = vspe.val$vspe2, clairance.ech = clairance.val)
+
+#specificité <- data.frame(vspe.app2, vspe.val2)
+sensibilité <- data.frame(vsens.app2, vsens.val2)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1, main = "1 couche 2 neurones")
+
+#matplot(1-vspe.app2,vsens.app2,col=rainbow(2),type="l",lty=1)
+#matplot(1-vspe.val2,vsens.val2,col=rainbow(2),type="l",lty=1)
+
 # rouge = app et bleu = val
+
+vsens.app3 = roc_courbe.sens(predire.ech = predire3.app$net.result[,1], vsens.ech = vsens.app$vsens3, clairance.ech = clairance.app)
+vsens.val3 = roc_courbe.sens(predire.ech = predire3.val$net.result[,1], vsens.ech = vsens.val$vsens3, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app3, vsens.val3)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 3 neurones")
+#####
+
+vsens.app4 = roc_courbe.sens(predire.ech = predire4.app$net.result[,1], vsens.ech = vsens.app$vsens4, clairance.ech = clairance.app)
+vsens.val4 = roc_courbe.sens(predire.ech = predire4.val$net.result[,1], vsens.ech = vsens.val$vsens4, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app4, vsens.val4)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 4 neurones")
+#####
+
+vsens.app5 = roc_courbe.sens(predire.ech = predire5.app$net.result[,1], vsens.ech = vsens.app$vsens5, clairance.ech = clairance.app)
+vsens.val5 = roc_courbe.sens(predire.ech = predire5.val$net.result[,1], vsens.ech = vsens.val$vsens5, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app5, vsens.val5)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 5 neurones")
+#####
+
+vsens.app6 = roc_courbe.sens(predire.ech = predire6.app$net.result[,1], vsens.ech = vsens.app$vsens6, clairance.ech = clairance.app)
+vsens.val6 = roc_courbe.sens(predire.ech = predire6.val$net.result[,1], vsens.ech = vsens.val$vsens6, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app6, vsens.val6)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 6 neurones")
+#####
+
+vsens.app7 = roc_courbe.sens(predire.ech = predire7.app$net.result[,1], vsens.ech = vsens.app$vsens7, clairance.ech = clairance.app)
+vsens.val7 = roc_courbe.sens(predire.ech = predire7.val$net.result[,1], vsens.ech = vsens.val$vsens7, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app7, vsens.val7)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 7 neurones")
+```
+
+## Courbe ROC (2)
+```{r fig.width = 10, fig.height = 7}
+par(mfrow = c(2,3))
+
+vsens.app8 = roc_courbe.sens(predire.ech = predire8.app$net.result[,1], vsens.ech = vsens.app$vsens8, clairance.ech = clairance.app)
+vsens.val8 = roc_courbe.sens(predire.ech = predire8.val$net.result[,1], vsens.ech = vsens.val$vsens8, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app8, vsens.val8)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 8 neurones")
+######
+
+vsens.app9 = roc_courbe.sens(predire.ech = predire9.app$net.result[,1], vsens.ech = vsens.app$vsens9, clairance.ech = clairance.app)
+vsens.val9 = roc_courbe.sens(predire.ech = predire9.val$net.result[,1], vsens.ech = vsens.val$vsens9, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app9, vsens.val9)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 9 neurones")
+#####
+
+vsens.app10 = roc_courbe.sens(predire.ech = predire10.app$net.result[,1], vsens.ech = vsens.app$vsens10, clairance.ech = clairance.app)
+vsens.val10 = roc_courbe.sens(predire.ech = predire10.val$net.result[,1], vsens.ech = vsens.val$vsens10, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app10, vsens.val10)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 10 neurones")
+#####
+
+vsens.app20 = roc_courbe.sens(predire.ech = predire20.app$net.result[,1], vsens.ech = vsens.app$vsens20, clairance.ech = clairance.app)
+vsens.val20 = roc_courbe.sens(predire.ech = predire20.val$net.result[,1], vsens.ech = vsens.val$vsens20, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app20, vsens.val20)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 20 neurones")
+#####
+
+vsens.app30 = roc_courbe.sens(predire.ech = predire30.app$net.result[,1], vsens.ech = vsens.app$vsens30, clairance.ech = clairance.app)
+vsens.val30 = roc_courbe.sens(predire.ech = predire30.val$net.result[,1], vsens.ech = vsens.val$vsens30, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app30, vsens.val30)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 30 neurones")
+#####
+
+vsens.app40 = roc_courbe.sens(predire.ech = predire40.app$net.result[,1], vsens.ech = vsens.app$vsens40, clairance.ech = clairance.app)
+vsens.val40 = roc_courbe.sens(predire.ech = predire40.val$net.result[,1], vsens.ech = vsens.val$vsens40, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app40, vsens.val40)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 40 neurones")
 ```
 
 
@@ -624,7 +714,58 @@ kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
 ## Courbe ROC
-```{r}
+```{r  fig.width = 10, fig.height = 7}
+par(mfrow = c(2,4))
+vsens.app <- data.frame(vsens2.1 = rep(NA, 100), vsens4.2 = c(NA), vsens6.3 = c(NA), vsens8.4 = c(NA), vsens10.5 = c(NA), vsens20.10 = c(NA), vsens100.50 = c(NA), vsens200.100 = c(NA))
+vsens.val <- data.frame(vsens2.1 = rep(NA, 100), vsens4.2 = c(NA), vsens6.3 = c(NA), vsens8.4 = c(NA), vsens10.5 = c(NA), vsens20.10 = c(NA), vsens100.50 = c(NA), vsens200.100 = c(NA))
+
+vsens.app2.1 = roc_courbe.sens(predire.ech = predire2.1.app$net.result[,1], vsens.ech = vsens.app$vsens2.1, clairance.ech = clairance.app)
+vsens.val2.1 = roc_courbe.sens(predire.ech = predire2.1.val$net.result[,1], vsens.ech = vsens.val$vsens2.1, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app2.1, vsens.val2.1)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 2.1 neurones")
+#####
+
+vsens.app4.2 = roc_courbe.sens(predire.ech = predire4.2.app$net.result[,1], vsens.ech = vsens.app$vsens4.2, clairance.ech = clairance.app)
+vsens.val4.2 = roc_courbe.sens(predire.ech = predire4.2.val$net.result[,1], vsens.ech = vsens.val$vsens4.2, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app4.2, vsens.val4.2)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 4.2 neurones")
+#####
+
+vsens.app6.3 = roc_courbe.sens(predire.ech = predire6.3.app$net.result[,1], vsens.ech = vsens.app$vsens6.3, clairance.ech = clairance.app)
+vsens.val6.3 = roc_courbe.sens(predire.ech = predire6.3.val$net.result[,1], vsens.ech = vsens.val$vsens6.3, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app6.3, vsens.val6.3)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 6.3 neurones")
+#####
+
+vsens.app8.4 = roc_courbe.sens(predire.ech = predire8.4.app$net.result[,1], vsens.ech = vsens.app$vsens8.4, clairance.ech = clairance.app)
+vsens.val8.4 = roc_courbe.sens(predire.ech = predire8.4.val$net.result[,1], vsens.ech = vsens.val$vsens8.4, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app8.4, vsens.val8.4)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 8.4 neurones")
+#####
+
+vsens.app10.5 = roc_courbe.sens(predire.ech = predire10.5.app$net.result[,1], vsens.ech = vsens.app$vsens10.5, clairance.ech = clairance.app)
+vsens.val10.5 = roc_courbe.sens(predire.ech = predire10.5.val$net.result[,1], vsens.ech = vsens.val$vsens10.5, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app10.5, vsens.val10.5)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 10.5 neurones")
+#####
+
+vsens.app20.10 = roc_courbe.sens(predire.ech = predire20.10.app$net.result[,1], vsens.ech = vsens.app$vsens20.10, clairance.ech = clairance.app)
+vsens.val20.10 = roc_courbe.sens(predire.ech = predire20.10.val$net.result[,1], vsens.ech = vsens.val$vsens20.10, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app20.10, vsens.val20.10)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 20.10 neurones")
+#####
+
+vsens.app100.50 = roc_courbe.sens(predire.ech = predire100.50.app$net.result[,1], vsens.ech = vsens.app$vsens100.50, clairance.ech = clairance.app)
+vsens.val100.50 = roc_courbe.sens(predire.ech = predire100.50.val$net.result[,1], vsens.ech = vsens.val$vsens100.50, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app100.50, vsens.val100.50)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 100.50 neurones")
+#####
+
+vsens.app200.100 = roc_courbe.sens(predire.ech = predire200.100.app$net.result[,1], vsens.ech = vsens.app$vsens200.100, clairance.ech = clairance.app)
+vsens.val200.100 = roc_courbe.sens(predire.ech = predire200.100.val$net.result[,1], vsens.ech = vsens.val$vsens200.100, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app200.100, vsens.val200.100)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 200.100 neurones")
+#####
 
 ```
 
@@ -753,7 +894,57 @@ kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
 ## Courbe ROC
-```{r}
+```{r  fig.width = 10, fig.height = 7}
+par(mfrow = c(2,4))
+vsens.val <- data.frame(vsens1.2 = rep(NA, 100), vsens2.4 = c(NA), vsens3.6 = c(NA), vsens4.8 = c(NA), vsens5.10 = c(NA), vsens10.20 = c(NA), vsens50.100 = c(NA), vsens100.200 = c(NA))
+
+vsens.app1.2 = roc_courbe.sens(predire.ech = predire1.2.app$net.result[,1], vsens.ech = vsens.app$vsens1.2, clairance.ech = clairance.app)
+vsens.val1.2 = roc_courbe.sens(predire.ech = predire1.2.val$net.result[,1], vsens.ech = vsens.val$vsens1.2, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app1.2, vsens.val1.2)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 1.2 neurones")
+#####
+
+vsens.app2.4 = roc_courbe.sens(predire.ech = predire2.4.app$net.result[,1], vsens.ech = vsens.app$vsens2.4, clairance.ech = clairance.app)
+vsens.val2.4 = roc_courbe.sens(predire.ech = predire2.4.val$net.result[,1], vsens.ech = vsens.val$vsens2.4, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app2.4, vsens.val2.4)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 2.4 neurones")
+#####
+
+vsens.app3.6 = roc_courbe.sens(predire.ech = predire3.6.app$net.result[,1], vsens.ech = vsens.app$vsens3.6, clairance.ech = clairance.app)
+vsens.val3.6 = roc_courbe.sens(predire.ech = predire3.6.val$net.result[,1], vsens.ech = vsens.val$vsens3.6, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app3.6, vsens.val3.6)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 3.6 neurones")
+#####
+
+vsens.app4.8 = roc_courbe.sens(predire.ech = predire4.8.app$net.result[,1], vsens.ech = vsens.app$vsens4.8, clairance.ech = clairance.app)
+vsens.val4.8 = roc_courbe.sens(predire.ech = predire4.8.val$net.result[,1], vsens.ech = vsens.val$vsens4.8, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app4.8, vsens.val4.8)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 4.8 neurones")
+#####
+
+vsens.app5.10 = roc_courbe.sens(predire.ech = predire5.10.app$net.result[,1], vsens.ech = vsens.app$vsens5.10, clairance.ech = clairance.app)
+vsens.val5.10 = roc_courbe.sens(predire.ech = predire5.10.val$net.result[,1], vsens.ech = vsens.val$vsens5.10, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app5.10, vsens.val5.10)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 5.10 neurones")
+#####
+
+vsens.app10.20 = roc_courbe.sens(predire.ech = predire10.20.app$net.result[,1], vsens.ech = vsens.app$vsens10.20, clairance.ech = clairance.app)
+vsens.val10.20 = roc_courbe.sens(predire.ech = predire10.20.val$net.result[,1], vsens.ech = vsens.val$vsens10.20, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app10.20, vsens.val10.20)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 10.20 neurones")
+#####
+
+vsens.app50.100 = roc_courbe.sens(predire.ech = predire50.100.app$net.result[,1], vsens.ech = vsens.app$vsens50.100, clairance.ech = clairance.app)
+vsens.val50.100 = roc_courbe.sens(predire.ech = predire50.100.val$net.result[,1], vsens.ech = vsens.val$vsens50.100, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app50.100, vsens.val50.100)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 50.100 neurones")
+#####
+
+vsens.app100.200 = roc_courbe.sens(predire.ech = predire100.200.app$net.result[,1], vsens.ech = vsens.app$vsens100.200, clairance.ech = clairance.app)
+vsens.val100.200 = roc_courbe.sens(predire.ech = predire100.200.val$net.result[,1], vsens.ech = vsens.val$vsens100.200, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app100.200, vsens.val100.200)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 100.200 neurones")
+#####
 
 ```
 
