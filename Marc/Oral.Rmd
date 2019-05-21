@@ -135,12 +135,48 @@ jeu de données comportant
 
 ** METTRE clairance en deux classe ** = SUPER IMPORTANT = ** histogramme**
 
-## Les réseaux de neurones
+## Visualisation des données
+
+- ACP => nécessité de normaliser les données
+- boxplot des descripteurs => normalisé et non normalisé
+
+# Les réseaux de neurones et les données `Iris de Fisher`
 
 **PRESENTATION rapide des NN**
 - la théorie des NN
 - le package utilisé neuralnet
 
+## Théorie
+
+cf cours NN de M. Guyon (mail)
+
+- image un neurone = boite noire avec entrée et sortie
+- image un réseau de neurone, entrées, sortie, couches et nb de neurones
+
+si tu reprends des images de qqn, pense à les citer.
+
+## Le package `neuralnet`
+
+## Echantillons d'apprentissage versus échantillon de validation
+
+## La table de confusion et les critères calculés
+table théorique et formule des critères
+
+## La courbe ROC
+
+- exemple avec deux courbes, une proche de la médiane = BOF, une proche de perpendiculaire = SUPER.
+
+
+
+# Application aux données
+
+- plusieurs essais
+  - 1 neurone
+  - 1 couche, x neurones
+  - 2 couches et x neurones
+  
+- je vous montre le  meilleur au sens de ...
+- et le  plus simple possible, ici le moins de neurones/couches possibles
 
 ## Les données PLACENTA
 ```{r}
