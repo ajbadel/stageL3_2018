@@ -7,7 +7,7 @@ output:
   revealjs::revealjs_presentation:
     center: yes
     highlight: kate
-    theme: league
+    theme: solarized
     transition: fade
   ioslides_presentation:
     highlight: kate
@@ -88,46 +88,53 @@ donnee.fin = donnee[,-1]
 donnee.fin$CI_class = as.factor(donnee.fin$CI_class)
 ```
 
+***
+Normalisation des données
+
+```{r normalisation}
+donnee.fin2 = scale(donnee.fin[,-208], center = TRUE, scale = TRUE)
+boxplot(donnee.fin2[,c(0:25)], las = 2)
+#La variance est entre -4 et 4 mais en réalité c'est -10 a 10 environs
+donnee.fin2 = data.frame(donnee.fin2,donnee.fin$CI_class)
+```
 
 ***
 Visualisation des données grâce à une remise à l'échelle des donnée.(MDS)
 ```{r MDS, fig.align = "center"}
-donnee.cmd = cmdscale(dist(donnee.fin))
+donnee.cmd = cmdscale(dist(donnee.fin2))
 plot(donnee.cmd, col = donnee.fin$CI_class)
 ```
 
 ***
 Visualisation des données grâce à une analyse des principaux composants
-```{r acp, fig.align = "center", messages = 'hide'}
+```{r acp, fig.align = "center", messages = 'hide', eval= F}
 #par(mfrow = c(1,2))
 donnee.acp <- prcomp(as.matrix(donnee.fin[,-208]))
 plot(donnee.acp)
 #biplot(donnee.acp)
 ```
 
-##Création des modèles d'apprentissage et de test
+##Création des échantillons d'apprentissage et de test
 
 ***
-Création d'un modèle d'apprentissage
+Création d'un échantillon d'apprentissage
 ```{r}
-ech.App = sample(1:dim(donnee.fin)[1],2*dim(donnee.fin)[1]/3)
-mat.App = donnee.fin[ech.App,-c(168,188)]
+ech.App = sample(1:dim(donnee.fin2)[1],2*dim(donnee.fin2)[1]/3)
+mat.App = donnee.fin2[ech.App,-c(168,188)]
 head(mat.App[,c(1:4)])
 matApp_row = nrow(mat.App)
 names(matApp_row) = "individus dans échantillon d'apprentissage"
 matApp_row
-
-#plot (model.app, data = donnee.cmd, donnee.cmd[1]~donnee.cmd[2])
 ```
 
 ***
-Création d'un modèle de test
+Création d'un échantillon de validation (test)
 ```{r}
-ech.Test = setdiff(1:nrow(donnee.fin),ech.App)
-mat.Test = donnee.fin[ech.Test,]
+ech.Test = setdiff(1:nrow(donnee.fin2),ech.App)
+mat.Test = donnee.fin2[ech.Test,]
 head(mat.Test[,c(1:4)])
 matTest_row = nrow(mat.Test)
-names(matTest_row) = "individus dans échantillon test"
+names(matTest_row) = "individus dans l'échantillon test"
 matTest_row
 ```
 
@@ -139,184 +146,11 @@ boxplot (mat.App[,c(10:20)], las = 2)
 boxplot (mat.Test[,c(10:20)], las = 2)
 ```
 
-##Verification des résultats de prédictions avec différents paramètres
-
 ***
-Résultats des prédictions sur le modèle d'apprentissage avec kernel *lineaire* et *polynomial*
-```{r kernel_lin}
-modelapp_lin = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "linear")
-#summary(modelapp_lin)
-```
-
-```{r pred_lin}
-predapp_lin = predict(modelapp_lin, mat.App)
-tabapp_lin = table(predit = predapp_lin, observe = mat.App$CI_class)
-tabapp_lin
-```
+Résultats des prédictions avec différents noyaux (kernel)
 
 ```{r}
-tabTBPapp = tx.bon(tabapp_lin)
-taberreurapp = tx.erreur(tabapp_lin)
-tabsensapp= sensibilite(tabapp_lin)
-tabspecapp = specificite(tabapp_lin)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-```{r kernel_pol}
-modelapp_pol = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "polynomial")
-#summary(modelapp_lin)
-```
-
-```{r pred_pol}
-predapp_pol = predict(modelapp_pol, mat.App)
-tabapp_pol = table(predit = predapp_pol, observe = mat.App$CI_class)
-tabapp_pol
-```
-
-```{r}
-tabTBPapp = tx.bon(tabapp_pol)
-taberreurapp = tx.erreur(tabapp_pol)
-tabsensapp= sensibilite(tabapp_pol)
-tabspecapp = specificite(tabapp_pol)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-***
-Résultats des prédictions sur le modèle d'apprentissage avec kernel *radial* et *sigmoïde*
-```{r kernel_rad}
-modelapp_rad = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "radial")
-#summary(modelapp_rad)
-```
-
-```{r pred_rad}
-predapp_rad = predict(modelapp_rad, mat.App)
-tabapp_rad = table(predit = predapp_rad, observe = mat.App$CI_class)
-tabapp_rad
-```
-
-```{r}
-tabTBPapp = tx.bon(tabapp_rad)
-taberreurapp = tx.erreur(tabapp_rad)
-tabsensapp= sensibilite(tabapp_rad)
-tabspecapp = specificite(tabapp_rad)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-```{r kernel_sig}
-modelapp_sig = svm(CI_class ~., data = mat.App, type = "C-classification", kernel = "sigmoid")
-#summary(modelapp_sig)
-```
-
-```{r pred_sig}
-predapp_sig = predict(modelapp_sig, mat.App)
-tabapp_sig = table(predit = predapp_sig, observe = mat.App$CI_class)
-tabapp_sig
-```
-
-```{r}
-tabTBPapp = tx.bon(tabapp_sig)
-taberreurapp = tx.erreur(tabapp_sig)
-tabsensapp= sensibilite(tabapp_sig)
-tabspecapp = specificite(tabapp_sig)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-***
-
-
-##Appliquons notre modèle sur l'échantillon de validation (test):
-
-***
-Résultats de prédiction obtenu grâce au modele utilisant un kernel *linéaire* et *polynomial*
-```{r pred_lintest}
-predtest_lin = predict(modelapp_lin, mat.Test)
-tabtest_lin = table(predit = predtest_lin, observe = mat.Test$CI_class)
-tabtest_lin
-```
-
-```{r}
-tabTBPapp = tx.bon(tabtest_lin)
-taberreurapp = tx.erreur(tabtest_lin)
-tabsensapp= sensibilite(tabtest_lin)
-tabspecapp = specificite(tabtest_lin)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-
-```{r pred_poltest}
-predtest_pol = predict(modelapp_pol, mat.Test)
-tabtest_pol = table(predit = predtest_pol, observe = mat.Test$CI_class)
-tabtest_pol
-```
-
-```{r}
-tabTBPapp = tx.bon(tabtest_pol)
-taberreurapp = tx.erreur(tabtest_pol)
-tabsensapp= sensibilite(tabtest_pol)
-tabspecapp = specificite(tabtest_pol)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-***
-Résultats de prédiction obtenu grâce au modele utilisant un kernel *radial* et *sigmoïde*
-```{r pred_radtest}
-predtest_rad = predict(modelapp_rad, mat.Test)
-tabtest_rad = table(predit = predtest_rad, observe = mat.Test$CI_class)
-tabtest_rad
-```
-
-```{r}
-tabTBPapp = tx.bon(tabtest_rad)
-taberreurapp = tx.erreur(tabtest_rad)
-tabsensapp= sensibilite(tabtest_rad)
-tabspecapp = specificite(tabtest_rad)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
-```
-
-
-```{r pred_sigtest}
-predtest_sig = predict(modelapp_sig, mat.Test)
-tabtest_sig = table(predit = predtest_sig, observe = mat.Test$CI_class)
-tabtest_sig
-```
-
-```{r}
-tabTBPapp = tx.bon(tabtest_sig)
-taberreurapp = tx.erreur(tabtest_sig)
-tabsensapp= sensibilite(tabtest_sig)
-tabspecapp = specificite(tabtest_sig)
-
-names(tabsensapp) = "sensibilite du modele d'apprentissage"
-tabsensapp
-names(tabspecapp) = "specificite du modele d'apprentissage"
-tabspecapp
+knitr::include_graphics("Kernel.png")
 ```
 
 ***
