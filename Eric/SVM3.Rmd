@@ -105,15 +105,6 @@ donnee.cmd = cmdscale(dist(donnee.fin2))
 plot(donnee.cmd, col = donnee.fin$CI_class)
 ```
 
-***
-Visualisation des données grâce à une analyse des principaux composants
-```{r acp, fig.align = "center", messages = 'hide', eval= F}
-#par(mfrow = c(1,2))
-donnee.acp <- prcomp(as.matrix(donnee.fin[,-208]))
-plot(donnee.acp)
-#biplot(donnee.acp)
-```
-
 ##Création des échantillons d'apprentissage et de test
 
 ***
@@ -157,3 +148,10 @@ knitr::include_graphics("Kernel.png")
 Conclusion
 
 On conclu que le meilleur modèle est le modele utilisant le kernel linéaire
+
+```{r acp, fig.align = "center", messages = 'hide'}
+#par(mfrow = c(1,2))
+donnee.acp <- prcomp(as.matrix(donnee.fin[,-208]))
+plot(donnee.acp)
+#biplot(donnee.acp)
+```
