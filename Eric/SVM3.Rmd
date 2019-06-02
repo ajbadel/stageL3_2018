@@ -138,6 +138,30 @@ boxplot (mat.Test[,c(10:20)], las = 2)
 ```
 
 ***
+**Une méthode de prédiction : support vector machines (SVM)**
+
+- Technique de classification et de régréssion des données
+- Permet la classification de plusieurs données à la fois (OvA ET OvO)
+- Se base sur 2 idées clés : la notion de *marge maximale* et la notion du *noyau* (kernel)
+
+***
+**La marge maximale**
+
+```{r}
+knitr::include_graphics("vecteur.png")
+```
+
+***
+**Le kernel**
+
+- Ensemble de fonctions mathématique ayant pour but de repésenter les données sous une forme particulière
+- Plusieurs types de kernel : **Linéaire, polynomial, radial et sigmoïde**
+- *Kernel trick*
+![Un neurone](PCAKernel.png)
+<span style='font-size:20px; border:1px'>
+
+
+***
 Résultats des prédictions avec différents noyaux (kernel)
 
 ```{r}
@@ -148,6 +172,8 @@ knitr::include_graphics("Kernel.png")
 Conclusion
 
 On conclu que le meilleur modèle est le modele utilisant le kernel linéaire
+
+***
 
 ```{r acp, fig.align = "center", messages = 'hide'}
 #par(mfrow = c(1,2))
