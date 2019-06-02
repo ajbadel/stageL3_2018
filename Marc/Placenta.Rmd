@@ -1,8 +1,9 @@
 ---
-title: "Oral de stage"
-subtitle: "Marc XU"
+title: "Utilisation d'un réseau de neurone pour des analyses des données"
+subtitle: "Anne BADEL"
 date: "04/06/2019"
-Tuteur: "BADEL Anne"
+author: "XU Marc"
+image: "diderot.gif"
 output: 
   revealjs::revealjs_presentation:
     center: no
@@ -10,12 +11,14 @@ output:
     theme: solarized
     transition: zoom
     toc: TRUE
+
 ---
+
 
 # Neural network ![Réseau de neurones](neurone.jpg)
 
 ```{r message = FALSE}
-set.seed(4)
+set.seed(16)
 #{data-background="neurone.png"}
 library("neuralnet")
 library("mclust")
@@ -43,7 +46,6 @@ knitr::opts_chunk$set(
 acc = function (resultats) {
   return(sum(diag(resultats)) / sum(resultats))
 }
-
 
 # La fonction sensibilité (taux sur les positifs bien prédit)
 sens = function (resultats) {
@@ -124,6 +126,7 @@ setwd("../Marc")
 placenta1 = na.omit(read.table(".././data/placenta90.208.Rdata.txt", dec = ".", sep = "\t", header =TRUE))
 
 prelevage = read.csv(".././data/placenta_MOE_2D_192.csv", dec = ".", sep = ";", header =TRUE)
+ok = read.csv(".././data/placenta_edragon_91mol.csv", dec = ".", sep = ";", header =TRUE)
 moe.avec = data.frame(prelevage$Noms, prelevage$CI)
 moe.sans = moe.avec[-which(moe.avec[,"prelevage.CI"] >= 1.57),]
 Noms = moe.sans[, "prelevage.Noms"]
@@ -134,20 +137,20 @@ placenta.nom = data.frame(Noms, placenta1)
 
   - Apprentissage de R avancé
 
-  - Apprentissage de la méthode de prédiction choisie et de sa librairie
+  - Apprentissage de la méthode de prédiction choisie et de sa librairie R
 ```{r, out.width = "340px"}
 knitr::include_graphics("couche_neurone.jpeg")
 ```
 
   - Apprentissage des critères de validation d'un modèle d'apprentissage en classification
   
-  - Application aux données "membranes placentaires"
+  - Application aux données "barrières placentaires"
 
 ## Objectif du stage
 
 Problématique :  
 
-**Établir un modèle permettant de prédire si une molécule donnée traverse la membrane placentaire.**
+**Établir un modèle permettant de prédire si une molécule donnée traverse la barrière placentaire.**
 
 ```{r, out.width = "340px"}
 knitr::include_graphics("placenta.png")
@@ -161,8 +164,8 @@ knitr::include_graphics("placenta.png")
 
 Le jeu de données comporte :  
 
-  - 90 molécules décrites par  
-  - 207 descripteurs calculées avec le logiciel e-dragon  
+  - 91 molécules décrites par  
+  - 800 descripteurs calculées avec le logiciel e-dragon  
   - une mesure de clairance, CI  
 
 ```{r}
@@ -193,39 +196,45 @@ par(mfrow = c(1,2))
 placenta1 = scale(placenta1, center = TRUE, scale = FALSE)
 placenta1.acp <- prcomp(as.matrix(placenta1[,2:nrow(placenta1)]))
 biplot(placenta1.acp, main = "Biplot du jeu de données")
-boxplot(placenta1[,c(2, 75:90)], main = "Boxplot du jeu de données")
+boxplot(placenta1[,c(2, 75:90)], main = "Boxplot du jeu de données", las = 2)
 ```
 
 <span style='font-size:12px; border:1px'> Source : https://journals.openedition.org/cal/7364 </span> 
 
 ##
 
-Données après normalisés
+Données après normalisation
 ```{r fig.width = 10, fig.height = 6}
-par(mfrow = c(1,2))
 placenta1 = scale(placenta1, center = TRUE, scale = TRUE)
 placenta1.acp <- prcomp(as.matrix(placenta1[,2:nrow(placenta1)]))
 biplot(placenta1.acp, main = "Biplot du jeu de données")
-boxplot(placenta1[,c(2, 75:90)], main = "Boxplot du jeu de données")
 ```
 
-# Les réseaux de neurones et les données 'Iris de Fisher'
+# Les réseaux de neurones
 
 ## Théorie
 
-<span style='font-size:20px; border:1px'> Source : "Les réseaux de neurones peuvent s'utiliser pour extraire des modèles et détecter des tendances reposant sur des fonctions mathématiques compliquées trop difficiles, voire impossible, à modéliser à l'aide de techniques analytiques ou paramétriques traditionnelles." </span>
+<span style='font-size:30px; border:1px'> Source : "Les réseaux de neurones peuvent s'utiliser pour extraire des modèles et détecter des tendances reposant sur des fonctions mathématiques compliquées trop difficiles, voire impossible, à modéliser à l'aide de techniques analytiques ou paramétriques traditionnelles." </span>
 
-![Un neurone](nn1.png)
-<span style='font-size:20px; border:1px'> Figure 1 : Un neurone 
-
-![Un réseau de neurone](nn2.png)
-</span> <span style='font-size:20px; border:1px'> Figure 2 : Un réseau de neurone </span>  
-
-<span style='font-size:9px; border:1px'> 
+<span style='font-size:15px; border:1px'> 
 Source : http://www.statsoft.fr/concepts-statistiques/reseaux-de-neurones-automatises  
-Images issues du cours de Frédéric Guyon - Méthodes d'apprentissage avec R 
 </span>
 
+```{r, out.width = "500px"}
+knitr::include_graphics("nn1.png")
+```
+<span style='font-size:25px; border:1px'> Figure 1 : Un neurone </span>  
+
+## 
+
+```{r, out.width = "750px"}
+knitr::include_graphics("nn2.png")
+```
+</span> <span style='font-size:25px; border:1px'> Figure 2 : Un réseau de neurone </span>  
+
+</span> <span style='font-size:20px; border:1px'>
+Images issues du cours de Frédéric Guyon - Méthodes d'apprentissage avec R 
+</span>
 
 ## Le package 'neuralnet'
 
@@ -233,14 +242,22 @@ Images issues du cours de Frédéric Guyon - Méthodes d'apprentissage avec R
 
 ## Échantillon d'apprentissage versus Échantillon de validation
 
-<span style='font-size:25px; border:1px'>
-L'échantillon d'apprentissage est constitué de 2/3 des individus du jeu de données.  
-L’échantillon d’apprentissage est celui où fait notre étude que nous supposons être représentatives. 
+<span style='font-size:20px; border:1px'>
+L'échantillon d'apprentissage est constitué aléatoirement de 2/3 des individus du jeu de données.  
+L'échantillon de validation est constitué aléatoirement de 1/3 des individus du jeu de données.  
 </span>
 
-<span style='font-size:25px; border:1px'>
-L'échantillon de validation est constitué de 1/3 des individus du jeu de données.  
-L’échantillon de validation permet de valider l’échantillon d’apprentissage, c’est-à-dire valider le modèle s’il est correct.
+<span style='font-size:20px; border:1px'>
+L'échantillon de validation permet de valider les résultats obtenus dans l'échantillon d'apprentissage.  
+</span>
+
+<span style='font-size:20px; border:1px'>
+Le meilleur modèle :
+</span>
+
+<span style='font-size:20px; border:1px'>
+  - très bon accuracy dans les deux échantillons  
+  - le plus simple possible
 </span>
 
 ## Table de confusion et critères calculés
@@ -248,8 +265,8 @@ L’échantillon de validation permet de valider l’échantillon d’apprentiss
 Tableau de confusion : 
 ```{r}
 Observé.Prédiction = c("0", "1")
-Val1 = c("TRUE NEGATIVE (TN)", "FALSE NEGATIVE (FN)")
-Val2 = c("FALSE POSITIVE (FP)", "TRUE POSITIVE (TP)")
+Val1 = c("TN", "FN")
+Val2 = c("FP", "TP")
 data.tableau = data.frame(Observé.Prédiction, Val1, Val2)
 names(data.tableau) <- c("Observé-Prédiction", "0", "1")
 kable(data.tableau)
@@ -259,8 +276,8 @@ Les critères :
 
   - Accuracy = (TN + TP) / (TN + FN + FP + TP)  
   - Sensibilité = TP / (TP + FN)  
-  - Sensitivité = TN / (TN + FP)  
-  - F1-score = 2 x (Sensibilite x Sensitivité) / (Sensibilité + Sensitivité)  
+  - Spécificité = TN / (TN + FP)  
+  - F1-score = 2 x (Sensibilite x Spécificité) / (Sensibilité + Spécificité)  
 
 ## Courbe ROC
 
@@ -272,19 +289,24 @@ Les critères :
 La courbe ROC (Receiving Operator Characteristics) permet de définir quelle est cette valeur seuil en représentant la sensibilité (Se) en ordonnée et 1 moins la spécificité (1-Sp) en abscisse.
 </span>
 
-<span style='font-size:10px; border:1px'> http://www.adscience.fr/uploads/ckfiles/files/html_files/StatEL/statel_courbe_ROC.htm </span>
+<span style='font-size:20px; border:1px'> http://www.adscience.fr/uploads/ckfiles/files/html_files/StatEL/statel_courbe_ROC.htm </span>
 
 
 # Applications aux données
 
 ## Plusieurs essais réalisés 
 
-  - 1 neurone  
-  - 1 couche et n neurones  
-  - 2 couches et 2n - n neurones  
-  - 2 couches et n - 2n neurones  
-
-À partir des différents essais réalisés, nous allons montrer lequel des essais est le meilleur.
+Les différents essais : 
+```{r}
+Couche = c("1 couche", "1 couche", "2 couche", "2 couche")
+couche1 = c(" 1 (perceptron) ", " n ", " 2n ", " n ")
+couche2 = c(" - ", " - ", " n ", " 2n ")
+case3 = c("TN", "FN")
+case4 = c("TN", "FN")
+data.tableau = data.frame(Couche, couche1, couche2)
+names(data.tableau) <- c("Couche(s)", "1e couche", "2e couche")
+kable(data.tableau)
+```
 
 # Prédiction
 
@@ -321,13 +343,25 @@ knitr::kable(confiance.2.val)
 ```
 
 ## Les Critères
-```{r}
+```{r fig.width = 6, fig.height = 4}
 Valeurs.2.app = c(acc(confiance.2.app), sens(confiance.2.app), spec(confiance.2.app), scor(confiance.2.app))
 Valeurs.2.val = c(acc(confiance.2.val), sens(confiance.2.val), spec(confiance.2.val), scor(confiance.2.val))
-kable(data.frame(Paramètres, Valeurs.2.app, Valeurs.2.val))
+tableau2 = data.frame(Paramètres, Valeurs.2.app, Valeurs.2.val)
+names(tableau2) = c("Paramètres", "Apprentissage", "Validation")
+kable(tableau2)
+
+specificite <- seq(0.01, 1, 0.01)
+seuil <- seq(0, 1, length.out = 100)
+clairance.app <- placenta.app$CI_groupe
+clairance.val <- placenta.val$CI_groupe
+
+vsens.app2 = roc_courbe.sens(predire.ech = predire2.app$net.result, clairance.ech = clairance.app)
+vsens.val2 = roc_courbe.sens(predire.ech = predire2.val$net.result, clairance.ech = clairance.val)
+sensibilité <- data.frame(vsens.app2, vsens.val2)
+matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1, main = "1 couche 2 neurones")
 ```
 
-## Prédiction pour n nombres de neurones pour 1 couche
+## Prédiction : 1 couche avec n neurones (Courbe ROC)
 ```{r}
 # Prédiction pour 1 couche = 1 neurone
 predire1.app = fonction_predire(1, placenta.app)
@@ -385,6 +419,9 @@ prediction.8.val = ifelse(predire8.val$net.result >= 0.5, 1 ,0)
 confiance.8.app <- table(prediction.8.app, placenta.app$CI_groupe, dnn = c("predit", "observe"))
 confiance.8.val <- table(prediction.8.val, placenta.val$CI_groupe, dnn = c("predit", "observe"))
 
+```
+
+```{r, eval = FALSE}
 # Prédiction pour 1 couche = 9 neurones
 predire9.app = fonction_predire(9, placenta.app)
 predire9.val = fonction_predire(9, placenta.val)
@@ -463,7 +500,6 @@ validation = c(acc(confiance.1.val), acc(confiance.2.val), acc(confiance.3.val),
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
-## Courbe ROC
 ```{r fig.width = 10, fig.height = 7}
 specificite <- seq(0.01, 1, 0.01)
 seuil <- seq(0, 1, length.out = 100)
@@ -476,10 +512,6 @@ par(mfrow = c(2,3))
 #sensibilité <- data.frame(vsens.app1, vsens.val1)
 #matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1, main = "1 couche 1 neurone")
 
-vsens.app2 = roc_courbe.sens(predire.ech = predire2.app$net.result, clairance.ech = clairance.app)
-vsens.val2 = roc_courbe.sens(predire.ech = predire2.val$net.result, clairance.ech = clairance.val)
-sensibilité <- data.frame(vsens.app2, vsens.val2)
-matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1, main = "1 couche 2 neurones")
 # rouge = app et bleu = val
 
 vsens.app3 = roc_courbe.sens(predire.ech = predire3.app$net.result, clairance.ech = clairance.app)
@@ -510,17 +542,17 @@ vsens.app7 = roc_courbe.sens(predire.ech = predire7.app$net.result, clairance.ec
 vsens.val7 = roc_courbe.sens(predire.ech = predire7.val$net.result, clairance.ech = clairance.val)
 sensibilité <- data.frame(vsens.app7, vsens.val7)
 matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 7 neurones")
-```
-
-## Courbe ROC (2)
-```{r fig.width = 10, fig.height = 7}
-par(mfrow = c(2,3))
+#####
 
 vsens.app8 = roc_courbe.sens(predire.ech = predire8.app$net.result, clairance.ech = clairance.app)
 vsens.val8 = roc_courbe.sens(predire.ech = predire8.val$net.result, clairance.ech = clairance.val)
 sensibilité <- data.frame(vsens.app8, vsens.val8)
 matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 8 neurones")
-######
+```
+
+```{r fig.width = 10, fig.height = 7, eval = FALSE}
+## Courbe ROC (2)
+par(mfrow = c(2,3))
 
 vsens.app9 = roc_courbe.sens(predire.ech = predire9.app$net.result, clairance.ech = clairance.app)
 vsens.val9 = roc_courbe.sens(predire.ech = predire9.val$net.result, clairance.ech = clairance.val)
@@ -552,7 +584,7 @@ sensibilité <- data.frame(vsens.app40, vsens.val40)
 matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "1 couche 40 neurones")
 ```
 
-## Prédiction pour 2n/n de neurones pour 2 couches
+## Prédiction : 2 couches avec 2n/n de neurones (Courbe ROC)
 ```{r}
 # Prédiction pour 2 couches = 2.1 neurones
 predire2.1.app = fonction_predire(c(2,1), placenta.app)
@@ -603,6 +635,9 @@ prediction.20.10.val = ifelse(predire20.10.val$net.result >= 0.5, 1 ,0)
 confiance.20.10.app <- table(prediction.20.10.app, placenta.app$CI_groupe, dnn = c("predit", "observe"))
 confiance.20.10.val <- table(prediction.20.10.val, placenta.val$CI_groupe, dnn = c("predit", "observe"))
 
+```
+
+```{r, eval = FALSE}
 # Prédiction pour 2 couches = 100.50 neurones
 predire100.50.app = fonction_predire(c(100,50), placenta.app)
 predire100.50.val = fonction_predire(c(100,50), placenta.val)
@@ -625,9 +660,8 @@ validation = c(acc(confiance.2.1.val), acc(confiance.4.2.val), acc(confiance.6.3
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
-## Courbe ROC
 ```{r  fig.width = 10, fig.height = 7}
-par(mfrow = c(2,4))
+par(mfrow = c(2,3))
 
 vsens.app2.1 = roc_courbe.sens(predire.ech = predire2.1.app$net.result, clairance.ech = clairance.app)
 vsens.val2.1 = roc_courbe.sens(predire.ech = predire2.1.val$net.result, clairance.ech = clairance.val)
@@ -665,19 +699,19 @@ sensibilité <- data.frame(vsens.app20.10, vsens.val20.10)
 matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 20.10 neurones")
 #####
 
-vsens.app100.50 = roc_courbe.sens(predire.ech = predire100.50.app$net.result, clairance.ech = clairance.app)
-vsens.val100.50 = roc_courbe.sens(predire.ech = predire100.50.val$net.result, clairance.ech = clairance.val)
-sensibilité <- data.frame(vsens.app100.50, vsens.val100.50)
-matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 100.50 neurones")
+#vsens.app100.50 = roc_courbe.sens(predire.ech = predire100.50.app$net.result, clairance.ech = clairance.app)
+#vsens.val100.50 = roc_courbe.sens(predire.ech = predire100.50.val$net.result, clairance.ech = clairance.val)
+#sensibilité <- data.frame(vsens.app100.50, vsens.val100.50)
+#matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 100.50 neurones")
 #####
 
-vsens.app200.100 = roc_courbe.sens(predire.ech = predire200.100.app$net.result, clairance.ech = clairance.app)
-vsens.val200.100 = roc_courbe.sens(predire.ech = predire200.100.val$net.result, clairance.ech = clairance.val)
-sensibilité <- data.frame(vsens.app200.100, vsens.val200.100)
-matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 200.100 neurones")
+#vsens.app200.100 = roc_courbe.sens(predire.ech = predire200.100.app$net.result, clairance.ech = clairance.app)
+#vsens.val200.100 = roc_courbe.sens(predire.ech = predire200.100.val$net.result, clairance.ech = clairance.val)
+#sensibilité <- data.frame(vsens.app200.100, vsens.val200.100)
+#matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 couches 200.100 neurones")
 ```
 
-## Prédiction pour n/2n de neurones pour 2 couches
+## Prédiction : 2 couches avec n/2n de neurones (Courbe ROC)
 ```{r}
 # Prédiction pour 2 couches = 1.2 neurones
 predire1.2.app = fonction_predire(c(1,2), placenta.app)
@@ -742,14 +776,15 @@ prediction.100.200.app = ifelse(predire100.200.app$net.result >= 0.5, 1 ,0)
 prediction.100.200.val = ifelse(predire100.200.val$net.result >= 0.5, 1 ,0)
 confiance.100.200.app <- table(prediction.100.200.app, placenta.app$CI_groupe, dnn = c("predit", "observe"))
 confiance.100.200.val <- table(prediction.100.200.val, placenta.val$CI_groupe, dnn = c("predit", "observe"))
+```
 
+```{r, eval = FALSE}
 couches.neurones = c("2 couches 1 neurone et 2 neurones", "2 couches 2 neurones et 4 neurones", "2 couches 3 neurones et 6 neurones", "2 couches 4 neurones et 8 neurones", "2 couches 5 neurones et 10 neurones", "2 couches 10 neurones et 20 neurones", "2 couches 50 neurones et 100 neurones", "2 couches 100 neurones et 200 neurones")
 apprentissage = c(acc(confiance.1.2.app), acc(confiance.2.4.app), acc(confiance.3.6.app), acc(confiance.4.8.app), acc(confiance.5.10.app), acc(confiance.10.20.app), acc(confiance.50.100.app), acc(confiance.100.200.app))
 validation = c(acc(confiance.1.2.val), acc(confiance.2.4.val), acc(confiance.3.6.val), acc(confiance.4.8.val), acc(confiance.5.10.val), acc(confiance.10.20.val), acc(confiance.50.100.val), acc(confiance.100.200.val))
 kable(data.frame(couches.neurones, apprentissage, validation))
 ```
 
-## Courbe ROC
 ```{r  fig.width = 10, fig.height = 7}
 par(mfrow = c(2,4))
 
@@ -808,9 +843,14 @@ matplot(1-specificite,sensibilité,col=rainbow(2),type="l",lty=1,  main = "2 cou
 
 Les meilleurs modèles sont :  
 
-  - 1 couche avec 9 neurones
-  - 2 couches avec 6 neurones et 3 neurones
+  - pour 1 couche avec 8 neurones
+  - pour 2 couches avec 6 neurones et 3 neurones  
 
+
+Cependant !  
+
+Le jeu de données serait alors pas très adapté à l'analyse des réseaux de neurones.  
+Pour étudier un jeu de données avec la méthode de réseaux de neurone, il faut qu'il y ait énormément de données.
 
 
 
